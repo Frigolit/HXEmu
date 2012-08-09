@@ -59,7 +59,7 @@ if [ "$PIKE" != "" ]; then
 	fi
 fi
 
-cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/
+if [ -d "data/src/roms/firmware" ]; then cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/; fi
 #cp data/src/addresses.txt $BUILDROOT/release/data/
 #cp -r data/src/addresses $BUILDROOT/release/data/
 
