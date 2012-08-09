@@ -1,0 +1,34 @@
+#!/bin/bash
+
+BUILDPATH="$BUILDROOT/work/hxemu"
+if [ ! -d "$BUILDPATH" ]; then mkdir $BUILDPATH; fi
+
+NEEDS_LINKING="no"
+
+# Compile
+for i in `ls hxemu/src/*.cpp`; do
+	SRCFILE="`basename ${i}`"
+	
+	if [ "$BUILDPATH/${SRCFILE}.o" -ot "${i}" ]; then
+		echo "$CXX $CXXFLAGS -c -o $BUILDPATH/${SRCFILE}.o ${i}"
+		$CXX $CXXFLAGS -c -o $BUILDPATH/${SRCFILE}.o ${i}
+		
+		if [ "$?" != "0" ]; then exit 1; fi
+	fi
+	
+	if [ "$BUILDPATH/$HXEMUFILENAME" -ot "${i}" ]; then
+		rm -f $BUILDPATH/$HXEMUFILENAME
+	fi
+done
+
+# Link
+if [ ! -e "$BUILDPATH/$HXEMUFILENAME" ]; then
+	echo "$CXX $LDFLAGS -o $BUILDPATH/$HXEMUFILENAME $BUILDPATH/*.o $POSTLDFLAGS"
+	$CXX $LDFLAGS -o $BUILDPATH/$HXEMUFILENAME $BUILDPATH/*.o $POSTLDFLAGS
+	
+	if [ "$?" != "0" ]; then exit 1; fi
+	
+	echo "cp $BUILDPATH/$HXEMUFILENAME $BUILDROOT/release/"
+	cp $BUILDPATH/$HXEMUFILENAME $BUILDROOT/release/
+fi
+

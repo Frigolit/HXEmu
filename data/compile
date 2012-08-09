@@ -1,0 +1,66 @@
+#!/bin/bash
+
+BUILDPATH="$BUILDROOT/work/data"
+if [ ! -d "$BUILDPATH" ]; then mkdir $BUILDPATH; fi
+
+if [ ! -d "$BUILDROOT/release/data" ]; then mkdir $BUILDROOT/release/data; fi
+if [ ! -d "$BUILDROOT/release/data/roms" ]; then mkdir $BUILDROOT/release/data/roms; fi
+
+if [ "$PIKE" != "" ]; then
+	# =======================================================
+	# Do some checks
+	# =======================================================
+	if [ "$AS02" != "" ]; then
+		if [ "$CC" != "" ]; then
+			# =======================================================
+			# Should we build romfixer.c?
+			# =======================================================
+			if [ "$BUILDPATH/romfixer" -ot "data/src/roms/test/romfixer.c" ]; then
+				rm -f $BUILDPATH/romfixer
+				rm -f $BUILDPATH/test.bin
+				
+				echo "$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c"
+				$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c
+				if [ "$?" != 0 ]; then
+					echo "ERROR: romfixer.c failed to compile"
+					exit 1
+				fi
+			fi
+			
+			# =======================================================
+			# Do some checks
+			# =======================================================
+			if [ "$BUILDPATH/test.bin" -ot "data/src/roms/test/test.s" ]; then
+				rm -f $BUILDPATH/test.bin
+				
+				echo "$AS02 -x -z -q -l -o$BUILDPATH/test.bin data/src/roms/test/test.s"
+				$AS02 -x -z -q -l -o$BUILDPATH/test.bin data/src/roms/test/test.s
+				
+				# Remove some files we don't want or need
+				rm -f data/src/roms/test/test.lst
+				
+				# Did we succeed?
+				if [ "$?" != 0 ]; then
+					echo "ERROR: Failed to build test ROM"
+					exit 1
+				fi
+				
+				echo "$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/external.bin"
+				$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/external.bin
+			fi
+			
+			if [ "$BUILDROOT/release/data/roms/test/external.bin" -ot "$BUILDPATH/external.bin" ]; then
+				if [ ! -d "$BUILDROOT/release/data/roms/test" ]; then mkdir $BUILDROOT/release/data/roms/test; fi
+				
+				echo "cp $BUILDPATH/external.bin $BUILDROOT/release/data/roms/test/external.bin"
+				cp $BUILDPATH/external.bin $BUILDROOT/release/data/roms/test/external.bin
+			fi
+		fi
+	fi
+fi
+
+cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/
+#cp data/src/addresses.txt $BUILDROOT/release/data/
+#cp -r data/src/addresses $BUILDROOT/release/data/
+
+chmod -R u+rw $BUILDROOT/release/data/
