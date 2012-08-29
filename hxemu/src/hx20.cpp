@@ -43,15 +43,6 @@ CHX20::CHX20() {
 		roms[i] = new CROM(8192);
 	}
 	
-	// Initialize test device
-	#ifndef NOTESTDEVICE
-		testdev = new CTestDevice();
-		if (!testdev->connect_to_host()) {
-			delete testdev;
-			testdev = NULL;
-		}
-	#endif
-	
 	// Initialize LCD and controllers
 	lcd = new CLCD();
 	for (int i = 0; i < 6; i++) {
@@ -64,26 +55,11 @@ CHX20::CHX20() {
 	mcu_master->membus->add(rtc,      0x0040, 64,    0x0000);
 	mcu_master->membus->add(ram1,     0x0080, 128,   0x0000);
 	mcu_master->membus->add(ram0,     0x0100, 16128, 0x0000);
-	mcu_master->membus->add(roms[4],  0x6000, 8192,  0x0000);
 	
-	#ifndef NOTESTDEVICE
-		if (testdev != NULL) {
-			// Attach test device to the upper 32kB (hooked via expansion port on the real hardware)
-			mcu_master->membus->add(testdev, 0x8000, 32768, 0x0000);
-		}
-		else {
-			// Attach ROMs
-			mcu_master->membus->add(roms[3],  0x8000, 8192,  0x0000);
-			mcu_master->membus->add(roms[2],  0xA000, 8192,  0x0000);
-			mcu_master->membus->add(roms[1],  0xC000, 8192,  0x0000);
-			mcu_master->membus->add(roms[0],  0xE000, 8192,  0x0000);
-		}
-	#else
-		mcu_master->membus->add(roms[3],  0x8000, 8192,  0x0000);
-		mcu_master->membus->add(roms[2],  0xA000, 8192,  0x0000);
-		mcu_master->membus->add(roms[1],  0xC000, 8192,  0x0000);
-		mcu_master->membus->add(roms[0],  0xE000, 8192,  0x0000);
-	#endif
+	mcu_master->membus->add(roms[3],  0x8000, 8192,  0x0000);
+	mcu_master->membus->add(roms[2],  0xA000, 8192,  0x0000);
+	mcu_master->membus->add(roms[1],  0xC000, 8192,  0x0000);
+	mcu_master->membus->add(roms[0],  0xE000, 8192,  0x0000);
 	
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {
@@ -91,10 +67,17 @@ CHX20::CHX20() {
 	}
 	
 	// Load ROMs
+	/*
 	roms[0]->load_from_file((char *)"data/roms/firmware/1.1/rom0.bin");
 	roms[1]->load_from_file((char *)"data/roms/firmware/1.1/rom1.bin");
 	roms[2]->load_from_file((char *)"data/roms/firmware/1.1/rom2.bin");
 	roms[3]->load_from_file((char *)"data/roms/firmware/1.1/rom3.bin");
+	*/
+	
+	roms[0]->load_from_file((char *)"data/roms/test/rom0.bin");
+	roms[1]->load_from_file((char *)"data/roms/test/rom1.bin");
+	roms[2]->load_from_file((char *)"data/roms/test/rom2.bin");
+	roms[3]->load_from_file((char *)"data/roms/test/rom3.bin");
 	
 	// Checksum ROMs
 	CHash *hash = new CHash();

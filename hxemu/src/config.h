@@ -7,7 +7,18 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define VIRTUALSERIAL_BUFFERSIZE 256
+	#define VIRTUALSERIAL_BUFFERSIZE 256
+
+	// Debugging
+	#ifdef DEBUG
+		#ifndef DEBUG_LCD
+			#define DEBUG_LCD
+		#endif
+		
+		#ifndef DEBUG_CPU
+			#define DEBUG_CPU
+		#endif
+	#endif
 
 #endif
 

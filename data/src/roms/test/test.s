@@ -1,68 +1,188 @@
-; ================================================================
+; =============================================================================
 ; @author  Pontus Rodling <frigolit@frigolit.net>
 ; @license MIT license - See LICENSE for more information
-; @version $Id: test.s 162 2012-03-06 17:12:56Z frigolit $
 ;
-; This ROM is to be loaded via custom hardware connected to the
-; expansion port on the real HX-20 or loaded via the CTestDevice
-; class in HXEmu.
-; ================================================================
+; This ROM is to be loaded into the ROM #0-3 socket on the HX-20.
+; =============================================================================
 
 	code
 
-; ================================================================
+; =============================================================================
 ; Program start
-; ================================================================
-	org 0xE000
+; =============================================================================
+	org 0x8000
 
 reset:
 	sei
-	ldaa 0x00
-	ldab 0x00
+	ldaa #0x00
+	ldab #0x00
+	
+	lds #0x3FFF
+	;db 0x8E,0x3F,0xFF	; Load stack pointer 0x3FFF
+	
+	jsr init_lcd
+	
+	ldaa #0x00
+	ldab #0x00
+	jsr lcd_draw_pixel
+	
+sleep_loop:
+	db 0x1A
+	jmp sleep_loop
 
-wait_for_test:
-	; Wait for a test to become ready
-	lda  0x01
-wait_for_test_2:
-	anda 0xA000
-	beq  wait_for_test_2
+; =============================================================================
+; Initialize LCD
+; =============================================================================
+init_lcd:
+	; Set frame frequency
+	; -------------------------------------
+	ldaa #0x10
+	sta 0x2A
+	jsr lcd_exec_cmd_all
 	
-	; Prepare for the test :3
-	clra
-	clrb
-	lds  0x3FFF
+	; Set multiplexing mode
+	; -------------------------------------
+	ldaa #0x1E		; Send command 1E to first controller
+	sta 0x2A
 	
-	; Run the test
-	jsr  0xC000
-
-; ================================================================
-; Serial dump function
-; ================================================================
-serial_dump:
-	; Output A, B and X to serial
-	sta 0xA002
-	stb 0xA002
-	stx 0xA002
+	ldaa #0x09
+	sta 0x26
+	jsr lcd_exec
 	
-	; Output CCR to serial
-	psha
-	tpa
-	sta 0xA002
-	pula
+	ldaa #0x1C		; Send command 1C to remaining controllers
+	sta 0x2A
 	
-	; Done!
+	ldaa #0x0A
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0B
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0C
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0D
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0E
+	sta 0x26
+	jsr lcd_exec
+	
+	; Disable display
+	; -------------------------------------
+	ldaa #0x08
+	sta 0x2A
+	jsr lcd_exec_cmd_all
+	
+	; Clear display
+	; -------------------------------------
+	ldaa #0x64	; Set write mode
+	sta 0x2A
+	jsr lcd_exec_cmd_all
+	
+	ldx #0x80	; width = 128
+	
+init_lcd_loop:
+	clr 0x2A
+	jsr lcd_exec_data_all
+	
+	dex
+	bne init_lcd_loop
+	
+	; Enable display
+	; -------------------------------------
+	ldaa #0x09
+	sta 0x2A
+	jsr lcd_exec_cmd_all
+	
 	rts
 
-; ================================================================
+; =============================================================================
+; LCD functions
+; =============================================================================
+lcd_exec:
+	ldd 0x2A
+	ldd 0x2A
+	ldd 0x2A
+	ldd 0x2A
+	rts
+
+lcd_exec_cmd_all:
+	ldaa #0x09
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0A
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0B
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0C
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0D
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x0E
+	sta 0x26
+	jsr lcd_exec
+	rts
+
+lcd_exec_data_all:
+	ldaa #0x01
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x02
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x03
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x04
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x05
+	sta 0x26
+	jsr lcd_exec
+	
+	ldaa #0x06
+	sta 0x26
+	jsr lcd_exec
+	rts
+
+lcd_draw_pixel:
+	psha
+	pshb
+	
+	
+	
+	pulb
+	pula
+	rts
+
+; =============================================================================
 ; TRAP interrupt
-; ================================================================
+; =============================================================================
 isr_trap:
 	; TODO: Tell the testing device we ran into a TRAP
 	jmp reset		; Reset
 
-; ================================================================
+; =============================================================================
 ; Interrupt vectors
-; ================================================================
+; =============================================================================
 isr_ignore:
 	rti
 

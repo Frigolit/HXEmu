@@ -17,7 +17,6 @@ using namespace std;
 #include "lcdcontroller.h"
 #include "fakeslave.h"
 #include "iocontroller.h"
-#include "testdevice.h"
 
 class CHX20 {
 	public:
@@ -52,11 +51,7 @@ class CHX20 {
 		
 		CIOController *ioctl;
 		
-		CROM *roms[5];
-		
-		#ifndef NOTESTDEVICE
-		CTestDevice *testdev;
-		#endif
+		CROM *roms[4];
 };
 
 #endif

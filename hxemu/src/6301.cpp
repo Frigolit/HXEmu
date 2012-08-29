@@ -172,7 +172,7 @@ void C6301::step() {
 		fputs(buf, tracefile);
 	}
 	
-	#ifdef DEBUG
+	#ifdef DEBUG_CPU
 		printf("\e[34m\e[1mC6301::step(): debug: === A: %02X, B: %02X, X: %04X, SP: %04X, PC: %04X, CCR: [%c%c%c%c%c%c], OP: %02X ==\e[0m\n", r_a, r_b, r_x, r_sp, r_pc - 1, (r_ccr_h ? 'H' : ' '), (r_ccr_i ? 'I' : ' '), (r_ccr_n ? 'N' : ' '), (r_ccr_z ? 'Z' : ' '), (r_ccr_v ? 'V' : ' '), (r_ccr_c ? 'C' : ' '), op);
 	#endif
 	
