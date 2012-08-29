@@ -51,7 +51,7 @@ void CLCDController::command(uint8_t n) {
 	}
 	else if (n >= 0x18 && n <= 0x1F) {
 		// Set Multiplexing Mode (SMM)
-		printf("CLCDController: debug: Set Multiplexing Mode -> 0x%02X\n", n);
+		// Ignored!
 	}
 	else if (n == 0x08) {
 		// Display Off (DISP OFF)
@@ -85,12 +85,38 @@ void CLCDController::command(uint8_t n) {
 	}
 	else if (n >= 0x40 && n <= 0x5F) {
 		// Bit set
-		//uint8_t bits = (n & 0b00011100) >> 2;		// TODO
+		if (lcd && (ptr & 0b00111111) < 40) {
+			uint8_t bt = (n & 0b00011100) >> 2;
+			
+			uint8_t yb = (ptr & 0b01000000) >> 3;
+			uint8_t x = ptr & 0b00111111;
+			
+			uint8_t n = (ram[ptr] |= (1 << bt));
+			
+			for (uint8_t y = 0; y < 8; y++) {
+				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
+				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+			}
+		}
+		
 		apply_ptr_op(n & 0x03);
 	}
 	else if (n >= 0x20 && n <= 0x3F) {
-		// Bit set
-		//uint8_t bits = (n & 0b00011100) >> 2;		// TODO
+		// Bit clear
+		if (lcd && (ptr & 0b00111111) < 40) {
+			uint8_t bt = (n & 0b00011100) >> 2;
+			
+			uint8_t yb = (ptr & 0b01000000) >> 3;
+			uint8_t x = ptr & 0b00111111;
+			
+			uint8_t n = (ram[ptr] &= ~(1 << bt));
+			
+			for (uint8_t y = 0; y < 8; y++) {
+				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
+				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+			}
+		}
+		
 		apply_ptr_op(n & 0x03);
 	}
 }
