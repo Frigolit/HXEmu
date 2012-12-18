@@ -23,7 +23,6 @@ class C6301 {
 		void reset();
 		void step();
 		void trap();
-		void interrupt();
 		void nmi();
 		void jump(uint16_t addr);
 		
@@ -40,7 +39,9 @@ class C6301 {
 		CMemoryBus    *membus;
 		CROM          *maskrom;
 		VirtualSerial *serial0;
-		VirtualSerial *serial1;		// TODO: Err... this perhaps should not exist...
+		
+		bool     b_irq1;
+		bool     b_trace;
 		
 	private:
 		FILE     *tracefile;
@@ -71,7 +72,6 @@ class C6301 {
 		uint8_t  r_internal[32];
 		
 		uint8_t  b_waitirq;
-		uint8_t  b_irq1;
 		bool     b_nmi;
 		bool     b_nmi_enter;
 		bool     b_irq_swi;

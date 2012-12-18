@@ -41,7 +41,7 @@ uint8_t CMemoryBus::read(uint16_t addr) {
 	}
 	
 	if (p_fallback == NULL) {
-		printf("CMemoryBus::read(): debug: unhandled address 0x%04X\n", addr);
+		//printf("CMemoryBus::read(): debug: unhandled address 0x%04X\n", addr);
 		return 0xFF;
 	}
 	else return p_fallback->read(addr);
@@ -62,7 +62,7 @@ void CMemoryBus::write(uint16_t addr, uint8_t data) {
 	
 	if (p_fallback != NULL) p_fallback->write(addr, data);
 	else {
-		printf("CMemoryBus::write(): debug: unhandled address 0x%04X\n", addr);
+		//printf("CMemoryBus::write(): debug: unhandled address 0x%04X\n", addr);
 	}
 }
 

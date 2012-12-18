@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include "config.h"
 #include "6301.h"
 
 C6301::C6301(uint8_t mode) {
@@ -28,9 +29,10 @@ C6301::C6301(uint8_t mode) {
 	// Initialize base stuff
 	membus    = new CMemoryBus();
 	serial0   = new VirtualSerial();
-	serial1   = new VirtualSerial();
 	ram       = new CRAM(128);
 	maskrom   = NULL;
+	
+	b_trace = false;
 	
 	if (opmode == 0 || opmode >= 5) {
 		// These modes should initialize the mask ROM
@@ -73,7 +75,6 @@ void C6301::reset() {
 	b_rdrf_clear = 0;
 	
 	b_waitirq = 0;
-	b_irq1 = 0;
 	b_nmi = false;
 	b_nmi_enter = false;
 	b_irq_swi = false;
@@ -97,10 +98,6 @@ void C6301::jump(uint16_t addr) {
 	b_sleep = false;
 }
 
-void C6301::interrupt() {
-	b_irq1 = 1;
-}
-
 void C6301::nmi() {
 	b_nmi_enter = true;
 }
@@ -108,38 +105,48 @@ void C6301::nmi() {
 void C6301::step() {
 	if (b_halted) return;
 	
-	// Increase free running counter and set timer overflow bit in TCSR on wraparound
+	// Increase free running counter
 	++r_counter;
 	
 	// Interrupts
 	if (b_nmi_enter) {
+		if (b_sleep) b_sleep = false;
 		b_nmi_enter = false;
 		interrupt_enter(0xFFFC, 0xFFFD);
-	}
-	else if (b_irq1) {
-		b_irq1 = 0;
-		if (!r_ccr_i) interrupt_enter(0xFFF8, 0xFFF9);
 	}
 	else if (b_irq_swi) {
 		b_irq_swi = false;
 		if (!r_ccr_i) interrupt_enter(0xFFFA, 0xFFFB);
 	}
+	else if (b_irq1) {
+		if (b_sleep) b_sleep = false;
+		//b_irq1 = 0;
+		if (!r_ccr_i) interrupt_enter(0xFFF8, 0xFFF9);
+	}
 	
-	// Check timer against OCR
+	// Check timer against OCR (Output Compare Register)
 	if (r_ocr == r_counter) {
 		r_tcsr |= 0x40;
-		if (r_tcsr & 0x08 && !r_ccr_i) {
-			printf("C6301::step(): debug: triggering OCR interrupt\n");
-			interrupt_enter(0xFFF4, 0xFFF5);
+		if (r_tcsr & 0x08) {
+			if (b_sleep) b_sleep = false;
+			
+			if (!r_ccr_i) {
+				printf("C6301::step(): debug: triggering OCR interrupt\n");
+				interrupt_enter(0xFFF4, 0xFFF5);
+			}
 		}
 	}
 	
 	// Check timer overflow
 	if (!r_counter) {
 		r_tcsr |= 0x20;
-		if (r_tcsr & 0x04 && !r_ccr_i) {
-			printf("C6301::step(): debug: triggering TOF interrupt\n");
-			interrupt_enter(0xFFF2, 0xFFF3);
+		if (r_tcsr & 0x04) {
+			if (b_sleep) b_sleep = false;
+			
+			if (!r_ccr_i) {
+				printf("C6301::step(): debug: triggering TOF interrupt\n");
+				interrupt_enter(0xFFF2, 0xFFF3);
+			}
 		}
 	}
 	
@@ -155,7 +162,7 @@ void C6301::step() {
 	// Sleeping?
 	if (b_sleep) return;
 	
-	// Checks for errors in the CCR-register which would show if the implementation is broken
+	// Checks for errors in the CCR-register which would indicate that my code is broken :P
 	if (r_ccr_i > 1) { printf("\e[31m\e[1mC6301::step(): fixme: ccr_i > 1\e[0m\n"); exit(1); }
 	if (r_ccr_n > 1) { printf("\e[31m\e[1mC6301::step(): fixme: ccr_n > 1\e[0m\n"); exit(1); }
 	if (r_ccr_v > 1) { printf("\e[31m\e[1mC6301::step(): fixme: ccr_v > 1\e[0m\n"); exit(1); }
@@ -166,7 +173,7 @@ void C6301::step() {
 	// Fetch next instruction
 	uint8_t op = get_next_byte();
 	
-	if (tracefile != NULL) {
+	if (b_trace && tracefile != NULL) {
 		char buf[255];
 		sprintf(buf, "A=%02X B=%02X X=%04X SP=%04X PC=%04X CCR=%c%c%c%c%c%c OP=%02X\n", r_a, r_b, r_x, r_sp, r_pc - 1, (r_ccr_h ? 'H' : 'h'), (r_ccr_i ? 'I' : 'i'), (r_ccr_n ? 'N' : 'n'), (r_ccr_z ? 'Z' : 'z'), (r_ccr_v ? 'V' : 'v'), (r_ccr_c ? 'C' : 'c'), op);
 		fputs(buf, tracefile);
@@ -174,6 +181,8 @@ void C6301::step() {
 	
 	#ifdef DEBUG_CPU
 		printf("\e[34m\e[1mC6301::step(): debug: === A: %02X, B: %02X, X: %04X, SP: %04X, PC: %04X, CCR: [%c%c%c%c%c%c], OP: %02X ==\e[0m\n", r_a, r_b, r_x, r_sp, r_pc - 1, (r_ccr_h ? 'H' : ' '), (r_ccr_i ? 'I' : ' '), (r_ccr_n ? 'N' : ' '), (r_ccr_z ? 'Z' : ' '), (r_ccr_v ? 'V' : ' '), (r_ccr_c ? 'C' : ' '), op);
+	#else
+		if (b_trace) printf("\e[34m\e[1mC6301::step(): debug: === A: %02X, B: %02X, X: %04X, SP: %04X, PC: %04X, CCR: [%c%c%c%c%c%c], OP: %02X ==\e[0m\n", r_a, r_b, r_x, r_sp, r_pc - 1, (r_ccr_h ? 'H' : ' '), (r_ccr_i ? 'I' : ' '), (r_ccr_n ? 'N' : ' '), (r_ccr_z ? 'Z' : ' '), (r_ccr_v ? 'V' : ' '), (r_ccr_c ? 'C' : ' '), op);
 	#endif
 	
 	// Execute it~
@@ -1867,7 +1876,7 @@ void C6301::step() {
 				break;
 				
 			case 0x1A:	// SLP - Sleep
-				printf("C6301::step(): debug: entering sleep mode\n");
+				//printf("C6301::step(): debug: entering sleep mode\n");
 				b_sleep = true;
 				break;
 				
@@ -2802,14 +2811,14 @@ void C6301::interrupt_leave() {
 // Stack functions
 // ================================================================================
 void C6301::stack_push(uint8_t data) {
-	#ifdef DEBUG
+	#ifdef DEBUG_CPU
 		printf("C6301::stack_push(): debug: pushing 0x%02X to 0x%04X\n", data, r_sp);
 	#endif
 	memwrite(r_sp--, data);
 }
 
 uint8_t C6301::stack_pop() {
-	#ifdef DEBUG
+	#ifdef DEBUG_CPU
 		uint8_t n = memread(++r_sp);
 		printf("C6301::stack_pop(): debug: popping 0x%02X from 0x%04X\n", n, r_sp);
 		return n;
@@ -2829,21 +2838,7 @@ uint8_t C6301::memread(uint16_t addr) {
 			return membus->read(addr);
 		}
 		else if (addr == 0x02) {
-			/*
-			P10		In		Data Set Ready (DSR)
-			P11		In		Clear To Send (CTS)
-			P12		Out		Slave CPU R/W control
-			P13		In		External port interrupt (active low)
-			P14		In		Power abnormal interrupt (active low)
-			P15		In		Keyboard input interrupt (active low)
-			P16		In		Peripheral status (Serial option, low = on)
-			P17		In		Cartridge option flag (low = ROM, high = microcassette)
-			
-			Note: P13-15 means that the specified interrupt has triggered - Not that it should be enabled
-			*/
-			
 			return r_internal[0x02];
-			//return 0b01011000;
 		}
 		else if (addr == 0x03) {
 			return 0x00;
@@ -2877,16 +2872,20 @@ uint8_t C6301::memread(uint16_t addr) {
 		r = membus->read(addr);
 	}
 	
-	#ifdef DEBUG
+	#ifdef DEBUG_CPU
 		printf("\e[32mC6301::memread(): reading from address \e[1m0x%04X\e[22m returned \e[1m0x%02X\e[0m\n", addr, r);
+	#else
+		if (b_trace) printf("\e[32mC6301::memread(): reading from address \e[1m0x%04X\e[22m returned \e[1m0x%02X\e[0m\n", addr, r);
 	#endif
 	
 	return r;
 }
 
 void C6301::memwrite(uint16_t addr, uint8_t data) {
-	#ifdef DEBUG
+	#ifdef DEBUG_CPU
 		printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
+	#else
+		if (b_trace) printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
 	#endif
 	
 	if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {

@@ -26,6 +26,14 @@ class CIOController: public CMemoryDevice {
 		
 		char    keyboard_map[256];
 		
+		/**
+		 * LCD chip select
+		 * Keyboard interrupt mask
+		 * Cartridge control
+		 * and something else...
+		 */
+		uint8_t r_9g;
+		
 	private:
 		CLCDController *lcd_ctls[6];
 		

@@ -94,21 +94,13 @@ CHX20::CHX20() {
 	reset();
 }
 
-Serial* CHX20::get_rs232() {
-	return mcu_master->serial1;
-}
-
 void CHX20::keyboard_down(uint8_t c) {
 	keyboard_pressed++;
 	ioctl->keyboard_map[c] = 1;
-	mcu_master->set_port1(0b01011000);
 }
 
 void CHX20::keyboard_up(uint8_t c) {
-	if (--keyboard_pressed) {
-		keyboard_repeat = 0;
-		mcu_master->set_port1(0b01111000);
-	}
+	keyboard_pressed--;
 	ioctl->keyboard_map[c] = 0;
 }
 
@@ -131,12 +123,35 @@ void CHX20::reset() {
 }
 
 void CHX20::think() {
+	bool irq_power = false;
+	bool irq_keyboard = keyboard_pressed > 0 && (ioctl->r_9g & 0x10);
+	mcu_master->b_irq1 = irq_keyboard | irq_power;
+	
+	/*
+	P10		In		Data Set Ready (DSR)
+	P11		In		Clear To Send (CTS)
+	P12		Out		Slave CPU R/W control
+	P13		In		External port interrupt (active low)
+	P14		In		Power abnormal interrupt (active low)
+	P15		In		Keyboard input interrupt (active low)
+	P16		In		Peripheral status (Serial option, low = on)
+	P17		In		Cartridge option flag (low = ROM, high = microcassette)
+	
+	Note: P13-15 means that the specified interrupt has triggered
+	*/
+	
+	bool b_rs232_dsr = false;
+	bool b_rs232_cts = false;
+	bool b_irq_ext = true;
+	bool b_irq_pwr = !irq_power;
+	bool b_irq_keyb = !irq_keyboard;
+	bool b_opt_active = true;
+	bool b_opt_type = false;
+	
+	mcu_master->set_port1((b_opt_type << 7) | (b_opt_active << 6) | (b_irq_keyb << 5) | (b_irq_pwr << 4) | (b_irq_ext << 3) | (b_rs232_cts << 1) | b_rs232_dsr);
+	
 	mcu_master->step();
 	mcu_slave->think();
-	
-	if (keyboard_pressed && !keyboard_repeat++) {
-		mcu_master->interrupt();
-	}
 }
 
 void CHX20::draw_lcd(SDL_Surface *dest, int x, int y) {

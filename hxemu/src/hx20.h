@@ -33,10 +33,8 @@ class CHX20 {
 		void keyboard_down(uint8_t c);
 		void keyboard_up(uint8_t c);
 		
-		Serial* get_rs232();
-		
 	private:
-		uint8_t keyboard_pressed;
+		uint8_t  keyboard_pressed;
 		uint16_t keyboard_repeat;
 		
 		FakeSlave *mcu_slave;
