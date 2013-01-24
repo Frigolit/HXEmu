@@ -35,31 +35,6 @@ if [ "$TARGET" == "i686-mingw32" ]; then
 fi
 
 # ================================================
-# Process make.conf if available
-# ================================================
-if [ "$TARGET" == "" ]; then
-	if [ -e "/etc/make.conf" ]; then
-		ECXXFLAGS="$CXXFLAGS"
-		ECFLAGS="$CFLAGS"
-		ELDFLAGS="$LDFLAGS"
-		. /etc/make.conf
-		CXXFLAGS="$ECXXFLAGS $CXXFLAGS"
-		CFLAGS="$ECFLAGS $CFLAGS"
-		LDFLAGS="$ELDFLAGS $LDFLAGS"
-	fi
-else
-	if [ -e "/usr/$TARGET/etc/make.conf" ]; then
-		ECXXFLAGS="$CXXFLAGS"
-		ECFLAGS="$CFLAGS"
-		ELDFLAGS="$LDFLAGS"
-		. /usr/$TARGET/etc/make.conf
-		CXXFLAGS="$ECXXFLAGS $CXXFLAGS"
-		CFLAGS="$ECFLAGS $CFLAGS"
-		LDFLAGS="$ELDFLAGS $LDFLAGS"
-	fi
-fi
-
-# ================================================
 # Get machine info
 # ================================================
 if [ "$ARCH" == "" ]; then
@@ -223,8 +198,8 @@ else
 fi
 
 export LDFLAGS
-export CXXFLAGS="-Wall -ffunction-sections -Wl,--gc-sections $CXXFLAGS"
-export CFLAGS="-Wall -ffunction-sections -Wl,--gc-sections $CFLAGS"
+export CXXFLAGS="-Wall -ffunction-sections $CXXFLAGS"
+export CFLAGS="-Wall -ffunction-sections $CFLAGS"
 
 # ================================================
 # Print environment information

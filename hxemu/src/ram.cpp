@@ -18,7 +18,7 @@ CRAM::CRAM(uint16_t size) {
 		return;
 	}
 	
-	memset(ram, 0xFF, size);
+	memset(ram, 0x00, size);
 }
 
 CRAM::~CRAM() {

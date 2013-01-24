@@ -4,8 +4,6 @@
 // @version $Id: hx20.cpp 167 2012-06-05 15:29:03Z frigolit $
 // =============================================================================
 
-using namespace std;
-
 #include <stdio.h>
 
 #include "6301.h"

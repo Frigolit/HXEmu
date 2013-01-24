@@ -4,6 +4,7 @@
 // @version $Id: memorydevice.h 94 2011-06-27 21:42:57Z frigolit $
 // =============================================================================
 
+#include <iostream>
 using namespace std;
 
 #ifndef __MEMORYDEVICE_H__

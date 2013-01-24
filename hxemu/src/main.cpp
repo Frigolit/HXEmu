@@ -5,6 +5,7 @@
 // @version $Id: main.cpp 167 2012-06-05 15:29:03Z frigolit $
 // =============================================================================
 
+#include <iostream>
 using namespace std;
 
 #include <stdio.h>
