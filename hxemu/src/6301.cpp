@@ -2844,7 +2844,7 @@ uint8_t C6301::memread(uint16_t addr) {
 			return 0x00;
 		}
 		else if (addr == 0x08) {
-			r_tcsr &= 0b00011111;
+			r_tcsr &= 0x1F;
 			return r_tcsr;
 		}
 		else if (addr == 0x09) {
@@ -2853,11 +2853,11 @@ uint8_t C6301::memread(uint16_t addr) {
 		else if (addr == 0x0A) {
 			return r_counter & 0xFF;
 		}
-		else if (addr == 0x0011 && (r & 0b10000000) && !b_rdrf_clear) {
+		else if (addr == 0x0011 && (r & 0x80) && !b_rdrf_clear) {
 			b_rdrf_clear = 1;
 		}
 		else if (addr == 0x0012 && b_rdrf_clear) {
-			r_internal[0x11] &= 0b01111111;
+			r_internal[0x11] &= 0x7F;
 			b_rdrf_clear = 0;
 		}
 		
@@ -2901,12 +2901,12 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 	}
 	else if (addr == 0x08) {
 		// Timer Control/Status Register (TCSR)
-		r_tcsr = (r_tcsr & 0b11100000) | (data & 0b00011111);
+		r_tcsr = (r_tcsr & 0xE0) | (data & 0x1F);
 		printf("r_tcsr set to %02X\n", r_tcsr);
 	}
 	else if (addr == 0x11) {
 		// Transmit/Receive Control and Status Register (TRCSR)
-		r_internal[0x11] = (r_internal[0x11] & 0b11100001) | data;
+		r_internal[0x11] = (r_internal[0x11] & 0xE1) | data;
 	}
 	else if (addr == 0x12) {
 		// Receive Data Register - Can't write here, TRAP!
@@ -2919,7 +2919,7 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 	}
 	else if (addr == 0x14) {
 		// RAM Control Register
-		r_internal[0x14] = data & 0b11000000;
+		r_internal[0x14] = data & 0xC0;
 	}
 	else if (addr >= 0x0080 && addr <= 0x00FF && (r_internal[0x14] & (1 << 6))) {
 		// Internal RAM

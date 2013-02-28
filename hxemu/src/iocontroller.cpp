@@ -43,9 +43,9 @@ uint8_t CIOController::read(uint16_t addr) {
 	
 	if (addr == 0x20) {
 		#ifdef DEBUG_IOCTL
-			printf("%02X\n", 0b00001000);
+			printf("%02X\n", 0x08);
 		#endif
-		return 0b00001000;
+		return 0x08;
 	}
 	else if (addr == 0x22) {
 		// KRTN 0-7
@@ -77,16 +77,16 @@ uint8_t CIOController::read(uint16_t addr) {
 		bool b_busy = true;
 		
 		uint8_t l = ~ram[0x20];
-		uint8_t k = 0b00000011;
+		uint8_t k = 0x03;
 		
-		if (l & 0x01) k ^= 0b00;
-		if (l & 0x02) k ^= 0b00;
-		if (l & 0x04) k ^= 0b10;
-		if (l & 0x08) k ^= 0b00;
-		if (l & 0x10) k ^= 0b00;
+		if (l & 0x01) k ^= 0x00;
+		if (l & 0x02) k ^= 0x00;
+		if (l & 0x04) k ^= 0x20;
+		if (l & 0x08) k ^= 0x00;
+		if (l & 0x10) k ^= 0x00;
 		if (l & 0x20) k ^= (keyboard_map[0x00] | keyboard_map[0x01]) << 1;	// Shift
-		if (l & 0x40) k ^= 0b00;
-		if (l & 0x80) k ^= 0b00;
+		if (l & 0x40) k ^= 0x00;
+		if (l & 0x80) k ^= 0x00;
 		
 		uint8_t n = (b_power << 7) | (b_busy << 6) | k;
 		
@@ -99,10 +99,10 @@ uint8_t CIOController::read(uint16_t addr) {
 		if (++lcd_clk_counter == 8) {
 			lcd_clk_counter = 0;
 			
-			if (r_9g & 0b00000111) {
-				uint8_t n = (r_9g & 0b00000111) - 1;
+			if (r_9g & 0x07) {
+				uint8_t n = (r_9g & 0x07) - 1;
 				
-				if (r_9g & 0b00001000) lcd_ctls[n]->command(ram[0x2A]);
+				if (r_9g & 0x08) lcd_ctls[n]->command(ram[0x2A]);
 				else lcd_ctls[n]->data(ram[0x2A]);
 			}
 		}
