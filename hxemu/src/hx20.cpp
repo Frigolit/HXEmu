@@ -37,7 +37,7 @@ CHX20::CHX20() {
 	ioctl = new CIOController();
 	
 	// Initialize ROMs
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 4; i++) {
 		roms[i] = new CROM(8192);
 	}
 	
