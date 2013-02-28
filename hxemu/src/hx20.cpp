@@ -111,7 +111,7 @@ CHX20::~CHX20() {
 	delete(ram0);
 	delete(ram1);
 	
-	for (int i = 0; i < 5; i++) delete(roms[i]);
+	for (int i = 0; i < 4; i++) delete(roms[i]);
 }
 
 void CHX20::reset() {
