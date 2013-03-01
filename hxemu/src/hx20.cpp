@@ -126,16 +126,29 @@ void CHX20::think() {
 	mcu_master->b_irq1 = irq_keyboard | irq_power;
 	
 	/*
-	P10		In		Data Set Ready (DSR)
-	P11		In		Clear To Send (CTS)
-	P12		Out		Slave CPU R/W control
-	P13		In		External port interrupt (active low)
-	P14		In		Power abnormal interrupt (active low)
-	P15		In		Keyboard input interrupt (active low)
-	P16		In		Peripheral status (Serial option, low = on)
-	P17		In		Cartridge option flag (low = ROM, high = microcassette)
+	=== Port 1 ===
+	P10    In     Data Set Ready (DSR)
+	P11    In     Clear To Send (CTS)
+	P12    Out    Slave CPU R/W control
+	P13    In     External port interrupt (active low)
+	P14    In     Power abnormal interrupt (active low)
+	P15    In     Keyboard input interrupt (active low)
+	P16    In     Peripheral status (Serial option, low = on)
+	P17    In     Cartridge option flag (low = ROM, high = microcassette)
 	
 	Note: P13-15 means that the specified interrupt has triggered
+	
+	=== Port 2 ===
+	P20    In     Serial receive (2F) - SW2.2 (Barcode data) / CN2.3 (RXD) - Channel selection controlled by slave CPU
+	P21    Out    Wired to CN2.2 (TXD)
+	P22	   Out    Serial channel selection (4D, 0 = Slave CPU, 1 = Serial Port)
+	P23    In     Serial receive (4D)
+	P24    Out    Serial transmit (4D)
+	P25    [In]	  Mode selection bit 0
+	P26    [In]	  Mode selection bit 1
+	P27    [In]	  Mode selection bit 2
+	
+	Note: P25-27 cannot be changed to outputs.
 	*/
 	
 	bool b_rs232_dsr = false;
