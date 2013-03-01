@@ -2935,7 +2935,7 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port1_data = data;
+		port1_data = (port1_data & ~port1_ddr) | (data & port1_ddr);
 	}
 	else if (addr == 0x03) {
 		// Port 2 Data Register
@@ -2951,7 +2951,7 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port2_data = data & 0x1F;
+		port2_data = (port2_data & ~port2_ddr) | (data & port2_ddr);
 	}
 	else if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {
 		membus->write(addr, data);
