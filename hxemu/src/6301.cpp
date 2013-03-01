@@ -34,6 +34,11 @@ C6301::C6301(uint8_t mode) {
 	
 	b_trace = false;
 	
+	port1_data = 0;
+	port1_ddr = 0;
+	port2_data = 0;
+	port2_ddr = 0;
+	
 	if (opmode == 0 || opmode >= 5) {
 		// These modes should initialize the mask ROM
 		maskrom = new CROM(4096);
@@ -2838,10 +2843,10 @@ uint8_t C6301::memread(uint16_t addr) {
 			return membus->read(addr);
 		}
 		else if (addr == 0x02) {
-			return r_internal[0x02];
+			return port1_data;
 		}
 		else if (addr == 0x03) {
-			return 0x00;
+			return port2_data;
 		}
 		else if (addr == 0x08) {
 			r_tcsr &= 0x1F;
@@ -2888,7 +2893,67 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		if (b_trace) printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
 	#endif
 	
-	if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {
+	if (addr == 0x00) {
+		// Port 1 Data Direction Register
+		printf("Port 1 DDR:  ");
+		
+		for (int i = 7; i >= 0; i--) {
+			if (data & (1 << i)) putchar('O');
+			else putchar('I');
+		}
+		
+		putchar('\n');
+		
+		port1_ddr = data;
+		port1_data = port1_data & ~data;
+	}
+	else if (addr == 0x01) {
+		// Port 2 Data Direction Register
+		printf("Port 2 DDR:  ---");
+		
+		for (int i = 4; i >= 0; i--) {
+			if (data & (1 << i)) putchar('O');
+			else putchar('I');
+		}
+		
+		putchar('\n');
+		
+		port2_ddr = data & 0x1F;
+		port2_data = port2_data & ~data;
+	}
+	else if (addr == 0x02) {
+		// Port 2 Data Register
+		printf("Port 1 Data: ");
+		
+		for (int i = 7; i >= 0; i--) {
+			if (port1_ddr & (1 << i)) {
+				if (data & (1 << i)) putchar('H');
+				else putchar('L');
+			}
+			else putchar('-');
+		}
+		
+		putchar('\n');
+		
+		port1_data = data;
+	}
+	else if (addr == 0x03) {
+		// Port 2 Data Register
+		printf("Port 2 Data: ---");
+		
+		for (int i = 4; i >= 0; i--) {
+			if (port2_ddr & (1 << i)) {
+				if (data & (1 << i)) putchar('H');
+				else putchar('L');
+			}
+			else putchar('-');
+		}
+		
+		putchar('\n');
+		
+		port2_data = data & 0x1F;
+	}
+	else if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {
 		membus->write(addr, data);
 	}
 	else if (addr == 0x0B) {
@@ -2944,12 +3009,11 @@ void C6301::memwrite_double(uint16_t addr, uint16_t data) {
 }
 
 uint8_t C6301::get_port1() {
-	return r_internal[0x02];
+	return port1_data;
 }
 
 uint8_t C6301::get_port2() {
-	printf("C6301::get_port2(): fixme: stub\n");
-	return 0x00;
+	return port2_data;
 }
 
 uint8_t C6301::get_port3() {
@@ -2963,11 +3027,11 @@ uint8_t C6301::get_port4() {
 }
 
 void C6301::set_port1(uint8_t d) {
-	r_internal[0x02] = d;
+	port1_data = d & ~port1_ddr;
 }
 
 void C6301::set_port2(uint8_t d) {
-	printf("C6301::set_port2(): fixme: stub\n");
+	port2_data = d & ~port2_ddr;
 }
 
 void C6301::set_port3(uint8_t d) {

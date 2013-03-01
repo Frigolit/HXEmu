@@ -52,6 +52,11 @@ class C6301 {
 		bool     b_halted;
 		bool     b_sleep;
 		
+		uint8_t  port1_ddr;
+		uint8_t  port1_data;
+		uint8_t  port2_ddr;
+		uint8_t  port2_data;
+		
 		uint8_t  r_a;
 		uint8_t  r_b;
 		uint16_t r_x;
