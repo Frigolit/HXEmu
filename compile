@@ -190,6 +190,14 @@ elif [ "$KERNEL" == "Linux" ]; then
 	fi
 	
 	LDFLAGS="$LDFLAGS $PKG_SDL"
+elif [ "$KERNEL" == "Darwin" ]; then
+	if [ "`xwhich sdl-config 2>/dev/null`" == "" ]; then
+		echo "ERROR: Cannot find SDL!"
+		exit 1
+	fi
+
+	LDFLAGS="$LDFLAGS $(sdl-config --libs)"
+	CXXFLAGS="$CXXFLAGS $(sdl-config --cflags)"
 else
 	if [ "$PKG_SDL" == "" ]; then
 		echo "ERROR: Unhandled auto-detection for SDL on $KERNEL! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("

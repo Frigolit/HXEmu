@@ -43,7 +43,7 @@ void CLCDController::apply_ptr_op(uint8_t n) {
 void CLCDController::command(uint8_t n) {
 	if (n & 0x80) {
 		// Load Data Pointer (LDPI)
-		ptr = n & 0b01111111;
+		ptr = n & 0x7F;
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Load Data Pointer (LDPI): ptr = 0x%02X\n", n, ptr);
 		#endif
@@ -124,11 +124,11 @@ void CLCDController::command(uint8_t n) {
 		#endif
 		
 		// Bit set
-		if (lcd && (ptr & 0b00111111) < 40) {
-			uint8_t bt = (n & 0b00011100) >> 2;
+		if (lcd && (ptr & 0x3F) < 40) {
+			uint8_t bt = (n & 0x1C) >> 2;
 			
-			uint8_t yb = (ptr & 0b01000000) >> 3;
-			uint8_t x = ptr & 0b00111111;
+			uint8_t yb = (ptr & 0x40) >> 3;
+			uint8_t x = ptr & 0x3F;
 			
 			uint8_t n = (ram[ptr] |= (1 << bt));
 			
@@ -146,11 +146,11 @@ void CLCDController::command(uint8_t n) {
 		#endif
 		
 		// Bit clear
-		if (lcd && (ptr & 0b00111111) < 40) {
-			uint8_t bt = (n & 0b00011100) >> 2;
+		if (lcd && (ptr & 0x3F) < 40) {
+			uint8_t bt = (n & 0x1C) >> 2;
 			
-			uint8_t yb = (ptr & 0b01000000) >> 3;
-			uint8_t x = ptr & 0b00111111;
+			uint8_t yb = (ptr & 0x40) >> 3;
+			uint8_t x = ptr & 0x3F;
 			
 			uint8_t n = (ram[ptr] &= ~(1 << bt));
 			
@@ -171,9 +171,9 @@ void CLCDController::data(uint8_t n) {
 	}
 	else if (mode == 2) {
 		// Write mode
-		if (lcd && (ptr & 0b00111111) < 40) {
-			uint8_t yb = (ptr & 0b01000000) >> 3;
-			uint8_t x = ptr & 0b00111111;
+		if (lcd && (ptr & 0x3F) < 40) {
+			uint8_t yb = (ptr & 0x40) >> 3;
+			uint8_t x = ptr & 0x3F;
 			
 			for (uint8_t y = 0; y < 8; y++) {
 				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);

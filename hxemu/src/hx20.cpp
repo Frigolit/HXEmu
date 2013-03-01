@@ -37,7 +37,7 @@ CHX20::CHX20() {
 	ioctl = new CIOController();
 	
 	// Initialize ROMs
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 4; i++) {
 		roms[i] = new CROM(8192);
 	}
 	
@@ -111,7 +111,7 @@ CHX20::~CHX20() {
 	delete(ram0);
 	delete(ram1);
 	
-	for (int i = 0; i < 5; i++) delete(roms[i]);
+	for (int i = 0; i < 4; i++) delete(roms[i]);
 }
 
 void CHX20::reset() {
