@@ -17,10 +17,14 @@
 CHX20::CHX20() {
 	// Initialize CPUs
 	mcu_master = new C6301();
-	mcu_slave = new FakeSlave();
+	#ifdef REALSLAVE
+		mcu_slave = new C6301();
+	#else
+		mcu_slave = new FakeSlave();
+	#endif
 	
 	// Link serial endpoints
-	mcu_master->serial0->set_endpoint(mcu_slave->serial_master);
+	mcu_master->serial0->set_endpoint(mcu_slave->serial0);
 	
 	// Initialize keyboard
 	keyboard_pressed = 0;
@@ -40,6 +44,11 @@ CHX20::CHX20() {
 	for (int i = 0; i < 4; i++) {
 		roms[i] = new CROM(8192);
 	}
+	
+	#ifdef REALSLAVE
+		mcu_slave->maskrom = new CROM(4096);
+		mcu_slave->maskrom->load_from_file((char *)"data/roms/test/slave.bin");
+	#endif
 	
 	// Initialize LCD and controllers
 	lcd = new CLCD();
@@ -86,9 +95,19 @@ CHX20::CHX20() {
 		}
 		printf("ROM #%d - Checksum: %08X\n", i, hash->crc32(buf, 8192));
 	}
+	
+	#ifdef REALSLAVE
+		for (int n = 0; n < 4096; n++) {
+			buf[n] = mcu_slave->maskrom->read(n);
+		}
+		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
+	#endif
 	delete hash;
 	
-	printf("Reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
+	printf("Master CPU reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
+	#ifdef REALSLAVE
+		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
+	#endif
 
 	// Reset
 	reset();
@@ -121,8 +140,11 @@ void CHX20::reset() {
 	mcu_slave->reset();
 	ioctl->reset();
 	
-	// Set operating mode for CPU
+	// Set operating mode for CPUs
 	mcu_master->set_port2(0x80);
+	#ifdef REALSLAVE
+		mcu_slave->set_port2(0xF0);
+	#endif
 }
 
 void CHX20::think() {
@@ -167,7 +189,7 @@ void CHX20::think() {
 	mcu_master->set_port1((b_opt_type << 7) | (b_opt_active << 6) | (b_irq_keyb << 5) | (b_irq_pwr << 4) | (b_irq_ext << 3) | (b_rs232_cts << 1) | b_rs232_dsr);
 	
 	mcu_master->step();
-	mcu_slave->think();
+	mcu_slave->step();
 }
 
 void CHX20::draw_lcd(SDL_Surface *dest, int x, int y) {

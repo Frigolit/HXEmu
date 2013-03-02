@@ -17,10 +17,10 @@ class FakeSlave {
 		~FakeSlave();
 		
 		void reset();
-		void think();
+		void step();
 		
-		VirtualSerial *serial_master;
-		VirtualSerial *serial_rs232;
+		VirtualSerial *serial0;
+		VirtualSerial *serial1;
 		
 	private:
 		int state;

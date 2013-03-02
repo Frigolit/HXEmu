@@ -35,7 +35,11 @@ class CHX20 {
 		uint8_t  keyboard_pressed;
 		uint16_t keyboard_repeat;
 		
-		FakeSlave *mcu_slave;
+		#ifdef REALSLAVE
+			C6301     *mcu_slave;
+		#else
+			FakeSlave *mcu_slave;
+		#endif
 		
 		CLCD *lcd;
 		CLCDController *lcd_ctls[6];
