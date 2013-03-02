@@ -3,16 +3,19 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "rtc.h"
 
 CRTC::CRTC() {
-	memset(&memory, 0, 50);
+	ram = (uint8_t *)malloc(50);
+	memset(ram, 0, 50);
 }
 
 CRTC::~CRTC() {
+	free(ram);
 }
 
 // TODO!
@@ -38,15 +41,25 @@ uint8_t CRTC::read(uint16_t addr) {
 	*/
 
 	if (addr <= 0x0D) return 0x00;
-	else return memory[addr - 0x0D];
+	else {
+		#ifdef DEBUG_RTC
+			printf("\e[32m\e[1mCRTC::read(0x%04X[RAM 0x%02X]) = %02X\e[0m\n", addr, (uint8_t)(addr - 0x0E), ram[addr - 0x0E]);
+		#endif
+		return ram[addr - 0x0E];
+	}
 }
 
 void CRTC::write(uint16_t addr, uint8_t data) {
 	if (addr > 63) {
 		addr = addr % 64;
-		printf("\e[31m\e[1mCRTC::read(0x%04X, 0x%02X): warning: write outside range - wrapping\e[0m\n", addr, data);
+		printf("\e[31m\e[1mCRTC::write(0x%04X, 0x%02X): warning: write outside range - wrapping\e[0m\n", addr, data);
 	}
 
-	if (addr > 0x0D) memory[addr - 0x0D] = data;
+	if (addr > 0x0D) {
+		#ifdef DEBUG_RTC
+			printf("\e[31m\e[1mCRTC::write(0x%04X [RAM 0x%02X], %02X)\e[0m\n", addr, (uint8_t)(addr - 0x0E), data);
+		#endif
+		ram[addr - 0x0E] = data;
+	}
 }
 

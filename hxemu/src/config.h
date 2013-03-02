@@ -25,6 +25,10 @@
 		#ifndef DEBUG_IOCTL
 			#define DEBUG_IOCTL
 		#endif
+		
+		#ifndef DEBUG_RTC
+			#define DEBUG_RTC
+		#endif
 	#endif
 
 #endif
