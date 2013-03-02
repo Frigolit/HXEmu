@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: fakeslave.cpp 138 2012-02-20 13:35:19Z frigolit $
 // =============================================================================
 
 #include <stdio.h>

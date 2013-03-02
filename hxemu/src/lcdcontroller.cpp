@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: lcdcontroller.cpp 167 2012-06-05 15:29:03Z frigolit $
 // @info    http://frigolit.net/archive/datasheets/PD7227.pdf
 // =============================================================================
 

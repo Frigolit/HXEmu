@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: lcd.cpp 166 2012-04-05 10:06:00Z frigolit $
 // =============================================================================
 
 #include <stdio.h>
@@ -44,7 +43,6 @@ void CLCD::set_pixel(uint8_t x, uint8_t y) {
 	
 	SDL_mutexP(mtx);
 	SDL_FillRect(surface, &r, color_set);
-	//*((uint32_t *)surface->pixels + y * surface->pitch/4 + x) = SDL_MapRGB(surface->format, 0, 40, 0);
 	SDL_mutexV(mtx);
 }
 
@@ -54,7 +52,6 @@ void CLCD::clear_pixel(uint8_t x, uint8_t y) {
 	
 	SDL_mutexP(mtx);
 	SDL_FillRect(surface, &r, color_clear);
-	//*((uint32_t *)surface->pixels + y * surface->pitch/4 + x) = SDL_MapRGB(surface->format, 50, 180, 20);
 	SDL_mutexV(mtx);
 }
 

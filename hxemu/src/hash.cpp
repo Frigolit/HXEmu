@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: hash.cpp 164 2012-03-09 10:49:03Z frigolit $
 //
 // Based on a CRC32 implementation by Finn Yannick Jacobs
 // =============================================================================

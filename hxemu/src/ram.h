@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: ram.h 166 2012-04-05 10:06:00Z frigolit $
 // =============================================================================
 
 #ifndef __RAM_H__

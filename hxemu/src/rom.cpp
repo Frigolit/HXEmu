@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: rom.cpp 161 2012-03-05 08:01:06Z frigolit $
 // =============================================================================
 
 #include <stdlib.h>

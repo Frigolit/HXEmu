@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: iocontroller.h 110 2012-02-14 09:23:51Z frigolit $
 // =============================================================================
 
 #ifndef __IOCONTROLLER_H__

@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: memorybus.cpp 94 2011-06-27 21:42:57Z frigolit $
 // =============================================================================
 
 #include <stdint.h>

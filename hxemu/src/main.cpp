@@ -2,7 +2,6 @@
 // @title   HXEmu - Epson HX-20 Emulator
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: main.cpp 167 2012-06-05 15:29:03Z frigolit $
 // =============================================================================
 
 #include <iostream>

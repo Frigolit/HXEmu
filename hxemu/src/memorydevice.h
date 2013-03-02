@@ -1,7 +1,6 @@
 // =============================================================================
 // @author  Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @version $Id: memorydevice.h 94 2011-06-27 21:42:57Z frigolit $
 // =============================================================================
 
 #include <iostream>
