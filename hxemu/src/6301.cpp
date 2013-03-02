@@ -18,7 +18,7 @@ C6301::C6301() {
 	membus       = new CMemoryBus();
 	serial0      = new VirtualSerial();
 	ram          = new CRAM(128);
-	maskrom      = new CROM(4096);
+	maskrom      = NULL;
 	
 	b_inited     = false;
 	b_trace      = false;
@@ -33,6 +33,7 @@ C6301::C6301() {
 }
 
 C6301::~C6301() {
+	maskrom = NULL;
 	delete(membus);
 	delete(serial0);
 	delete(ram);
@@ -2877,7 +2878,11 @@ uint8_t C6301::memread(uint16_t addr) {
 	}
 	else if (opmode == 7 && addr >= 0xF000) {
 		// Mask ROM
-		printf("\e[31mC6301::memwrite(): write to mask rom ignored\n");
+		if (maskrom != NULL) return maskrom->read(addr - 0xF000);
+		else {
+			printf("C6301::stack_pop(): error: no mask rom attached in single-chip mode (7)\n");
+			return 0xFF;
+		}
 	}
 	else {
 		// Read from external memory bus
