@@ -16,7 +16,7 @@
 
 CHX20::CHX20() {
 	// Initialize CPUs
-	mcu_master = new C6301(4);
+	mcu_master = new C6301();
 	mcu_slave = new FakeSlave();
 	
 	// Link serial endpoints
@@ -88,6 +88,8 @@ CHX20::CHX20() {
 	}
 	delete hash;
 	
+	printf("Reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
+
 	// Reset
 	reset();
 }
@@ -118,6 +120,9 @@ void CHX20::reset() {
 	mcu_master->reset();
 	mcu_slave->reset();
 	ioctl->reset();
+	
+	// Set operating mode for CPU
+	mcu_master->set_port2(0x80);
 }
 
 void CHX20::think() {
@@ -139,7 +144,7 @@ void CHX20::think() {
 	Note: P13-15 means that the specified interrupt has triggered
 	
 	=== Port 2 ===
-	P20    In     Serial receive (2F) - SW2.2 (Barcode data) / CN2.3 (RXD) - Channel selection controlled by slave CPU
+	P20    In     Barcode data
 	P21    Out    Wired to CN2.2 (TXD)
 	P22	   Out    Serial channel selection (4D, 0 = Slave CPU, 1 = Serial Port)
 	P23    In     Serial receive (4D)

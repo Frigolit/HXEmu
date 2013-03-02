@@ -17,7 +17,7 @@
 
 class C6301 {
 	public:
-		C6301(uint8_t mode);
+		C6301();
 		~C6301();
 		
 		void reset();
@@ -44,6 +44,8 @@ class C6301 {
 		bool     b_trace;
 		
 	private:
+		bool     b_inited;
+		
 		FILE     *tracefile;
 		CRAM     *ram;
 		
@@ -52,10 +54,10 @@ class C6301 {
 		bool     b_halted;
 		bool     b_sleep;
 		
-		uint8_t  port1_ddr;
-		uint8_t  port1_data;
-		uint8_t  port2_ddr;
-		uint8_t  port2_data;
+		uint8_t  r_port1_ddr;
+		uint8_t  r_port1_data;
+		uint8_t  r_port2_ddr;
+		uint8_t  r_port2_data;
 		
 		uint8_t  r_a;
 		uint8_t  r_b;

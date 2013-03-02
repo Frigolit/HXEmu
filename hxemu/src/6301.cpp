@@ -13,38 +13,22 @@
 #include "config.h"
 #include "6301.h"
 
-C6301::C6301(uint8_t mode) {
-	// Set operating mode
-	if (mode > 7) {
-		printf("C6301::C6301(): Assertion failed: mode < 8\n");
-		exit(1);
-	}
-	else if (mode != 2 && mode != 4) {
-		printf("C6301::C6301(): error: unimplemented operating mode %d\n", opmode);
-		exit(1);
-	}
-	
-	opmode = mode;
-	
+C6301::C6301() {
 	// Initialize base stuff
-	membus    = new CMemoryBus();
-	serial0   = new VirtualSerial();
-	ram       = new CRAM(128);
-	maskrom   = NULL;
+	membus       = new CMemoryBus();
+	serial0      = new VirtualSerial();
+	ram          = new CRAM(128);
+	maskrom      = new CROM(4096);
 	
-	b_trace = false;
+	b_inited     = false;
+	b_trace      = false;
 	
-	port1_data = 0;
-	port1_ddr = 0;
-	port2_data = 0;
-	port2_ddr = 0;
+	r_port1_data = 0;
+	r_port1_ddr  = 0;
+	r_port2_data = 0;
+	r_port2_ddr  = 0;
 	
-	if (opmode == 0 || opmode >= 5) {
-		// These modes should initialize the mask ROM
-		maskrom = new CROM(4096);
-	}
-	
-	tracefile = NULL;
+	tracefile    = NULL;
 	//tracefile = fopen("cputrace.log", "w");
 }
 
@@ -60,9 +44,9 @@ void C6301::reset() {
 	b_sleep = false;
 	
 	// Reset registers
-	r_a = 0;
-	r_b = 0;
-	r_x = 0;
+	r_a  = 0;
+	r_b  = 0;
+	r_x  = 0;
 	r_sp = 0;
 	
 	r_ccr_i = 1;
@@ -73,19 +57,22 @@ void C6301::reset() {
 	r_ccr_c = 0;
 	
 	r_counter = 0;
-	r_ocr = 0xFFFF;
-	r_tcsr = 0;
+	r_ocr     = 0xFFFF;
+	r_tcsr    = 0;
+
+	// Reset ports
+	r_port1_ddr  = 0;
+	r_port1_data = 0;
+	r_port2_ddr  = 0;
+	r_port2_data = 0;
 	
 	// Reset internal states
+	b_inited     = 0;
 	b_rdrf_clear = 0;
-	
-	b_waitirq = 0;
-	b_nmi = false;
-	b_nmi_enter = false;
-	b_irq_swi = false;
-	
-	// Load reset vector
-	r_pc = (memread(0xFFFE) << 8) | memread(0xFFFF);
+	b_waitirq    = 0;
+	b_nmi        = false;
+	b_nmi_enter  = false;
+	b_irq_swi    = false;
 	
 	// Initialize internal registers
 	memset(&r_internal, 0, 32);
@@ -108,6 +95,17 @@ void C6301::nmi() {
 }
 
 void C6301::step() {
+	if (!b_inited) {
+		opmode = r_port2_data >> 5;
+		printf("C6301::step(): debug: opmode = %d\n", opmode);
+
+		// Load reset vector
+		r_pc = (memread(0xFFFE) << 8) | memread(0xFFFF);
+
+		b_inited = true;
+		return;
+	}
+
 	if (b_halted) return;
 	
 	// Increase free running counter
@@ -125,7 +123,6 @@ void C6301::step() {
 	}
 	else if (b_irq1) {
 		if (b_sleep) b_sleep = false;
-		//b_irq1 = 0;
 		if (!r_ccr_i) interrupt_enter(0xFFF8, 0xFFF9);
 	}
 	
@@ -2838,15 +2835,21 @@ uint8_t C6301::memread(uint16_t addr) {
 	if (addr <= 0x001F) {
 		r = r_internal[(uint8_t)addr];
 		
-		// Externally mapped addresses in mode 4: 0x04, 0x05, 0x06, 0x07 and 0x0F
-		if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {
-			return membus->read(addr);
+		if (addr == 0x00) {
+			return r_port1_ddr;
+		}
+		else if (addr == 0x01) {
+			return r_port2_ddr;
 		}
 		else if (addr == 0x02) {
-			return port1_data;
+			return r_port1_data;
 		}
 		else if (addr == 0x03) {
-			return port2_data;
+			return r_port2_data;
+		}
+		if (opmode == 4 && ((addr >= 0x04 && addr <= 0x07) || addr == 0x0F)) {
+			// Externally mapped addresses in mode 4: 0x04, 0x05, 0x06, 0x07 and 0x0F
+			return membus->read(addr);
 		}
 		else if (addr == 0x08) {
 			r_tcsr &= 0x1F;
@@ -2871,6 +2874,10 @@ uint8_t C6301::memread(uint16_t addr) {
 	else if (addr >= 0x0080 && addr <= 0x00FF && (r_internal[0x14] & (1 << 6))) {
 		// Internal RAM
 		r = ram->read(addr & 0x007F);
+	}
+	else if (opmode == 7 && addr >= 0xF000) {
+		// Mask ROM
+		printf("\e[31mC6301::memwrite(): write to mask rom ignored\n");
 	}
 	else {
 		// Read from external memory bus
@@ -2904,8 +2911,8 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port1_ddr = data;
-		port1_data = port1_data & ~data;
+		r_port1_ddr = data;
+		r_port1_data = r_port1_data & ~data;
 	}
 	else if (addr == 0x01) {
 		// Port 2 Data Direction Register
@@ -2918,15 +2925,15 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port2_ddr = data & 0x1F;
-		port2_data = port2_data & ~data;
+		r_port2_ddr = data & 0x1F;
+		r_port2_data = r_port2_data & ~data;
 	}
 	else if (addr == 0x02) {
 		// Port 2 Data Register
 		printf("Port 1 Data: ");
 		
 		for (int i = 7; i >= 0; i--) {
-			if (port1_ddr & (1 << i)) {
+			if (r_port1_ddr & (1 << i)) {
 				if (data & (1 << i)) putchar('H');
 				else putchar('L');
 			}
@@ -2935,14 +2942,14 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port1_data = (port1_data & ~port1_ddr) | (data & port1_ddr);
+		r_port1_data = (r_port1_data & ~r_port1_ddr) | (data & r_port1_ddr);
 	}
 	else if (addr == 0x03) {
 		// Port 2 Data Register
 		printf("Port 2 Data: ---");
 		
 		for (int i = 4; i >= 0; i--) {
-			if (port2_ddr & (1 << i)) {
+			if (r_port2_ddr & (1 << i)) {
 				if (data & (1 << i)) putchar('H');
 				else putchar('L');
 			}
@@ -2951,7 +2958,7 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		
 		putchar('\n');
 		
-		port2_data = (port2_data & ~port2_ddr) | (data & port2_ddr);
+		r_port2_data = (r_port2_data & ~r_port2_ddr) | (data & r_port2_ddr);
 	}
 	else if (opmode == 4 && ((addr >= 0x0004 && addr <= 0x0007) || addr == 0x000F)) {
 		membus->write(addr, data);
@@ -2993,6 +3000,10 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 	else if (addr <= 0x1F) {
 		printf("\e[31mC6301::memwrite(): unhandled internal register 0x%02X (0x%02X)\e[0m\n", addr, data);
 	}
+	else if (opmode == 7 && addr >= 0xF000) {
+		// Mask ROM
+		printf("\e[31mC6301::memwrite(): write to mask rom ignored\n");
+	}
 	else {
 		// Write to external memory bus
 		membus->write(addr, data);
@@ -3009,11 +3020,11 @@ void C6301::memwrite_double(uint16_t addr, uint16_t data) {
 }
 
 uint8_t C6301::get_port1() {
-	return port1_data;
+	return r_port1_data;
 }
 
 uint8_t C6301::get_port2() {
-	return port2_data;
+	return r_port2_data;
 }
 
 uint8_t C6301::get_port3() {
@@ -3027,11 +3038,11 @@ uint8_t C6301::get_port4() {
 }
 
 void C6301::set_port1(uint8_t d) {
-	port1_data = d & ~port1_ddr;
+	r_port1_data = d & ~r_port1_ddr;
 }
 
 void C6301::set_port2(uint8_t d) {
-	port2_data = d & ~port2_ddr;
+	r_port2_data = d & ~r_port2_ddr;
 }
 
 void C6301::set_port3(uint8_t d) {

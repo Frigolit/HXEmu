@@ -15,7 +15,6 @@ CIOController::CIOController() {
 	}
 	
 	lcd_clk_counter = 0;
-	
 	r_9g = 0x00;
 }
 
@@ -30,6 +29,9 @@ void CIOController::reset() {
 	for (int i = 0; i < 6; i++) {
 		lcd_ctls[i]->reset();
 	}
+
+	lcd_clk_counter = 0;
+	r_9g = 0x00;
 }
 
 void CIOController::set_lcd_controller(uint8_t n, CLCDController *c) {
@@ -66,12 +68,6 @@ uint8_t CIOController::read(uint16_t addr) {
 		#endif
 		return n;
 	}
-	else if (addr == 0x26) {
-		#ifdef DEBUG_IOCTL
-			printf("FF\n");
-		#endif
-		return 0xFF;
-	}
 	else if (addr == 0x28) {
 		bool b_power = true;
 		bool b_busy = true;
@@ -107,14 +103,11 @@ uint8_t CIOController::read(uint16_t addr) {
 			}
 		}
 	}
-	else if (addr == 0x2C) {
-		//return 0x00;
-	}
 	
 	#ifdef DEBUG_IOCTL
-		printf("00\n");
+		printf("FF\n");
 	#endif
-	return 0x00;
+	return 0xFF;
 }
 
 void CIOController::write(uint16_t addr, uint8_t data) {
