@@ -7,7 +7,7 @@
 #define __LCD_H__
 
 #include <stdint.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class CLCD {
 	public:

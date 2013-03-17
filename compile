@@ -190,6 +190,7 @@ elif [ "$KERNEL" == "Linux" ]; then
 	fi
 	
 	LDFLAGS="$LDFLAGS $PKG_SDL"
+	CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl)"
 elif [ "$KERNEL" == "Darwin" ]; then
 	if [ "`xwhich sdl-config 2>/dev/null`" == "" ]; then
 		echo "ERROR: Cannot find SDL!"
