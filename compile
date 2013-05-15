@@ -27,7 +27,7 @@ if [ -d "bin" ]; then chmod +x bin/*; fi
 # ================================================
 # Hacks for special targets
 # ================================================
-if [ "$TARGET" == "i686-mingw32" ]; then
+if [ "$TARGET" == "i686-mingw32" ] || [ "$TARGET" == "mingw32" ] || [ "$TARGET" == "x86_64-w64-mingw32" ]; then
 	CXXFLAGS="$CXXFLAGS -DNOTESTDEVICE"
 	LDFLAGS="-static-libgcc -static-libstdc++ $LDFLAGS"
 	export POSTLDFLAGS="$POSTLDFLAGS -lSDL"
@@ -180,8 +180,10 @@ if [ "$KERNEL" == "SunOS" ]; then
 elif [ "$KERNEL" == "Linux" ]; then
 	if [ "$TARGET" != "" ]; then
 		PKG_SDL="`${TARGET}-pkg-config --libs sdl 2>/dev/null`"
+		CXXFLAGS="$CXXFLAGS $(${TARGET}-pkg-config --cflags sdl)"
 	else
 		PKG_SDL="`pkg-config --libs sdl 2>/dev/null`"
+		CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl)"
 	fi
 	
 	if [ "$PKG_SDL" == "" ]; then
@@ -190,7 +192,6 @@ elif [ "$KERNEL" == "Linux" ]; then
 	fi
 	
 	LDFLAGS="$LDFLAGS $PKG_SDL"
-	CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl)"
 elif [ "$KERNEL" == "Darwin" ]; then
 	if [ "`xwhich sdl-config 2>/dev/null`" == "" ]; then
 		echo "ERROR: Cannot find SDL!"
