@@ -22,8 +22,8 @@ CLCD::CLCD() {
 }
 
 CLCD::~CLCD() {
-	free(surface);
-	free(mtx);
+	SDL_FreeSurface(surface);
+	SDL_DestroyMutex(mtx);
 }
 
 void CLCD::draw(SDL_Surface *dest, int x, int y) {

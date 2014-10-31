@@ -14,6 +14,12 @@ CMemoryBus::CMemoryBus() {
 }
 
 CMemoryBus::~CMemoryBus() {
+	int sz = entries->size();
+
+	for (int i = 0; i < sz; i++) {
+		delete(entries->at(i));
+	}
+
 	delete(entries);
 }
 

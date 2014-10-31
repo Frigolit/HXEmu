@@ -183,6 +183,8 @@ void shutdown() {
 		SDL_KillThread(threads[i]);
 		delete(machines[i]);
 	}
+
+	SDL_Quit();
 }
 
 int hx20_thread(void *data) {

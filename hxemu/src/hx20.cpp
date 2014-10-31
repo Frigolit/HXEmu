@@ -55,7 +55,7 @@ CHX20::CHX20() {
 		lcd_ctls[i] = new CLCDController();
 		lcd_ctls[i]->set_lcd(lcd, (i % 3) * 40, (i / 3) * 16);
 	}
-	
+
 	// Add master MCU memory devices
 	mcu_master->membus->add(ioctl,    0x0020, 32,    0x0020);
 	mcu_master->membus->add(rtc,      0x0040, 64,    0x0000);
@@ -125,13 +125,19 @@ void CHX20::keyboard_up(uint8_t c) {
 CHX20::~CHX20() {
 	delete(mcu_master);
 	delete(mcu_slave);
-	
+
+	delete(rtc);
+	delete(lcd);
 	delete(ioctl);
-	
+
 	delete(ram0);
 	delete(ram1);
-	
+
 	for (int i = 0; i < 4; i++) delete(roms[i]);
+
+	for (int i = 0; i < 6; i++) {
+		delete(lcd_ctls[i]);
+	}
 }
 
 void CHX20::reset() {
