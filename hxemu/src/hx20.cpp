@@ -14,6 +14,9 @@
 #include "lcdcontroller.h"
 
 CHX20::CHX20() {
+	// Create controls
+	controls = new CControls(this);
+
 	// Initialize CPUs
 	mcu_master = new C6301();
 	#ifdef REALSLAVE
@@ -140,6 +143,10 @@ CHX20::~CHX20() {
 	}
 }
 
+void CHX20::poweroff() {
+	printf("not yet implemented: CHX20::poweroff()\n");
+}
+
 void CHX20::reset() {
 	mcu_master->reset();
 	mcu_slave->reset();
@@ -197,7 +204,8 @@ void CHX20::think() {
 	mcu_slave->step();
 }
 
-void CHX20::draw_lcd(SDL_Surface *dest, int x, int y) {
+void CHX20::draw(SDL_Surface *dest, int x, int y) {
 	lcd->draw(dest, x, y);
+	controls->render(dest, x + 480, y);
 }
 

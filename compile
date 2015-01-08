@@ -208,7 +208,7 @@ else
 fi
 
 export LDFLAGS
-export CXXFLAGS="-Wall -ffunction-sections $CXXFLAGS"
+export CXXFLAGS="-Wall -ffunction-sections -std=c++11 $CXXFLAGS"
 export CFLAGS="-Wall -ffunction-sections $CFLAGS"
 
 # ================================================

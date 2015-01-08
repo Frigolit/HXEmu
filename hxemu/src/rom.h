@@ -13,7 +13,7 @@
 class CROM : public CMemoryDevice {
 	public:
 		CROM(uint16_t size);
-		~CROM();
+		virtual ~CROM();
 		
 		uint8_t read(uint16_t addr);
 		void    write(uint16_t addr, uint8_t data);

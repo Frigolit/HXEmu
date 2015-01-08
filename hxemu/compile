@@ -6,7 +6,7 @@ if [ ! -d "$BUILDPATH" ]; then mkdir $BUILDPATH; fi
 NEEDS_LINKING="no"
 
 # Compile
-for i in `ls hxemu/src/*.cpp`; do
+for i in `ls hxemu/src/*.cpp hxemu/src/ui/*.cpp`; do
 	SRCFILE="`basename ${i}`"
 	
 	if [ "$BUILDPATH/${SRCFILE}.o" -ot "${i}" ]; then

@@ -13,7 +13,7 @@
 class VirtualSerial : public Serial {
 	public:
 		VirtualSerial();
-		~VirtualSerial();
+		virtual ~VirtualSerial();
 		
 		void    reset();
 		void    send(uint8_t c);

@@ -15,6 +15,8 @@ using namespace std;
 #include "version.h"
 #include "hx20.h"
 
+#include "ui.h"
+
 #define MACHINECOUNT 1
 
 SDL_Surface *screen;
@@ -27,7 +29,7 @@ void shutdown();
 
 int main(int argc, char **argv) {
 	sdl_init();
-	
+
 	for (int i = 0; i < MACHINECOUNT; i++) {
 		machines[i] = new CHX20();
 		threads[i] = SDL_CreateThread(hx20_thread, machines[i]);
@@ -39,9 +41,9 @@ int main(int argc, char **argv) {
 	
 	while (1) {
 		for (int i = 0; i < MACHINECOUNT; i++) {
-			machines[i]->draw_lcd(screen, 0, i * 128);
+			machines[i]->draw(screen, 0, i * 128);
 		}
-		
+
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
@@ -137,8 +139,24 @@ int main(int argc, char **argv) {
 					break;
 				
 				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.x < 4 && event.button.y < 4) {
-						machines[0]->mcu_master->b_trace = true;
+					{
+						int mx = event.button.x;
+						int my = event.button.y;
+
+						if (mx >= 480) {
+							machines[my / 128]->controls->mousedown(mx - 480, my % 128);
+						}
+					}
+					break;
+
+				case SDL_MOUSEBUTTONUP:
+					{
+						int mx = event.button.x;
+						int my = event.button.y;
+
+						if (mx >= 480) {
+							machines[my / 128]->controls->mouseup(mx - 480, my % 128);
+						}
 					}
 					break;
 				
@@ -168,7 +186,7 @@ void sdl_init() {
 	// Clean up nicely on exit
 	atexit(SDL_Quit);
 	
-	screen = SDL_SetVideoMode(480, 128 * MACHINECOUNT, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
+	screen = SDL_SetVideoMode(480 + 256, 128 * MACHINECOUNT, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
 	if (!screen) {
 		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 		exit(1);

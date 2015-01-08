@@ -14,7 +14,7 @@
 class CIOController: public CMemoryDevice {
 	public:
 		CIOController();
-		~CIOController();
+		virtual ~CIOController();
 		
 		void    reset();
 		

@@ -13,8 +13,8 @@ CLCD::CLCD() {
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, 120 * 4, 32 * 4, 32, 0, 0, 0, 0);
 	mtx = SDL_CreateMutex();
 	
-	color_set = SDL_MapRGB(surface->format, 0, 40, 0);
-	color_clear = SDL_MapRGB(surface->format, 50, 180, 20);
+	color_set = SDL_MapRGB(surface->format, 0x12, 0x15, 0x13);
+	color_clear = SDL_MapRGB(surface->format, 0x76, 0x84, 0x7d);
 	
 	SDL_Rect r;
 	r.x = 0; r.y = 0; r.w = 120 * 4; r.h = 32 * 4;

@@ -13,7 +13,7 @@
 class Serial {
 	public:
 		Serial();
-		~Serial();
+		virtual ~Serial();
 		
 		virtual void reset() { }
 		virtual void send(uint8_t c) { }

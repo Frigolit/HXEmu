@@ -13,7 +13,7 @@
 class CRAM : public CMemoryDevice {
 	public:
 		CRAM(uint16_t size);
-		~CRAM();
+		virtual ~CRAM();
 		
 		uint8_t read(uint16_t addr);
 		void    write(uint16_t addr, uint8_t data);
