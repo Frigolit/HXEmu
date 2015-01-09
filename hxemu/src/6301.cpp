@@ -2765,9 +2765,12 @@ inline uint8_t C6301::get_next_byte() {
 }
 
 void C6301::trap() {
-	printf("C6301::trap(): debug: halting on trap\n");
-	b_halted = true;
-	//interrupt_enter(0xFFEE, 0xFFEF);
+	#ifdef HALT_ON_TRAP
+		printf("C6301::trap(): debug: halting on trap\n");
+		b_halted = true;
+	#else
+		interrupt_enter(0xFFEE, 0xFFEF);
+	#endif
 }
 
 void C6301::interrupt_enter(uint16_t vecl, uint16_t vech) {

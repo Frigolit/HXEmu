@@ -82,7 +82,7 @@ CHX20::CHX20() {
 	roms[2]->load_from_file((char *)"data/roms/firmware/1.1/rom2.bin");
 	roms[3]->load_from_file((char *)"data/roms/firmware/1.1/rom3.bin");
 	*/
-	
+
 	roms[0]->load_from_file((char *)"data/roms/test/rom0.bin");
 	roms[1]->load_from_file((char *)"data/roms/test/rom1.bin");
 	roms[2]->load_from_file((char *)"data/roms/test/rom2.bin");

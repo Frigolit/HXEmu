@@ -25,8 +25,9 @@ class CControls {
 
 		bool modified;
 
-		void cb_btn_power(CWidget *widget);
 		void cb_btn_reset(CWidget *widget);
+		void cb_btn_power(CWidget *widget);
+		void cb_btn_monitor(CWidget *widget);
 		void cb_btn_trace(CWidget *widget);
 };
 

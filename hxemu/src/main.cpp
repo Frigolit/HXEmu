@@ -9,11 +9,13 @@ using namespace std;
 
 #include <stdio.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 #include "hash.h"
 #include "config.h"
 #include "version.h"
 #include "hx20.h"
+#include "fonts.h"
 
 #include "ui.h"
 
@@ -29,6 +31,7 @@ void shutdown();
 
 int main(int argc, char **argv) {
 	sdl_init();
+	fonts_init();
 
 	for (int i = 0; i < MACHINECOUNT; i++) {
 		machines[i] = new CHX20();
@@ -182,16 +185,23 @@ void sdl_init() {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
-	
+
 	// Clean up nicely on exit
 	atexit(SDL_Quit);
-	
+
+	// Initialize SDL_ttf
+	if (TTF_Init() < 0) {
+		fprintf(stderr, "Unable to initialize SDL_ttf\n");
+		exit(1);
+	}
+
+	// Create window
 	screen = SDL_SetVideoMode(480 + 256, 128 * MACHINECOUNT, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
 	if (!screen) {
 		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
-	
+
 	// Set window title
 	SDL_WM_SetCaption("HXEmu 0.1", "");
 }
@@ -202,6 +212,8 @@ void shutdown() {
 		delete(machines[i]);
 	}
 
+	fonts_quit();
+	TTF_Quit();
 	SDL_Quit();
 }
 
