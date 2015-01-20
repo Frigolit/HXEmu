@@ -46,6 +46,7 @@ CHX20::CHX20() {
 	for (int i = 0; i < 4; i++) {
 		roms[i] = new CROM(8192);
 	}
+	optionrom = new CROM(8192);
 	
 	#ifdef REALSLAVE
 		mcu_slave->maskrom = new CROM(4096);
@@ -64,30 +65,50 @@ CHX20::CHX20() {
 	mcu_master->membus->add(rtc,      0x0040, 64,    0x0000);
 	mcu_master->membus->add(ram1,     0x0080, 128,   0x0000);
 	mcu_master->membus->add(ram0,     0x0100, 16128, 0x0000);
-	
+
 	mcu_master->membus->add(roms[3],  0x8000, 8192,  0x0000);
 	mcu_master->membus->add(roms[2],  0xA000, 8192,  0x0000);
 	mcu_master->membus->add(roms[1],  0xC000, 8192,  0x0000);
 	mcu_master->membus->add(roms[0],  0xE000, 8192,  0x0000);
-	
+
+	mcu_master->membus->add(optionrom, 0x6000, 8192,  0x0000);
+
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {
 		ioctl->set_lcd_controller(i, lcd_ctls[i]);
 	}
 	
-	// Load ROMs
-	/*
-	roms[0]->load_from_file((char *)"data/roms/firmware/1.1/rom0.bin");
-	roms[1]->load_from_file((char *)"data/roms/firmware/1.1/rom1.bin");
-	roms[2]->load_from_file((char *)"data/roms/firmware/1.1/rom2.bin");
-	roms[3]->load_from_file((char *)"data/roms/firmware/1.1/rom3.bin");
-	*/
-
-	roms[0]->load_from_file((char *)"data/roms/test/rom0.bin");
-	roms[1]->load_from_file((char *)"data/roms/test/rom1.bin");
-	roms[2]->load_from_file((char *)"data/roms/test/rom2.bin");
-	roms[3]->load_from_file((char *)"data/roms/test/rom3.bin");
+	// Checksum ROMs
 	
+	#ifdef REALSLAVE
+		CHash *hash = new CHash();
+		uint8_t buf[4096];
+
+		for (int n = 0; n < 4096; n++) {
+			buf[n] = mcu_slave->maskrom->read(n);
+		}
+
+		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
+		delete hash;
+	#endif
+	
+	printf("Master CPU reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
+	#ifdef REALSLAVE
+		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
+	#endif
+
+	// Reset
+	reset();
+}
+
+void CHX20::load_roms(char *dirname) {
+	char x[256];
+
+	for (int i = 0; i < 4; i++) {
+		sprintf(x, "data/roms/%s/rom%d.bin", dirname, i);
+		roms[i]->load_from_file(x);
+	}
+
 	// Checksum ROMs
 	CHash *hash = new CHash();
 	uint8_t buf[8192];
@@ -97,22 +118,20 @@ CHX20::CHX20() {
 		}
 		printf("ROM #%d - Checksum: %08X\n", i, hash->crc32(buf, 8192));
 	}
-	
-	#ifdef REALSLAVE
-		for (int n = 0; n < 4096; n++) {
-			buf[n] = mcu_slave->maskrom->read(n);
-		}
-		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
-	#endif
 	delete hash;
-	
-	printf("Master CPU reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
-	#ifdef REALSLAVE
-		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
-	#endif
+}
 
-	// Reset
-	reset();
+void CHX20::load_option_rom(char *path) {
+	optionrom->load_from_file(path);
+
+	// Checksum ROMs
+	CHash *hash = new CHash();
+	uint8_t buf[8192];
+	for (int n = 0; n < 8192; n++) {
+		buf[n] = optionrom->read(n);
+	}
+	printf("Option ROM - Checksum: %08X\n", hash->crc32(buf, 8192));
+	delete hash;
 }
 
 void CHX20::keyboard_down(uint8_t c) {
@@ -137,6 +156,7 @@ CHX20::~CHX20() {
 	delete(ram1);
 
 	for (int i = 0; i < 4; i++) delete(roms[i]);
+	delete(optionrom);
 
 	for (int i = 0; i < 6; i++) {
 		delete(lcd_ctls[i]);

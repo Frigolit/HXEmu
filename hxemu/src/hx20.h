@@ -30,6 +30,9 @@ class CHX20 {
 		void poweroff();
 		void reset();
 
+		void load_roms(char *dirname);
+		void load_option_rom(char *path);
+
 		void draw(SDL_Surface *dest, int x, int y);
 		void keyboard_down(uint8_t c);
 		void keyboard_up(uint8_t c);
@@ -55,6 +58,7 @@ class CHX20 {
 		CIOController *ioctl;
 
 		CROM *roms[4];
+		CROM *optionrom;
 };
 
 #endif

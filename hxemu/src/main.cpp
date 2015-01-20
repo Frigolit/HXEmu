@@ -8,6 +8,7 @@
 using namespace std;
 
 #include <stdio.h>
+
 #include <SDL.h>
 #include <SDL_ttf.h>
 
@@ -30,16 +31,35 @@ int hx20_thread(void *data);
 void shutdown();
 
 int main(int argc, char **argv) {
+	char rompath[128];
+	char optionrompath[128];
+
+	if (argc > 1) {
+		strcpy(rompath, argv[1]);
+	}
+	else {
+		strcpy(rompath, "firmware/1.1");
+	}
+
+	if (argc > 2) {
+		strcpy(optionrompath, argv[2]);
+	}
+	else optionrompath[0] = 0;
+
+	// Initialize
 	sdl_init();
 	fonts_init();
 
 	for (int i = 0; i < MACHINECOUNT; i++) {
 		machines[i] = new CHX20();
+		machines[i]->load_roms(rompath);
+		if (optionrompath[0]) machines[i]->load_option_rom(optionrompath);
+
 		threads[i] = SDL_CreateThread(hx20_thread, machines[i]);
 	}
-	
+
 	SDL_Event event;
-	
+
 	atexit(shutdown);
 	
 	while (1) {
