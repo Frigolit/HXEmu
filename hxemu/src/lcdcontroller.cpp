@@ -35,8 +35,8 @@ void CLCDController::set_lcd(CLCD *l, uint8_t x, uint8_t y) {
 }
 
 void CLCDController::apply_ptr_op(uint8_t n) {
-	if (n == 0) ++ptr;
-	else if (n == 1) --ptr;
+	if (n == 0) ptr = (ptr + 1) % 128;
+	else if (n == 1) ptr = (ptr - 1) % 128;
 }
 
 void CLCDController::command(uint8_t n) {
