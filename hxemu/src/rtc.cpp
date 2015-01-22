@@ -10,12 +10,10 @@
 #include "rtc.h"
 
 CRTC::CRTC() {
-	ram = (uint8_t *)malloc(50);
 	memset(ram, 0, 50);
 }
 
 CRTC::~CRTC() {
-	free(ram);
 }
 
 // TODO!

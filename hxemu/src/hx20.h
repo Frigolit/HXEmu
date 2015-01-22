@@ -15,6 +15,7 @@
 #include "fakeslave.h"
 #include "iocontroller.h"
 #include "controls.h"
+#include "expansion.h"
 
 class CControls;
 
@@ -59,6 +60,9 @@ class CHX20 {
 
 		CROM *roms[4];
 		CROM *optionrom;
+
+		CMemoryBus *membus;
+		CExpansion *expansion;
 };
 
 #endif

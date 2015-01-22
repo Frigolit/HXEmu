@@ -35,7 +35,7 @@ class C6301 {
 		void set_port3(uint8_t d);
 		void set_port4(uint8_t d);
 		
-		CMemoryBus    *membus;
+		CMemoryDevice *membus;
 		CROM          *maskrom;
 		VirtualSerial *serial0;
 		

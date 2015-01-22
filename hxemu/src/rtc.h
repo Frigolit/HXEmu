@@ -19,7 +19,7 @@ class CRTC : public CMemoryDevice {
 		void write(uint16_t addr, uint8_t data);
 		
 	private:
-		uint8_t *ram;
+		uint8_t ram[50];
 };
 
 #endif

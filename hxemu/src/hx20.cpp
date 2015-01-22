@@ -17,6 +17,11 @@ CHX20::CHX20() {
 	// Create controls
 	controls = new CControls(this);
 
+	// Initialize memory bus
+	membus = new CMemoryBus();
+	expansion = new CExpansion(membus);
+	expansion->attach_device(new CExpansionDevice());
+
 	// Initialize CPUs
 	mcu_master = new C6301();
 	#ifdef REALSLAVE
@@ -24,7 +29,9 @@ CHX20::CHX20() {
 	#else
 		mcu_slave = new FakeSlave();
 	#endif
-	
+
+	mcu_master->membus = (CMemoryDevice *)expansion;
+
 	// Link serial endpoints
 	mcu_master->serial0->set_endpoint(mcu_slave->serial0);
 	
@@ -61,17 +68,17 @@ CHX20::CHX20() {
 	}
 
 	// Add master MCU memory devices
-	mcu_master->membus->add(ioctl,    0x0020, 32,    0x0020);
-	mcu_master->membus->add(rtc,      0x0040, 64,    0x0000);
-	mcu_master->membus->add(ram1,     0x0080, 128,   0x0000);
-	mcu_master->membus->add(ram0,     0x0100, 16128, 0x0000);
+	membus->add(ioctl,    0x0020, 32,    0x0020);
+	membus->add(rtc,      0x0040, 64,    0x0000);
+	membus->add(ram1,     0x0080, 128,   0x0000);
+	membus->add(ram0,     0x0100, 16128, 0x0000);
 
-	mcu_master->membus->add(roms[3],  0x8000, 8192,  0x0000);
-	mcu_master->membus->add(roms[2],  0xA000, 8192,  0x0000);
-	mcu_master->membus->add(roms[1],  0xC000, 8192,  0x0000);
-	mcu_master->membus->add(roms[0],  0xE000, 8192,  0x0000);
+	membus->add(roms[3],  0x8000, 8192,  0x0000);
+	membus->add(roms[2],  0xA000, 8192,  0x0000);
+	membus->add(roms[1],  0xC000, 8192,  0x0000);
+	membus->add(roms[0],  0xE000, 8192,  0x0000);
 
-	mcu_master->membus->add(optionrom, 0x6000, 8192,  0x0000);
+	membus->add(optionrom, 0x6000, 8192,  0x0000);
 
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {
@@ -92,7 +99,7 @@ CHX20::CHX20() {
 		delete hash;
 	#endif
 	
-	printf("Master CPU reset vector is 0x%02X%02X\n", mcu_master->membus->read(0xFFFE), mcu_master->membus->read(0xFFFF));
+	printf("Master CPU reset vector is 0x%02X%02X\n", membus->read(0xFFFE), membus->read(0xFFFF));
 	#ifdef REALSLAVE
 		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
 	#endif
@@ -155,12 +162,19 @@ CHX20::~CHX20() {
 	delete(ram0);
 	delete(ram1);
 
+	void *e = expansion->detach_device();
+	if (e != NULL) delete(e);
+
+	delete(expansion);
+
 	for (int i = 0; i < 4; i++) delete(roms[i]);
 	delete(optionrom);
 
 	for (int i = 0; i < 6; i++) {
 		delete(lcd_ctls[i]);
 	}
+
+	delete(membus);
 }
 
 void CHX20::poweroff() {

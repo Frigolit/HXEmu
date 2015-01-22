@@ -14,7 +14,7 @@
 
 C6301::C6301() {
 	// Initialize base stuff
-	membus       = new CMemoryBus();
+	membus       = NULL;
 	serial0      = new VirtualSerial();
 	ram          = new CRAM(128);
 	maskrom      = NULL;
@@ -33,7 +33,6 @@ C6301::C6301() {
 
 C6301::~C6301() {
 	maskrom = NULL;
-	delete(membus);
 	delete(serial0);
 	delete(ram);
 }
