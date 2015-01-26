@@ -1407,7 +1407,7 @@ void C6301::step() {
 				r_ccr_v = 0;
 				break;
 			
-			case 0xD7:	// STA B - Store Accumulator A (direct)
+			case 0xD7:	// STA B - Store Accumulator B (direct)
 				memwrite(get_next_byte(), r_b);
 				r_ccr_n = r_b >> 7;
 				r_ccr_z = !r_b;
@@ -2552,7 +2552,7 @@ void C6301::step() {
 				{
 					int8_t n = (int8_t)get_next_byte();
 					
-					if (!(r_ccr_z & (!((r_ccr_n + r_ccr_v) % 2)))) {
+					if (!(r_ccr_z & !(r_ccr_n ^ r_ccr_v))) {
 						r_pc += n;
 					}
 				}
@@ -2773,8 +2773,13 @@ void C6301::trap() {
 }
 
 void C6301::interrupt_enter(uint16_t vecl, uint16_t vech) {
-	if (b_nmi) printf("C6301::interrupt_enter(): error: blocked by on-going NMI interrupt\n");
-	else printf("C6301::interrupt_enter()\n");
+	if (b_nmi) {
+		printf("C6301::interrupt_enter(): error: blocked by on-going NMI interrupt\n");
+		return;
+	}
+	#ifdef DEBUG_CPU
+		else printf("C6301::interrupt_enter()\n");
+	#endif
 	b_sleep = false;	// Stop sleeping
 	
 	uint8_t ccr = r_ccr_c | (r_ccr_v << 1) | (r_ccr_z << 2) | (r_ccr_n << 3) | (r_ccr_i << 4) | (r_ccr_h << 5);
@@ -2793,7 +2798,9 @@ void C6301::interrupt_enter(uint16_t vecl, uint16_t vech) {
 }
 
 void C6301::interrupt_leave() {
-	printf("C6301::interrupt_leave()\n");
+	#ifdef DEBUG_CPU
+		printf("C6301::interrupt_leave()\n");
+	#endif
 	uint8_t ccr = stack_pop();
 	
 	r_b  = stack_pop();
@@ -2890,21 +2897,13 @@ uint8_t C6301::memread(uint16_t addr) {
 		r = membus->read(addr);
 	}
 	
-	#ifdef DEBUG_CPU
-		printf("\e[32mC6301::memread(): reading from address \e[1m0x%04X\e[22m returned \e[1m0x%02X\e[0m\n", addr, r);
-	#else
-		if (b_trace) printf("\e[32mC6301::memread(): reading from address \e[1m0x%04X\e[22m returned \e[1m0x%02X\e[0m\n", addr, r);
-	#endif
+	if (b_trace) printf("\e[32mC6301::memread(): reading from address \e[1m0x%04X\e[22m returned \e[1m0x%02X\e[0m\n", addr, r);
 	
 	return r;
 }
 
 void C6301::memwrite(uint16_t addr, uint8_t data) {
-	#ifdef DEBUG_CPU
-		printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
-	#else
-		if (b_trace) printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
-	#endif
+	if (b_trace) printf("\e[31mC6301::memwrite(): writing \e[1m0x%02X\e[22m to address \e[1m0x%04X\e[0m\n", data, addr);
 	
 	if (addr == 0x00) {
 		// Port 1 Data Direction Register
