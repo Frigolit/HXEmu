@@ -20,7 +20,6 @@ CHX20::CHX20() {
 	// Initialize memory bus
 	membus = new CMemoryBus();
 	expansion = new CExpansion(membus);
-	expansion->attach_device(new CExpansionDevice());
 
 	// Initialize CPUs
 	mcu_master = new C6301();
@@ -162,7 +161,7 @@ CHX20::~CHX20() {
 	delete(ram0);
 	delete(ram1);
 
-	void *e = expansion->detach_device();
+	CExpansionDevice *e = expansion->detach_device();
 	if (e != NULL) delete(e);
 
 	delete(expansion);

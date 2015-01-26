@@ -6,11 +6,9 @@
 
 class CExpansionDevice {
 	public:
-		uint8_t read(uint16_t addr, CMemoryDevice *mem);
-		void write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
-
-	private:
-		char ram[8192];
+		virtual ~CExpansionDevice();
+		virtual uint8_t read(uint16_t addr, CMemoryDevice *mem);
+		virtual void write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
 };
 
 #endif

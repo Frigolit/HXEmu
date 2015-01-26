@@ -14,10 +14,9 @@ CWidget::~CWidget() {
 }
 
 void CWidget::draw(SDL_Surface *dest) {
-	SDL_Rect src, dst;
+	SDL_Rect dst;
 
 	dst.x = x; dst.y = y; dst.w = w; dst.h = h;
-	src.x = 0; src.y = 0; src.w = 256; src.h = 128;
 
 	SDL_BlitSurface(surface, NULL, dest, &dst);
 }
