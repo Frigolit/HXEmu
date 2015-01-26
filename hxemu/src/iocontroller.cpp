@@ -54,13 +54,13 @@ uint8_t CIOController::read(uint16_t addr) {
 		uint8_t l = ~ram[0x20];
 		uint8_t n = 0xFF;
 
-		if (l & 0x01) n ^= keyboard_map['0']  | (keyboard_map['1'] << 1) | (keyboard_map['2'] << 2)  | (keyboard_map['3'] << 3) | (keyboard_map['4'] << 4) | (keyboard_map['5'] << 5)  | (keyboard_map['6'] << 6) | (keyboard_map['7'] << 7);
-		if (l & 0x02) n ^= keyboard_map['8']  | (keyboard_map['9'] << 1) | (keyboard_map[':'] << 2)  | (keyboard_map[';'] << 3) | (keyboard_map[','] << 4) | (keyboard_map['-'] << 5)  | (keyboard_map['.'] << 6) | (keyboard_map['/'] << 7);
-		if (l & 0x04) n ^= keyboard_map['@']  | (keyboard_map['a'] << 1) | (keyboard_map['b'] << 2)  | (keyboard_map['c'] << 3) | (keyboard_map['d'] << 4) | (keyboard_map['e'] << 5)  | (keyboard_map['f'] << 6) | (keyboard_map['g'] << 7);
-		if (l & 0x08) n ^= keyboard_map['h']  | (keyboard_map['i'] << 1) | (keyboard_map['j'] << 2)  | (keyboard_map['k'] << 3) | (keyboard_map['l'] << 4) | (keyboard_map['m'] << 5)  | (keyboard_map['n'] << 6) | (keyboard_map['o'] << 7);
-		if (l & 0x10) n ^= keyboard_map['p']  | (keyboard_map['q'] << 1) | (keyboard_map['r'] << 2)  | (keyboard_map['s'] << 3) | (keyboard_map['t'] << 4) | (keyboard_map['u'] << 5)  | (keyboard_map['v'] << 6) | (keyboard_map['w'] << 7);
-		if (l & 0x20) n ^= keyboard_map['x']  | (keyboard_map['y'] << 1) | (keyboard_map['z'] << 2)  | (keyboard_map['['] << 3) | (keyboard_map[']'] << 4) | (keyboard_map['\\'] << 5) | (keyboard_map[0] << 6) | (keyboard_map[0] << 7);
-		if (l & 0x40) n ^= keyboard_map['\n'] | (keyboard_map[' '] << 1) | (keyboard_map['\t'] << 2) | (keyboard_map[0] << 3) | (keyboard_map[0] << 4) | (keyboard_map[0] << 5) | (keyboard_map[0] << 6) | (keyboard_map[0] << 7);
+		if (l & 0x01) n ^= keyboard_map[(uint8_t)'0']  | (keyboard_map[(uint8_t)'1'] << 1) | (keyboard_map[(uint8_t)'2'] << 2)  | (keyboard_map[(uint8_t)'3'] << 3) | (keyboard_map[(uint8_t)'4'] << 4) | (keyboard_map[(uint8_t)'5'] << 5)  | (keyboard_map[(uint8_t)'6'] << 6) | (keyboard_map[(uint8_t)'7'] << 7);
+		if (l & 0x02) n ^= keyboard_map[(uint8_t)'8']  | (keyboard_map[(uint8_t)'9'] << 1) | (keyboard_map[(uint8_t)':'] << 2)  | (keyboard_map[(uint8_t)';'] << 3) | (keyboard_map[(uint8_t)','] << 4) | (keyboard_map[(uint8_t)'-'] << 5)  | (keyboard_map[(uint8_t)'.'] << 6) | (keyboard_map[(uint8_t)'/'] << 7);
+		if (l & 0x04) n ^= keyboard_map[(uint8_t)'@']  | (keyboard_map[(uint8_t)'a'] << 1) | (keyboard_map[(uint8_t)'b'] << 2)  | (keyboard_map[(uint8_t)'c'] << 3) | (keyboard_map[(uint8_t)'d'] << 4) | (keyboard_map[(uint8_t)'e'] << 5)  | (keyboard_map[(uint8_t)'f'] << 6) | (keyboard_map[(uint8_t)'g'] << 7);
+		if (l & 0x08) n ^= keyboard_map[(uint8_t)'h']  | (keyboard_map[(uint8_t)'i'] << 1) | (keyboard_map[(uint8_t)'j'] << 2)  | (keyboard_map[(uint8_t)'k'] << 3) | (keyboard_map[(uint8_t)'l'] << 4) | (keyboard_map[(uint8_t)'m'] << 5)  | (keyboard_map[(uint8_t)'n'] << 6) | (keyboard_map[(uint8_t)'o'] << 7);
+		if (l & 0x10) n ^= keyboard_map[(uint8_t)'p']  | (keyboard_map[(uint8_t)'q'] << 1) | (keyboard_map[(uint8_t)'r'] << 2)  | (keyboard_map[(uint8_t)'s'] << 3) | (keyboard_map[(uint8_t)'t'] << 4) | (keyboard_map[(uint8_t)'u'] << 5)  | (keyboard_map[(uint8_t)'v'] << 6) | (keyboard_map[(uint8_t)'w'] << 7);
+		if (l & 0x20) n ^= keyboard_map[(uint8_t)'x']  | (keyboard_map[(uint8_t)'y'] << 1) | (keyboard_map[(uint8_t)'z'] << 2)  | (keyboard_map[(uint8_t)'['] << 3) | (keyboard_map[(uint8_t)']'] << 4) | (keyboard_map[(uint8_t)'\\'] << 5) | (keyboard_map[0] << 6) | (keyboard_map[0] << 7);
+		if (l & 0x40) n ^= keyboard_map[(uint8_t)'\n'] | (keyboard_map[(uint8_t)' '] << 1) | (keyboard_map[(uint8_t)'\t'] << 2) | (keyboard_map[0] << 3) | (keyboard_map[0] << 4) | (keyboard_map[0] << 5) | (keyboard_map[0] << 6) | (keyboard_map[0] << 7);
 		if (l & 0x80) n ^= keyboard_map[0] | (keyboard_map[0] << 1) | (keyboard_map[0] << 2) | (keyboard_map[0] << 3) | (keyboard_map[0] << 4) | (keyboard_map[0] << 5) | (keyboard_map[0] << 6) | (keyboard_map[0] << 7);
 
 		#ifdef DEBUG_IOCTL

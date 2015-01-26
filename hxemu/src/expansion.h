@@ -12,7 +12,7 @@
 class CExpansion : public CMemoryDevice {
 	public:
 		CExpansion(CMemoryDevice *mem);
-		~CExpansion();
+		virtual ~CExpansion();
 
 		virtual uint8_t read(uint16_t addr);
 		virtual void write(uint16_t addr, uint8_t data);
