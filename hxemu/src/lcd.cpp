@@ -27,13 +27,12 @@ CLCD::~CLCD() {
 }
 
 void CLCD::draw(SDL_Surface *dest, int x, int y) {
-	SDL_Rect src, dst;
+	SDL_Rect dst;
 	
 	dst.x = x; dst.y = y; dst.w = 120 * 4; dst.h = 32 * 4;
-	src.x = 0; src.y = 0; src.w = 120 * 4; src.h = 32 * 4;
 	
 	SDL_mutexP(mtx);
-	SDL_BlitSurface(surface, &src, dest, &dst);
+	SDL_BlitSurface(surface, NULL, dest, &dst);
 	SDL_mutexV(mtx);
 }
 
