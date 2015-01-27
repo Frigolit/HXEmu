@@ -8,6 +8,8 @@
 #include "iocontroller.h"
 
 CIOController::CIOController() {
+	b_power = true;
+
 	memset(&keyboard_map, 0, 256);
 
 	for (int i = 0; i < 6; i++) {
@@ -32,6 +34,14 @@ void CIOController::reset() {
 
 	lcd_clk_counter = 0;
 	r_9g = 0x00;
+}
+
+void CIOController::set_power_button(bool p) {
+	b_power = p;
+}
+
+bool CIOController::get_power_button() {
+	return b_power;
 }
 
 void CIOController::set_lcd_controller(uint8_t n, CLCDController *c) {
@@ -69,11 +79,10 @@ uint8_t CIOController::_read(uint16_t addr) {
 		return n;
 	}
 	else if (addr == 0x28) {
-		bool b_power = true;
 		bool b_busy = true;
 
 		uint8_t l = ~ram[0x20];
-		uint8_t k = 0x03;
+		uint8_t k = 0x03;	// TODO: What is this? DIP-switch?
 
 		if (l & 0x01) k ^= 0x00;
 		if (l & 0x02) k ^= 0x00;

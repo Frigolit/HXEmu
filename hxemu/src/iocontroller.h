@@ -23,6 +23,9 @@ class CIOController: public CMemoryDevice {
 
 		void    set_lcd_controller(uint8_t n, CLCDController *c);
 
+		void    set_power_button(bool p);
+		bool    get_power_button();
+
 		char    keyboard_map[256];
 
 		/**
@@ -34,6 +37,8 @@ class CIOController: public CMemoryDevice {
 		uint8_t r_9g;
 
 	private:
+		bool b_power;
+
 		CLCDController *lcd_ctls[6];
 
 		uint8_t lcd_clk_counter;

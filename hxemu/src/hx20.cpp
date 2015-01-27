@@ -178,7 +178,7 @@ CHX20::~CHX20() {
 }
 
 void CHX20::poweroff() {
-	printf("not yet implemented: CHX20::poweroff()\n");
+	ioctl->set_power_button(!ioctl->get_power_button());
 }
 
 void CHX20::reset() {
