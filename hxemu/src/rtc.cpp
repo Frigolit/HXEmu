@@ -19,8 +19,8 @@ CRTC::~CRTC() {
 // TODO!
 uint8_t CRTC::read(uint16_t addr) {
 	if (addr > 63) {
-		addr = addr % 64;
-		printf("\e[31m\e[1mCRTC::read(0x%04X): warning: read outside range - wrapping\e[0m\n", addr);
+		printf("Assertion failed: addr < 64 in CRTC::read()\n");
+		exit(1);
 	}
 
 	/*
@@ -38,7 +38,7 @@ uint8_t CRTC::read(uint16_t addr) {
 	0E-3F  General-purpose RAM
 	*/
 
-	if (addr <= 0x0D) return 0x00;
+	if (addr < 0x0E) return 0x00;
 	else {
 		#ifdef DEBUG_RTC
 			printf("\e[32m\e[1mCRTC::read(0x%04X[RAM 0x%02X]) = %02X\e[0m\n", addr, (uint8_t)(addr - 0x0E), ram[addr - 0x0E]);
@@ -49,11 +49,11 @@ uint8_t CRTC::read(uint16_t addr) {
 
 void CRTC::write(uint16_t addr, uint8_t data) {
 	if (addr > 63) {
-		addr = addr % 64;
-		printf("\e[31m\e[1mCRTC::write(0x%04X, 0x%02X): warning: write outside range - wrapping\e[0m\n", addr, data);
+		printf("Assertion failed: addr < 64 in CRTC::read()\n");
+		exit(1);
 	}
 
-	if (addr > 0x0D) {
+	if (addr >= 0x0E) {
 		#ifdef DEBUG_RTC
 			printf("\e[31m\e[1mCRTC::write(0x%04X [RAM 0x%02X], %02X)\e[0m\n", addr, (uint8_t)(addr - 0x0E), data);
 		#endif

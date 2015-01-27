@@ -19,7 +19,7 @@ class CMemoryBus: public CMemoryDevice {
 		uint8_t read(uint16_t addr);
 		void    write(uint16_t addr, uint8_t data);
 		
-		void    add(CMemoryDevice *dev, uint16_t start, uint16_t size, uint16_t offset);
+		void    add(CMemoryDevice *dev, uint16_t start, uint16_t size);
 		
 		void    set_fallback(CMemoryDevice *dev);
 		
@@ -29,7 +29,6 @@ class CMemoryBus: public CMemoryDevice {
 				CMemoryDevice *p_device;
 				uint16_t i_start;
 				uint16_t i_size;
-				uint16_t i_offset;
 		};
 		
 		CMemoryDevice *p_fallback;

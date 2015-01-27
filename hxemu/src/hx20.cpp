@@ -69,17 +69,16 @@ CHX20::CHX20() {
 	}
 
 	// Add master MCU memory devices
-	membus->add(ioctl,    0x0020, 32,    0x0020);
-	membus->add(rtc,      0x0040, 64,    0x0000);
-	membus->add(ram1,     0x0080, 128,   0x0000);
-	membus->add(ram0,     0x0100, 16128, 0x0000);
+	membus->add(ioctl,     0x0020, 32);
+	membus->add(rtc,       0x0040, 64);
+	membus->add(ram1,      0x0080, 128);
+	membus->add(ram0,      0x0100, 16128);
 
-	membus->add(roms[3],  0x8000, 8192,  0x0000);
-	membus->add(roms[2],  0xA000, 8192,  0x0000);
-	membus->add(roms[1],  0xC000, 8192,  0x0000);
-	membus->add(roms[0],  0xE000, 8192,  0x0000);
-
-	membus->add(optionrom, 0x6000, 8192,  0x0000);
+	membus->add(optionrom, 0x6000, 8192);
+	membus->add(roms[3],   0x8000, 8192);
+	membus->add(roms[2],   0xA000, 8192);
+	membus->add(roms[1],   0xC000, 8192);
+	membus->add(roms[0],   0xE000, 8192);
 
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {

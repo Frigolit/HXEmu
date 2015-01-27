@@ -15,16 +15,16 @@ class CIOController: public CMemoryDevice {
 	public:
 		CIOController();
 		virtual ~CIOController();
-		
+
 		void    reset();
-		
+
 		uint8_t read(uint16_t addr);
 		void    write(uint16_t addr, uint8_t data);
-		
+
 		void    set_lcd_controller(uint8_t n, CLCDController *c);
-		
+
 		char    keyboard_map[256];
-		
+
 		/**
 		 * LCD chip select
 		 * Keyboard interrupt mask
@@ -32,12 +32,16 @@ class CIOController: public CMemoryDevice {
 		 * and something else...
 		 */
 		uint8_t r_9g;
-		
+
 	private:
 		CLCDController *lcd_ctls[6];
-		
+
 		uint8_t lcd_clk_counter;
 		uint8_t ram[64];
+
+		#ifdef DEBUG_IOCTL
+		uint8_t _read(uint16_t addr);
+		#endif
 };
 
 #endif
