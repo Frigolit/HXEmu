@@ -44,25 +44,13 @@ if [ "$PIKE" != "" ]; then
 					echo "ERROR: Failed to build test ROM"
 					exit 1
 				fi
-				
-				echo "$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom3.bin 0"
-				$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom3.bin 0
-				
-				echo "$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom2.bin 8192"
-				$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom2.bin 8192
-				
-				echo "$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom1.bin 16384"
-				$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom1.bin 16384
-				
-				echo "$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom0.bin 24576"
-				$BUILDPATH/romfixer $BUILDPATH/test.bin $BUILDPATH/rom0.bin 24576
 			fi
 			
-			if [ "$BUILDROOT/release/data/roms/test/rom0.bin" -ot "$BUILDPATH/rom0.bin" ]; then
-				if [ ! -d "$BUILDROOT/release/data/roms/test" ]; then mkdir $BUILDROOT/release/data/roms/test; fi
-				
-				echo cp $BUILDPATH/rom{0,1,2,3}.bin $BUILDROOT/release/data/roms/test/
-				cp $BUILDPATH/rom{0,1,2,3}.bin $BUILDROOT/release/data/roms/test/
+			if [ "$BUILDROOT/release/data/roms/ext-test/test.bin" -ot "$BUILDPATH/test.bin" ]; then
+				if [ ! -d "$BUILDROOT/release/data/roms/ext-test" ]; then mkdir $BUILDROOT/release/data/roms/ext-test; fi
+
+				echo cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/ext-test/
+				cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/ext-test/
 			fi
 		fi
 	fi

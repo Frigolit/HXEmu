@@ -12,6 +12,7 @@
 #include "iocontroller.h"
 #include "lcd.h"
 #include "lcdcontroller.h"
+#include "testdevice.h"
 
 CHX20::CHX20() {
 	// Create controls
@@ -20,6 +21,7 @@ CHX20::CHX20() {
 	// Initialize memory bus
 	membus = new CMemoryBus();
 	expansion = new CExpansion(membus);
+	expansion->attach_device(new CTestDevice());
 
 	// Initialize CPUs
 	mcu_master = new C6301();
