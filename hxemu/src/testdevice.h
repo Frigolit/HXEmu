@@ -8,11 +8,16 @@ class CTestDevice : public CExpansionDevice {
 	public:
 		CTestDevice();
 		~CTestDevice();
+
 		uint8_t read(uint16_t addr, CMemoryDevice *mem);
-		void write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
+		void    write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
 
 	private:
-		CROM *rom;
+		int     state;
+		int     test_no;
+
+		CROM    *rom;
+		uint8_t *dynrom;
 };
 
 #endif
