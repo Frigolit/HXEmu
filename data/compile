@@ -18,7 +18,7 @@ if [ "$PIKE" != "" ]; then
 			if [ "$BUILDPATH/romfixer" -ot "data/src/roms/test/romfixer.c" ]; then
 				rm -f $BUILDPATH/romfixer
 				rm -f $BUILDPATH/test.bin
-				
+
 				echo "$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c"
 				$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c
 				if [ "$?" != 0 ]; then
@@ -26,26 +26,26 @@ if [ "$PIKE" != "" ]; then
 					exit 1
 				fi
 			fi
-			
+
 			# =======================================================
 			# Do some checks
 			# =======================================================
 			if [ "$BUILDPATH/test.bin" -ot "data/src/roms/test/test.s" ]; then
 				rm -f $BUILDPATH/test.bin
-				
+
 				echo "$AS02 -x -z -q -l -o$BUILDPATH/test.bin data/src/roms/test/test.s"
 				$AS02 -x -z -q -l -o$BUILDPATH/test.bin data/src/roms/test/test.s
-				
+
 				# Remove some files we don't want or need
 				rm -f data/src/roms/test/test.lst
-				
+
 				# Did we succeed?
 				if [ "$?" != 0 ]; then
 					echo "ERROR: Failed to build test ROM"
 					exit 1
 				fi
 			fi
-			
+
 			if [ "$BUILDROOT/release/data/roms/ext-test/test.bin" -ot "$BUILDPATH/test.bin" ]; then
 				if [ ! -d "$BUILDROOT/release/data/roms/ext-test" ]; then mkdir $BUILDROOT/release/data/roms/ext-test; fi
 
@@ -56,8 +56,14 @@ if [ "$PIKE" != "" ]; then
 	fi
 fi
 
-if [ -d "data/src/roms/firmware" ]; then cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/; fi
+if [ -d "data/src/roms/firmware" ]; then
+	cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/
+fi
 #cp data/src/addresses.txt $BUILDROOT/release/data/
 #cp -r data/src/addresses $BUILDROOT/release/data/
 
+# Copy binary files
+cp -rv data/bin/fonts ${BUILDROOT}/release/data/
+
+# Ensure the target folder is read/write
 chmod -R u+rw $BUILDROOT/release/data/
