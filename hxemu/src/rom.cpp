@@ -39,7 +39,7 @@ void CROM::eject() {
 	rom = NULL;
 }
 
-bool CROM::load_from_file(char *fn) {
+bool CROM::load_from_file(const char *fn) {
 	FILE *fp = fopen(fn, "rb");
 	if (fp == NULL) {
 		printf("CROM::load_from_file(): error: couldn't open rom \"%s\"\n", fn);
@@ -56,6 +56,7 @@ bool CROM::load_from_file(char *fn) {
 	}
 
 	fclose(fp);
+	printf("CROM::load_from_file(): ROM file \"%s\" %ld bytes loaded\n", fn, r);
 	return true;
 }
 

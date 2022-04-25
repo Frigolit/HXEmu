@@ -1,0 +1,3 @@
+export ARCH="`arch 2>/dev/null || uname -m 2>/dev/null || echo unknown`"
+export BUILDROOT="build/$ARCH"
+cd $BUILDROOT/release/ && ./hxemu

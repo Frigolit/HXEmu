@@ -58,7 +58,7 @@ CHX20::CHX20() {
 	
 	#ifdef REALSLAVE
 		mcu_slave->maskrom = new CROM(4096);
-		mcu_slave->maskrom->load_from_file((char *)"data/roms/test/slave.bin");
+		mcu_slave->maskrom->load_from_file("slave.bin");
 	#endif
 	
 	// Initialize LCD and controllers
@@ -74,11 +74,11 @@ CHX20::CHX20() {
 	membus->add(ram1,      0x0080, 128);
 	membus->add(ram0,      0x0100, 16128);
 
-	membus->add(optionrom, 0x6000, 8192);
-	membus->add(roms[3],   0x8000, 8192);
-	membus->add(roms[2],   0xA000, 8192);
-	membus->add(roms[1],   0xC000, 8192);
-	membus->add(roms[0],   0xE000, 8192);
+	membus->add(optionrom, 0x6000, 8192);  // HX-20 board option ROM 4
+	membus->add(roms[0],   0x8000, 8192);  // HX-20 board BASIC ROM 3
+	membus->add(roms[1],   0xA000, 8192);  // HX-20 board BASIC ROM 2
+	membus->add(roms[2],   0xC000, 8192);  // HX-20 board UTILITY ROM 1
+	membus->add(roms[3],   0xE000, 8192);  // HX-20 board MONITOR ROM 1
 
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {
@@ -108,11 +108,10 @@ CHX20::CHX20() {
 	reset();
 }
 
-void CHX20::load_roms(char *dirname) {
+void CHX20::load_roms(const char *dirname) {
 	char x[256];
-
 	for (int i = 0; i < 4; i++) {
-		sprintf(x, "data/roms/%s/rom%d.bin", dirname, i);
+		sprintf(x, "rom%d.bin", i);
 		roms[i]->load_from_file(x);
 	}
 
@@ -128,7 +127,7 @@ void CHX20::load_roms(char *dirname) {
 	delete hash;
 }
 
-void CHX20::load_option_rom(char *path) {
+void CHX20::load_option_rom(const char *path) {
 	optionrom->load_from_file(path);
 
 	// Checksum ROMs

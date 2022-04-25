@@ -19,7 +19,7 @@ class CROM : public CMemoryDevice {
 		void    write(uint16_t addr, uint8_t data);
 
 		void    load(char *src, int offset, int size);
-		bool    load_from_file(char *fn);
+		bool    load_from_file(const char *fn);
 		void    eject();
 
 	private:

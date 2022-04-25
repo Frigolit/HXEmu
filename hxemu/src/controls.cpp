@@ -64,10 +64,9 @@ void CControls::render(SDL_Surface *dest, int x, int y) {
 	dst.x = x; dst.y = y; dst.w = 256; dst.h = 128;
 	src.x = 0; src.y = 0; src.w = 256; src.h = 128;
 
-	//SDL_FillRect(surface, &src, 0);
+	// SDL_FillRect(surface, &src, 0);
 
 	int sz = widgets->size();
-
 	for (int i = 0; i < sz; i++) {
 		CWidget *w = widgets->at(i);
 		if (w->update()) {
@@ -82,7 +81,6 @@ void CControls::render(SDL_Surface *dest, int x, int y) {
 
 void CControls::mousedown(int x, int y) {
 	int sz = widgets->size();
-
 	for (int i = 0; i < sz; i++) {
 		CWidget *w = widgets->at(i);
 		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
@@ -94,7 +92,6 @@ void CControls::mousedown(int x, int y) {
 
 void CControls::mouseup(int x, int y) {
 	int sz = widgets->size();
-
 	for (int i = 0; i < sz; i++) {
 		CWidget *w = widgets->at(i);
 		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {

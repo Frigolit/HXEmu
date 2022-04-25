@@ -17,7 +17,7 @@ CTestDevice::CTestDevice() {
 	state = 0;
 
 	rom = new CROM(4096);
-	rom->load_from_file((char *)"data/roms/ext-test/test.bin");
+	rom->load_from_file("test.bin");
 
 	dynrom = (uint8_t *)malloc(sizeof(uint8_t) * 2048);
 	memset(dynrom, 0, 2048);

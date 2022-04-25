@@ -14,7 +14,6 @@ class CTestDevice : public CExpansionDevice {
 
 	private:
 		int     state;
-		int     test_no;
 
 		CROM    *rom;
 		uint8_t *dynrom;

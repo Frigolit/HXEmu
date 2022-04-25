@@ -6,7 +6,7 @@
 extern TTF_Font *font_buttons;
 
 void fonts_init(void);
-void fonts_quit(void);
+void fonts_close(void);
 
 #endif
 

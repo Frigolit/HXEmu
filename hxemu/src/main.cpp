@@ -9,8 +9,9 @@ using namespace std;
 
 #include <stdio.h>
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_timer.h>
 
 #include "hash.h"
 #include "config.h"
@@ -22,7 +23,6 @@ using namespace std;
 
 #define MACHINECOUNT 1
 
-SDL_Surface *screen;
 CHX20 *machines[MACHINECOUNT];
 SDL_Thread *threads[MACHINECOUNT];
 
@@ -30,43 +30,44 @@ void sdl_init();
 int hx20_thread(void *data);
 void shutdown();
 
-int main(int argc, char **argv) {
-	char rompath[128];
-	char optionrompath[128];
+int main(int argc, char *argv[]) {
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        printf("Error initializing SDL: %s\n", SDL_GetError());
+    }
+    const int WINDOW_W = 480 + 256, WINDOW_H = 128 * MACHINECOUNT;
+    SDL_Window* win = SDL_CreateWindow("HXEmu 0.2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                       WINDOW_W, WINDOW_H, 0);
+    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Surface *surface = SDL_CreateRGBSurface(SDL_RLEACCEL, WINDOW_W, WINDOW_H, 32, 0, 0, 0, 0);
 
-	if (argc > 1) {
-		strcpy(rompath, argv[1]);
-	}
-	else {
-		strcpy(rompath, "firmware/1.1");
-	}
+    TTF_Init();
+    fonts_init();
 
-	if (argc > 2) {
-		strcpy(optionrompath, argv[2]);
-	}
-	else optionrompath[0] = 0;
+	SDL_Color text_fg;
+	SDL_Color text_bg;
+	text_fg.r = text_fg.g = text_fg.b = 0; text_fg.a = 255;
+	text_bg.r = text_bg.g = text_bg.b = 0xC9; text_bg.a = 255;
+    SDL_Surface *surf_text = TTF_RenderText_Shaded(font_buttons, "ABCD", text_fg, text_bg);
+    if (!surf_text) {
+        printf("surf_text is NULL\n");
+    }
 
-	// Initialize
-	sdl_init();
-	fonts_init();
+    SDL_Rect destr;
+    destr.x = 0; destr.y = 0; destr.w = WINDOW_W; destr.h = WINDOW_H;
 
-	for (int i = 0; i < MACHINECOUNT; i++) {
+    // Machine init
+    for (int i = 0; i < MACHINECOUNT; i++) {
 		machines[i] = new CHX20();
-		machines[i]->load_roms(rompath);
-		if (optionrompath[0]) machines[i]->load_option_rom(optionrompath);
+		machines[i]->load_roms("");
+		// if (optionrompath[0]) machines[i]->load_option_rom(optionrompath);
 
-		threads[i] = SDL_CreateThread(hx20_thread, machines[i]);
+		threads[i] = SDL_CreateThread(hx20_thread, "", machines[i]);
 	}
 
-	SDL_Event event;
-
-	atexit(shutdown);
-	
-	while (1) {
-		for (int i = 0; i < MACHINECOUNT; i++) {
-			machines[i]->draw(screen, 0, i * 128);
-		}
-
+    // Main loop
+    SDL_Event event;
+    bool stop_flag = false;
+    while (!stop_flag) {
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
@@ -116,7 +117,7 @@ int main(int argc, char **argv) {
 					else if (event.key.keysym.sym == SDLK_LSHIFT) machines[0]->keyboard_down(0x00);
 					else if (event.key.keysym.sym == SDLK_RSHIFT) machines[0]->keyboard_down(0x01);
 					break;
-					
+
 				case SDL_KEYUP:
 					if (event.key.keysym.sym == SDLK_RETURN) machines[0]->keyboard_up('\n');
 					else if (event.key.keysym.sym == SDLK_0) machines[0]->keyboard_up('0');
@@ -160,7 +161,7 @@ int main(int argc, char **argv) {
 					else if (event.key.keysym.sym == SDLK_LSHIFT) machines[0]->keyboard_up(0x00);
 					else if (event.key.keysym.sym == SDLK_RSHIFT) machines[0]->keyboard_up(0x01);
 					break;
-				
+
 				case SDL_MOUSEBUTTONDOWN:
 					{
 						int mx = event.button.x;
@@ -182,67 +183,44 @@ int main(int argc, char **argv) {
 						}
 					}
 					break;
-				
+
 				case SDL_QUIT:
-					SDL_Quit();
-					return 0;
-					
+					stop_flag = true;
+					break;
+
 				default:
 					break;
-			} 
+			}
 		}
-		
-		// Flip and wait
-		SDL_Flip(screen);
+
+        // Draw to the surface
+		for (int i = 0; i < MACHINECOUNT; i++) {
+			machines[i]->draw(surface, 0, i * 128);
+		}
+
+        // Update
+		SDL_RenderClear(ren);
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(ren, surface);
+		SDL_RenderCopy(ren, tex, NULL, &destr);
+		SDL_RenderPresent(ren);
+        SDL_DestroyTexture(tex);
+
 		SDL_Delay(10);
-	}
-	
-	return 0;
-}
+    }
 
-void sdl_init() {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	// Clean up nicely on exit
-	atexit(SDL_Quit);
-
-	// Initialize SDL_ttf
-	if (TTF_Init() < 0) {
-		fprintf(stderr, "Unable to initialize SDL_ttf\n");
-		exit(1);
-	}
-
-	// Create window
-	screen = SDL_SetVideoMode(480 + 256, 128 * MACHINECOUNT, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
-	if (!screen) {
-		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	// Set window title
-	SDL_WM_SetCaption("HXEmu 0.1", "");
-}
-
-void shutdown() {
-	for (int i = 0; i < MACHINECOUNT; i++) {
-		SDL_KillThread(threads[i]);
-		delete(machines[i]);
-	}
-
-	fonts_quit();
-	TTF_Quit();
+    SDL_FreeSurface(surface);
+	SDL_DestroyRenderer(ren);
+	SDL_DestroyWindow(win);
+	fonts_close();
 	SDL_Quit();
+
+    return 0;
 }
 
 int hx20_thread(void *data) {
 	CHX20 *hx20 = (CHX20*)data;
-	
-	int i;
 	while (1) {
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			hx20->think();
 			hx20->think();
 			hx20->think();
@@ -279,7 +257,6 @@ int hx20_thread(void *data) {
 		
 		SDL_Delay(1);
 	}
-	
 	return 0;
 }
 

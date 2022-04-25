@@ -31,8 +31,8 @@ class CHX20 {
 		void poweroff();
 		void reset();
 
-		void load_roms(char *dirname);
-		void load_option_rom(char *path);
+		void load_roms(const char *dirname);
+		void load_option_rom(const char *path);
 
 		void draw(SDL_Surface *dest, int x, int y);
 		void keyboard_down(uint8_t c);

@@ -27,8 +27,8 @@ bool CButton::update() {
 	SDL_Color text_fg;
 	SDL_Color text_bg;
 
-	text_fg.r = text_fg.g = text_fg.b = 0;
-	text_bg.r = text_bg.g = text_bg.b = 0xC9;
+	text_fg.r = text_fg.g = text_fg.b = 0; text_fg.a = 255;
+	text_bg.r = text_bg.g = text_bg.b = 0xC9; text_bg.a = 255;
 
 	uint32_t c0 = SDL_MapRGB(surface->format, 0xDD, 0xDD, 0xDD);
 	uint32_t c1 = SDL_MapRGB(surface->format, 0xC9, 0xC9, 0xC9);
@@ -48,15 +48,18 @@ bool CButton::update() {
 	SDL_FillRect(surface, &r, c1);
 
 	// Draw label
-	SDL_Surface *surf_text = TTF_RenderText_Shaded(font_buttons, caption, text_fg, text_bg);
-
-	SDL_Rect rect_text;
-	rect_text.w = surf_text->w;
-	rect_text.h = surf_text->h;
-	rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0));
-	rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0));
-
-	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+	if (font_buttons) {
+        SDL_Rect rect_text;
+        SDL_Surface *surf_text = TTF_RenderText_Shaded(font_buttons, caption, text_fg, text_bg);
+        rect_text.w = surf_text->w;
+        rect_text.h = surf_text->h;
+        rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0));
+        rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0));
+        SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+        SDL_FreeSurface(surf_text);
+	} else {
+	    printf("Warning: the font is not loaded\n");
+	}
 
 	updated = true;
 	return true;

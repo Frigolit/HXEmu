@@ -140,7 +140,7 @@ if [ "$HOST_CXX" == "" ]; then
 fi
 
 # ================================================
-# Prepare build directory
+# Prepare directories
 # ================================================
 if [ "$TARGET" != "" ]; then
 	export BUILDROOT="build/$TARGET"
@@ -151,6 +151,10 @@ fi
 if [ ! -d "$BUILDROOT" ]; then mkdir $BUILDROOT; fi
 if [ ! -d "$BUILDROOT/release" ]; then mkdir $BUILDROOT/release; fi
 if [ ! -d "$BUILDROOT/work" ]; then mkdir $BUILDROOT/work; fi
+
+cp "data/Vera.ttf" $BUILDROOT/release
+
+export FIRMWARE="data/roms/firmware/1.0"
 
 # ================================================
 # Detect C++11 support
@@ -190,11 +194,11 @@ if [ "$KERNEL" == "SunOS" ]; then
 	fi
 elif [ "$KERNEL" == "Linux" ]; then
 	if [ "$TARGET" != "" ]; then
-		PKG_SDL="`${TARGET}-pkg-config --libs sdl SDL_ttf 2>/dev/null`"
-		CXXFLAGS="$CXXFLAGS $(${TARGET}-pkg-config --cflags sdl SDL_ttf)"
+		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf 2>/dev/null`"
+		CXXFLAGS="$CXXFLAGS $(${TARGET}-pkg-config --cflags sdl2 SDL2_ttf)"
 	else
-		PKG_SDL="`pkg-config --libs sdl SDL_ttf 2>/dev/null`"
-		CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl SDL_ttf)"
+		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf 2>/dev/null`"
+		CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl2 SDL2_ttf)"
 	fi
 	
 	if [ "$PKG_SDL" == "" ]; then
@@ -202,16 +206,16 @@ elif [ "$KERNEL" == "Linux" ]; then
 		exit 1
 	fi
 	
-	LDFLAGS="$LDFLAGS $PKG_SDL"
+	LDFLAGS="$LDFLAGS $PKG_SDL -ldl -lpthread -lasound -lwayland-client"
 elif [ "$KERNEL" == "Darwin" ]; then
 	# TODO: Add support for SDL_ttf
-	if [ "`xwhich sdl-config 2>/dev/null`" == "" ]; then
+	if [ "`xwhich sdl2-config 2>/dev/null`" == "" ]; then
 		echo "ERROR: Cannot find SDL!"
 		exit 1
 	fi
 
-	LDFLAGS="$LDFLAGS $(sdl-config --libs)"
-	CXXFLAGS="$CXXFLAGS $(sdl-config --cflags)"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib -lSDL2 -lSDL2_ttf"
+	CXXFLAGS="$CXXFLAGS $(sdl2-config --cflags)"
 else
 	if [ "$PKG_SDL" == "" ]; then
 		echo "ERROR: Unhandled auto-detection for SDL and SDL_ttf on $KERNEL! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
