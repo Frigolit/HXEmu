@@ -5,7 +5,7 @@ xwhich() {
 	if [ "$?" == "0" ]; then echo "${R}"; fi
 }
 
-export PATH="$PATH:`pwd`/bin"
+export PATH="${PATH}:`pwd`/bin"
 
 # ================================================
 # Set some default values
@@ -27,112 +27,112 @@ if [ -d "bin" ]; then chmod +x bin/*; fi
 # ================================================
 # Hacks for special targets
 # ================================================
-if [ "$TARGET" == "i686-mingw32" ] || [ "$TARGET" == "mingw32" ] || [ "$TARGET" == "x86_64-w64-mingw32" ]; then
-	CXXFLAGS="$CXXFLAGS -DNOTESTDEVICE"
-	LDFLAGS="-static-libgcc -static-libstdc++ $LDFLAGS"
-	export POSTLDFLAGS="$POSTLDFLAGS -lSDL"
+if [ "${TARGET}" == "i686-mingw32" ] || [ "${TARGET}" == "mingw32" ] || [ "${TARGET}" == "x86_64-w64-mingw32" ]; then
+	CXXFLAGS="${CXXFLAGS} -DNOTESTDEVICE"
+	LDFLAGS="-static-libgcc -static-libstdc++ ${LDFLAGS}"
+	export POSTLDFLAGS="${POSTLDFLAGS} -lSDL"
 	export HXEMUFILENAME="hxemu.exe"
 fi
 
 # ================================================
 # Get machine info
 # ================================================
-if [ "$ARCH" == "" ]; then
+if [ "${ARCH}" == "" ]; then
 	export ARCH="`arch 2>/dev/null || uname -m 2>/dev/null || echo unknown`"
 fi
 
-if [ "$KERNEL" == "" ]; then
+if [ "${KERNEL}" == "" ]; then
 	export KERNEL="`uname -s 2>/dev/null || echo unknown`"
 fi
 
-if [ "$KERNEL_VERSION" == "" ]; then
+if [ "${KERNEL_VERSION}" == "" ]; then
 	export KERNEL_VERSION="`uname -r 2>/dev/null || echo unknown`"
 fi
 
 # ================================================
 # Find executables
 # ================================================
-if [ "$AS02" == "" ]; then
+if [ "${AS02}" == "" ]; then
 	export AS02="`xwhich as02 2>/dev/null`"
 
-	if [ "$AS02" == "" ]; then
-		if [ "$KERNEL" == "Linux" ]; then
-			if [ "$ARCH" == "i686" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
-			if [ "$ARCH" == "x86_64" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
+	if [ "${AS02}" == "" ]; then
+		if [ "${KERNEL}" == "Linux" ]; then
+			if [ "${ARCH}" == "i686" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
+			if [ "${ARCH}" == "x86_64" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
 		fi
 	fi
 fi
 
-if [ "$CC" == "" ]; then
-	if [ "$TARGET" != "" ]; then
-		export CC="`xwhich $TARGET-gcc 2>/dev/null`"
+if [ "${CC}" == "" ]; then
+	if [ "${TARGET}" != "" ]; then
+		export CC="`xwhich ${TARGET}-gcc 2>/dev/null`"
 	else
-		if [ "$CHOST" != "" ]; then
-			export CC="`xwhich $CHOST-gcc 2>/dev/null`"
+		if [ "${CHOST}" != "" ]; then
+			export CC="`xwhich ${CHOST}-gcc 2>/dev/null`"
 		fi
 
-		if [ "$CC" == "" ]; then
+		if [ "${CC}" == "" ]; then
 			export CC="`xwhich gcc 2>/dev/null`"
 		fi
 
-		if [ "$CC" == "" ]; then
+		if [ "${CC}" == "" ]; then
 			export CC="`xwhich cc 2>/dev/null`"
 		fi
 	fi
 
-	if [ "$CC" == "" ]; then
+	if [ "${CC}" == "" ]; then
 		echo "ERROR: No C compiler found :("
 		exit 1
 	fi
 fi
 
-if [ "$CXX" == "" ]; then
-	if [ "$TARGET" != "" ]; then
-		export CXX="`xwhich $TARGET-g++ 2>/dev/null`"
+if [ "${CXX}" == "" ]; then
+	if [ "${TARGET}" != "" ]; then
+		export CXX="`xwhich ${TARGET}-g++ 2>/dev/null`"
 	else
-		if [ "$CHOST" != "" ]; then
-			export CXX="`xwhich $CHOST-g++ 2>/dev/null`"
+		if [ "${CHOST}" != "" ]; then
+			export CXX="`xwhich ${CHOST}-g++ 2>/dev/null`"
 		fi
 
-		if [ "$CXX" == "" ]; then
+		if [ "${CXX}" == "" ]; then
 			export CXX="`xwhich g++ 2>/dev/null`"
 		fi
 
-		if [ "$CXX" == "" ]; then
+		if [ "${CXX}" == "" ]; then
 			export CXX="`xwhich cpp 2>/dev/null`"
 		fi
 	fi
 
-	if [ "$CXX" == "" ]; then
+	if [ "${CXX}" == "" ]; then
 		echo "ERROR: No C++ compiler found :("
 		exit 1
 	fi
 fi
 
-if [ "$PIKE" == "" ]; then
+if [ "${PIKE}" == "" ]; then
 	export PIKE="`xwhich pike 2>/dev/null`"
 fi
 
-if [ "$HOST_CC" == "" ]; then
-	if [ "$TARGET" == "" ]; then
-		export HOST_CC="$CC";
+if [ "${HOST_CC}" == "" ]; then
+	if [ "${TARGET}" == "" ]; then
+		export HOST_CC="${CC}";
 	else
 		export HOST_CC="`xwhich gcc 2>/dev/null`"
 
-		if [ "$HOST_CC" == "" ]; then
+		if [ "${HOST_CC}" == "" ]; then
 			echo "ERROR: No host C compiler found :("
 			exit 1
 		fi
 	fi
 fi
 
-if [ "$HOST_CXX" == "" ]; then
-	if [ "$TARGET" == "" ]; then
-		export HOST_CXX="$CXX";
+if [ "${HOST_CXX}" == "" ]; then
+	if [ "${TARGET}" == "" ]; then
+		export HOST_CXX="${CXX}";
 	else
 		export HOST_CXX="`xwhich g++ 2>/dev/null`"
 
-		if [ "$HOST_CXX" == "" ]; then
+		if [ "${HOST_CXX}" == "" ]; then
 			echo "ERROR: No host C++ compiler found :("
 			exit 1
 		fi
@@ -142,21 +142,21 @@ fi
 # ================================================
 # Prepare build directory
 # ================================================
-if [ "$TARGET" != "" ]; then
-	export BUILDROOT="build/$TARGET"
+if [ "${TARGET}" != "" ]; then
+	export BUILDROOT="build/${TARGET}"
 else
-	export BUILDROOT="build/$ARCH"
+	export BUILDROOT="build/${ARCH}"
 fi
 
-if [ ! -d "$BUILDROOT" ]; then mkdir $BUILDROOT; fi
-if [ ! -d "$BUILDROOT/release" ]; then mkdir $BUILDROOT/release; fi
-if [ ! -d "$BUILDROOT/work" ]; then mkdir $BUILDROOT/work; fi
+if [ ! -d "${BUILDROOT}" ]; then mkdir ${BUILDROOT}; fi
+if [ ! -d "${BUILDROOT}/release" ]; then mkdir ${BUILDROOT}/release; fi
+if [ ! -d "${BUILDROOT}/work" ]; then mkdir ${BUILDROOT}/work; fi
 
 # ================================================
 # Detect C++11 support
 # ================================================
 
-$CXX -std=c++11 -dM -E -x c++ /dev/null 2>/dev/null >/dev/null
+${CXX} -std=c++11 -dM -E -x c++ /dev/null 2>/dev/null >/dev/null
 if [ "$?" != "0" ]; then
 	echo "ERROR: ${CXX} doesn't support C++11!"
 	exit 1
@@ -165,9 +165,9 @@ fi
 # ================================================
 # Find libraries
 # ================================================
-if [ "$KERNEL" == "SunOS" ]; then
+if [ "${KERNEL}" == "SunOS" ]; then
 	# TODO: Add support for SDL_ttf
-	if [ "$PKG_SDL" == "" ]; then
+	if [ "${PKG_SDL}" == "" ]; then
 		pkg list developer/gcc-48 &>/dev/null
 		if [ "$?" == "1" ]; then
 			echo "ERROR: Missing package developer/gcc-48"
@@ -186,70 +186,70 @@ if [ "$KERNEL" == "SunOS" ]; then
 			exit 1
 		fi
 
-		LDFLAGS="$LDFLAGS -lxnet -lSDL"
+		LDFLAGS="${LDFLAGS} -lxnet -lSDL"
 	fi
-elif [ "$KERNEL" == "Linux" ]; then
-	if [ "$TARGET" != "" ]; then
+elif [ "${KERNEL}" == "Linux" ]; then
+	if [ "${TARGET}" != "" ]; then
 		PKG_SDL="`${TARGET}-pkg-config --libs sdl SDL_ttf 2>/dev/null`"
-		CXXFLAGS="$CXXFLAGS $(${TARGET}-pkg-config --cflags sdl SDL_ttf)"
+		CXXFLAGS="${CXXFLAGS} $(${TARGET}-pkg-config --cflags sdl SDL_ttf)"
 	else
 		PKG_SDL="`pkg-config --libs sdl SDL_ttf 2>/dev/null`"
-		CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl SDL_ttf)"
+		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl SDL_ttf)"
 	fi
 
-	if [ "$PKG_SDL" == "" ]; then
+	if [ "${PKG_SDL}" == "" ]; then
 		echo "ERROR: Cannot find SDL and/or SDL_ttf!"
 		exit 1
 	fi
 
-	LDFLAGS="$LDFLAGS $PKG_SDL"
-elif [ "$KERNEL" == "Darwin" ]; then
+	LDFLAGS="${LDFLAGS} ${PKG_SDL}"
+elif [ "${KERNEL}" == "Darwin" ]; then
 	# TODO: Add support for SDL_ttf
 	if [ "`xwhich sdl-config 2>/dev/null`" == "" ]; then
 		echo "ERROR: Cannot find SDL!"
 		exit 1
 	fi
 
-	LDFLAGS="$LDFLAGS $(sdl-config --libs)"
-	CXXFLAGS="$CXXFLAGS $(sdl-config --cflags)"
+	LDFLAGS="${LDFLAGS} $(sdl-config --libs)"
+	CXXFLAGS="${CXXFLAGS} $(sdl-config --cflags)"
 else
-	if [ "$PKG_SDL" == "" ]; then
-		echo "ERROR: Unhandled auto-detection for SDL and SDL_ttf on $KERNEL! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
+	if [ "${PKG_SDL}" == "" ]; then
+		echo "ERROR: Unhandled auto-detection for SDL and SDL_ttf on ${KERNEL}! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
 		exit 1
 	fi
 fi
 
 export LDFLAGS
-export CXXFLAGS="-Wall -ffunction-sections -std=c++11 $CXXFLAGS"
-export CFLAGS="-Wall -ffunction-sections $CFLAGS"
+export CXXFLAGS="-Wall -ffunction-sections -std=c++11 ${CXXFLAGS}"
+export CFLAGS="-Wall -ffunction-sections ${CFLAGS}"
 
 # ================================================
 # Print environment information
 # ================================================
-echo "Architecture:          $ARCH"
-echo "Kernel:                $KERNEL $KERNEL_VERSION"
-echo "Build root:            $BUILDROOT"
+echo "Architecture:          ${ARCH}"
+echo "Kernel:                ${KERNEL} ${KERNEL_VERSION}"
+echo "Build root:            ${BUILDROOT}"
 echo "--------------------------------------------------------------------------------"
-echo "6301 Assembler:        $AS02"
+echo "6301 Assembler:        ${AS02}"
 
-if [ "$CC" == "$HOST_CC" ]; then
-	echo "C compiler:            $CC"
+if [ "${CC}" == "${HOST_CC}" ]; then
+	echo "C compiler:            ${CC}"
 else
-	echo "C compiler (target):   $CC"
-	echo "C compiler (host):     $HOST_CC"
+	echo "C compiler (target):   ${CC}"
+	echo "C compiler (host):     ${HOST_CC}"
 fi
-if [ "$CXX" == "$HOST_CXX" ]; then
-	echo "C++ compiler:          $CXX"
+if [ "${CXX}" == "${HOST_CXX}" ]; then
+	echo "C++ compiler:          ${CXX}"
 else
-	echo "C++ compiler (target): $CXX"
-	echo "C++ compiler (host):   $HOST_CXX"
+	echo "C++ compiler (target): ${CXX}"
+	echo "C++ compiler (host):   ${HOST_CXX}"
 fi
 
-echo "Pike executable:       $PIKE"
+echo "Pike executable:       ${PIKE}"
 echo "--------------------------------------------------------------------------------"
-echo "C flags:               $CFLAGS"
-echo "C++ flags:             $CXXFLAGS"
-echo "Libraries:             $LDFLAGS"
+echo "C flags:               ${CFLAGS}"
+echo "C++ flags:             ${CXXFLAGS}"
+echo "Libraries:             ${LDFLAGS}"
 echo ""
 
 # ================================================

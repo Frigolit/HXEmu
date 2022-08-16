@@ -1,7 +1,7 @@
 // =============================================================================
-// @author  Pontus Rodling <frigolit@frigolit.net>
+// @author Pontus Rodling <frigolit@frigolit.net>
 // @license MIT license - See LICENSE for more information
-// @info    http://frigolit.net/archive/datasheets/PD7227.pdf
+// @info https://frigolit.net/archive/datasheets/PD7227.pdf
 // =============================================================================
 
 #include <stdio.h>

@@ -1,0 +1,5 @@
+#!/bin/sh
+. ./compile || exit 1
+
+cd ${BUILDROOT}/release/ || exit 1
+./hxemu || exit 1
