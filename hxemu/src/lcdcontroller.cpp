@@ -13,7 +13,7 @@
 CLCDController::CLCDController() {
 	lcd = NULL;
 	ram = (uint8_t *)malloc(128);
-	
+
 	reset();
 }
 
@@ -35,8 +35,12 @@ void CLCDController::set_lcd(CLCD *l, uint8_t x, uint8_t y) {
 }
 
 void CLCDController::apply_ptr_op(uint8_t n) {
-	if (n == 0) ptr = (ptr + 1) % 128;
-	else if (n == 1) ptr = (ptr - 1) % 128;
+	if (n == 0) {
+		ptr = (ptr + 1) % 128;
+	}
+	else if (n == 1) {
+		ptr = (ptr - 1) % 128;
+	}
 }
 
 void CLCDController::command(uint8_t n) {
@@ -77,7 +81,7 @@ void CLCDController::command(uint8_t n) {
 		// Set Read Mode (SRM)
 		mode = 1;
 		ptrop = n & 0x03;
-		
+
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Set Read Mode (SRM)\n", n);
 		#endif
@@ -86,7 +90,7 @@ void CLCDController::command(uint8_t n) {
 		// Set Write Mode (SWM)
 		mode = 2;
 		ptrop = n & 0x03;
-		
+
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Set Write Mode (SWM)\n", n);
 		#endif
@@ -95,7 +99,7 @@ void CLCDController::command(uint8_t n) {
 		// Set OR Mode (SORM)
 		mode = 3;
 		ptrop = n & 0x03;
-		
+
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Set OR Mode (SORM)\n", n);
 		#endif
@@ -104,7 +108,7 @@ void CLCDController::command(uint8_t n) {
 		// Set AND Mode (SANDM)
 		mode = 4;
 		ptrop = n & 0x03;
-		
+
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Set AND Mode (SANDM)\n", n);
 		#endif
@@ -112,7 +116,7 @@ void CLCDController::command(uint8_t n) {
 	else if (n == 0x72) {
 		// Set Character Mode (SCM)
 		mode = 5;
-		
+
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Set Character Mode (SCM)\n", n);
 		#endif
@@ -121,44 +125,48 @@ void CLCDController::command(uint8_t n) {
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Bit Set\n", n);
 		#endif
-		
+
 		// Bit set
 		if (lcd && (ptr & 0x3F) < 40) {
 			uint8_t bt = (n & 0x1C) >> 2;
-			
+
 			uint8_t yb = (ptr & 0x40) >> 3;
 			uint8_t x = ptr & 0x3F;
-			
+
 			uint8_t n = (ram[ptr] |= (1 << bt));
-			
+
 			for (uint8_t y = 0; y < 8; y++) {
 				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
 				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
 			}
 		}
-		
+
 		apply_ptr_op(n & 0x03);
 	}
 	else if (n >= 0x20 && n <= 0x3F) {
 		#ifdef DEBUG_LCD
 			printf("CLCDController::command(0x%02X): Bit Clear\n", n);
 		#endif
-		
+
 		// Bit clear
 		if (lcd && (ptr & 0x3F) < 40) {
 			uint8_t bt = (n & 0x1C) >> 2;
-			
+
 			uint8_t yb = (ptr & 0x40) >> 3;
 			uint8_t x = ptr & 0x3F;
-			
+
 			uint8_t n = (ram[ptr] &= ~(1 << bt));
-			
+
 			for (uint8_t y = 0; y < 8; y++) {
-				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
-				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				if (n & (1 << y)) {
+					lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
+				}
+				else {
+					lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				}
 			}
 		}
-		
+
 		apply_ptr_op(n & 0x03);
 	}
 }
@@ -173,15 +181,19 @@ void CLCDController::data(uint8_t n) {
 		if (lcd && (ptr & 0x3F) < 40) {
 			uint8_t yb = (ptr & 0x40) >> 3;
 			uint8_t x = ptr & 0x3F;
-			
+
 			for (uint8_t y = 0; y < 8; y++) {
-				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
-				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				if (n & (1 << y)) {
+					lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
+				}
+				else {
+					lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				}
 			}
-			
+
 			ram[ptr] = n;
 		}
-		
+
 		apply_ptr_op(ptrop);
 	}
 	else if (mode == 3) {

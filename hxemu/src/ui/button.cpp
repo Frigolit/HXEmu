@@ -72,6 +72,7 @@ void CButton::set_click_callback(std::function<void(CWidget*)> callback) {
 }
 
 void CButton::mouseup(int cx, int cy) {
-	if (cb_click != NULL) cb_click(this);
+	if (cb_click != NULL) {
+		cb_click(this);
+	}
 }
-

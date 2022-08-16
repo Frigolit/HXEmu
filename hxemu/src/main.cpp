@@ -38,13 +38,19 @@ int main(int argc, char **argv) {
 		strcpy(rompath, argv[1]);
 	}
 	else {
-		strcpy(rompath, "firmware/1.1");
+		strcpy(rompath, "firmware/v1.1-swe");
 	}
 
 	if (argc > 2) {
 		strcpy(optionrompath, argv[2]);
 	}
-	else optionrompath[0] = 0;
+	else {
+		optionrompath[0] = 0;
+	}
+
+	printf("HXEmu v%d.%d.%d\n", APP_MAJOR, APP_MINOR, APP_REVISION);
+	printf("Firmware path: %s\n", rompath);
+	putchar('\n');
 
 	// Initialize
 	sdl_init();
@@ -61,7 +67,7 @@ int main(int argc, char **argv) {
 	SDL_Event event;
 
 	atexit(shutdown);
-	
+
 	while (1) {
 		for (int i = 0; i < MACHINECOUNT; i++) {
 			machines[i]->draw(screen, 0, i * 128);
@@ -115,8 +121,10 @@ int main(int argc, char **argv) {
 					else if (event.key.keysym.sym == SDLK_PERIOD) machines[0]->keyboard_down('.');
 					else if (event.key.keysym.sym == SDLK_LSHIFT) machines[0]->keyboard_down(0x00);
 					else if (event.key.keysym.sym == SDLK_RSHIFT) machines[0]->keyboard_down(0x01);
+					else if (event.key.keysym.sym == SDLK_LCTRL) machines[0]->keyboard_down(0x02);
+					else if (event.key.keysym.sym == SDLK_RCTRL) machines[0]->keyboard_down('[');
 					break;
-					
+
 				case SDL_KEYUP:
 					if (event.key.keysym.sym == SDLK_RETURN) machines[0]->keyboard_up('\n');
 					else if (event.key.keysym.sym == SDLK_0) machines[0]->keyboard_up('0');
@@ -159,8 +167,10 @@ int main(int argc, char **argv) {
 					else if (event.key.keysym.sym == SDLK_PERIOD) machines[0]->keyboard_up('.');
 					else if (event.key.keysym.sym == SDLK_LSHIFT) machines[0]->keyboard_up(0x00);
 					else if (event.key.keysym.sym == SDLK_RSHIFT) machines[0]->keyboard_up(0x01);
+					else if (event.key.keysym.sym == SDLK_LCTRL) machines[0]->keyboard_up(0x02);
+					else if (event.key.keysym.sym == SDLK_RCTRL) machines[0]->keyboard_up('[');
 					break;
-				
+
 				case SDL_MOUSEBUTTONDOWN:
 					{
 						int mx = event.button.x;
@@ -182,21 +192,21 @@ int main(int argc, char **argv) {
 						}
 					}
 					break;
-				
+
 				case SDL_QUIT:
 					SDL_Quit();
 					return 0;
-					
+
 				default:
 					break;
-			} 
+			}
 		}
-		
+
 		// Flip and wait
 		SDL_Flip(screen);
 		SDL_Delay(10);
 	}
-	
+
 	return 0;
 }
 
@@ -223,7 +233,9 @@ void sdl_init() {
 	}
 
 	// Set window title
-	SDL_WM_SetCaption("HXEmu 0.1", "");
+	char buf[256];
+	sprintf(buf, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
+	SDL_WM_SetCaption(buf, "");
 }
 
 void shutdown() {
@@ -239,47 +251,16 @@ void shutdown() {
 
 int hx20_thread(void *data) {
 	CHX20 *hx20 = (CHX20*)data;
-	
+
 	int i;
 	while (1) {
-		for (i = 0; i < 100; i++) {
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
-			hx20->think();
+		for (i = 0; i < 3200; i++) {
 			hx20->think();
 		}
-		
+
 		SDL_Delay(1);
 	}
-	
+
 	return 0;
 }
 

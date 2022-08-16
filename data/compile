@@ -56,14 +56,16 @@ if [ "$PIKE" != "" ]; then
 	fi
 fi
 
-if [ -d "data/src/roms/firmware" ]; then
-	cp -r data/src/roms/firmware $BUILDROOT/release/data/roms/
-fi
+# Copy firmware
+echo "Installing firmware ROMs..."
+cp -r data/bin/roms/firmware $BUILDROOT/release/data/roms/ || exit 1
+
 #cp data/src/addresses.txt $BUILDROOT/release/data/
 #cp -r data/src/addresses $BUILDROOT/release/data/
 
 # Copy binary files
-cp -rv data/bin/fonts ${BUILDROOT}/release/data/
+echo "Installing fonts..."
+cp -r data/bin/fonts ${BUILDROOT}/release/data/  || exit 1
 
 # Ensure the target folder is read/write
 chmod -R u+rw $BUILDROOT/release/data/

@@ -14,7 +14,7 @@ using namespace std;
 class CMemoryDevice {
 	public:
 		virtual uint8_t read(uint16_t addr) { return 0x00; }
-		virtual void write(uint16_t addr, uint8_t data) { }
+		virtual bool write(uint16_t addr, uint8_t data) { return false; }
 };
 
 #endif

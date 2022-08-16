@@ -50,7 +50,7 @@ uint8_t CTestDevice::read(uint16_t addr, CMemoryDevice *mem) {
 	else return mem->read(addr);
 }
 
-void CTestDevice::write(uint16_t addr, uint8_t data, CMemoryDevice *mem) {
+bool CTestDevice::write(uint16_t addr, uint8_t data, CMemoryDevice *mem) {
 	if (addr >= 0x4000 && addr < 0x6000) {
 		if (addr == 0x5FF0) {
 			printf("[Test control] 0x%02X\n", data);
@@ -62,6 +62,10 @@ void CTestDevice::write(uint16_t addr, uint8_t data, CMemoryDevice *mem) {
 			printf("\e[32;1m%c\e[0m", data);
 		}
 	}
-	else mem->write(addr, data);
+	else {
+		mem->write(addr, data);
+	}
+
+	return true;
 }
 

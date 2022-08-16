@@ -29,12 +29,16 @@ uint8_t CROM::read(uint16_t addr) {
 	return rom[addr];
 }
 
-void CROM::write(uint16_t addr, uint8_t data) {
+bool CROM::write(uint16_t addr, uint8_t data) {
 	printf("CROM::write(): warning: cannot write to rom\n");
+	return false;
 }
 
 void CROM::eject() {
-	if (rom == NULL) return;
+	if (rom == NULL) {
+		return;
+	}
+
 	free(rom);
 	rom = NULL;
 }
@@ -46,8 +50,8 @@ bool CROM::load_from_file(char *fn) {
 		return false;
 	}
 
-	if (rom == NULL) {
-		if (!allocate()) return false;
+	if (rom == NULL && !allocate()) {
+		return false;
 	}
 
 	long int r = fread(rom, 1, size, fp);
@@ -72,7 +76,7 @@ bool CROM::allocate() {
 
 	rom = (uint8_t*)malloc(size);
 	if (rom == NULL) {
-		printf("CROM::allocate(): error: couldn't allocate %d byte rom\n", size);
+		printf("CROM::allocate(): error: couldn't allocate %d byte(s)\n", size);
 		return false;
 	}
 

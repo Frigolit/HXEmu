@@ -54,7 +54,7 @@ fi
 # ================================================
 if [ "$AS02" == "" ]; then
 	export AS02="`xwhich as02 2>/dev/null`"
-	
+
 	if [ "$AS02" == "" ]; then
 		if [ "$KERNEL" == "Linux" ]; then
 			if [ "$ARCH" == "i686" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
@@ -70,16 +70,16 @@ if [ "$CC" == "" ]; then
 		if [ "$CHOST" != "" ]; then
 			export CC="`xwhich $CHOST-gcc 2>/dev/null`"
 		fi
-		
+
 		if [ "$CC" == "" ]; then
 			export CC="`xwhich gcc 2>/dev/null`"
 		fi
-		
+
 		if [ "$CC" == "" ]; then
 			export CC="`xwhich cc 2>/dev/null`"
 		fi
 	fi
-	
+
 	if [ "$CC" == "" ]; then
 		echo "ERROR: No C compiler found :("
 		exit 1
@@ -93,16 +93,16 @@ if [ "$CXX" == "" ]; then
 		if [ "$CHOST" != "" ]; then
 			export CXX="`xwhich $CHOST-g++ 2>/dev/null`"
 		fi
-		
+
 		if [ "$CXX" == "" ]; then
 			export CXX="`xwhich g++ 2>/dev/null`"
 		fi
-		
+
 		if [ "$CXX" == "" ]; then
 			export CXX="`xwhich cpp 2>/dev/null`"
 		fi
 	fi
-	
+
 	if [ "$CXX" == "" ]; then
 		echo "ERROR: No C++ compiler found :("
 		exit 1
@@ -118,7 +118,7 @@ if [ "$HOST_CC" == "" ]; then
 		export HOST_CC="$CC";
 	else
 		export HOST_CC="`xwhich gcc 2>/dev/null`"
-		
+
 		if [ "$HOST_CC" == "" ]; then
 			echo "ERROR: No host C compiler found :("
 			exit 1
@@ -131,7 +131,7 @@ if [ "$HOST_CXX" == "" ]; then
 		export HOST_CXX="$CXX";
 	else
 		export HOST_CXX="`xwhich g++ 2>/dev/null`"
-		
+
 		if [ "$HOST_CXX" == "" ]; then
 			echo "ERROR: No host C++ compiler found :("
 			exit 1
@@ -173,19 +173,19 @@ if [ "$KERNEL" == "SunOS" ]; then
 			echo "ERROR: Missing package developer/gcc-48"
 			exit 1
 		fi
-		
+
 		pkg list system/header &>/dev/null
 		if [ "$?" == "1" ]; then
 			echo "ERROR: Missing package system/header"
 			exit 1
 		fi
-		
+
 		pkg list library/sdl &> /dev/null
 		if [ "$?" == "1" ]; then
 			echo "ERROR: Missing package library/sdl"
 			exit 1
 		fi
-		
+
 		LDFLAGS="$LDFLAGS -lxnet -lSDL"
 	fi
 elif [ "$KERNEL" == "Linux" ]; then
@@ -196,12 +196,12 @@ elif [ "$KERNEL" == "Linux" ]; then
 		PKG_SDL="`pkg-config --libs sdl SDL_ttf 2>/dev/null`"
 		CXXFLAGS="$CXXFLAGS $(pkg-config --cflags sdl SDL_ttf)"
 	fi
-	
+
 	if [ "$PKG_SDL" == "" ]; then
 		echo "ERROR: Cannot find SDL and/or SDL_ttf!"
 		exit 1
 	fi
-	
+
 	LDFLAGS="$LDFLAGS $PKG_SDL"
 elif [ "$KERNEL" == "Darwin" ]; then
 	# TODO: Add support for SDL_ttf
@@ -253,11 +253,12 @@ echo "Libraries:             $LDFLAGS"
 echo ""
 
 # ================================================
-# Build stuff
+# Build HXEmu
 # ================================================
-./hxemu/compile
-if [ "$?" != "0" ]; then exit 1; fi
+./hxemu/compile || exit 1
 
-./data/compile
-if [ "$?" != "0" ]; then exit 1; fi
+# ================================================
+# Build and install data files
+# ================================================
+./data/compile || exit 1
 

@@ -19,9 +19,13 @@ uint8_t CExpansion::read(uint16_t addr) {
 	else return memory->read(addr);
 }
 
-void CExpansion::write(uint16_t addr, uint8_t data) {
-	if (expdevice != NULL) expdevice->write(addr, data, memory);
-	else memory->write(addr, data);
+bool CExpansion::write(uint16_t addr, uint8_t data) {
+	if (expdevice != NULL) {
+		return expdevice->write(addr, data, memory);
+	}
+	else {
+		return memory->write(addr, data);
+	}
 }
 
 void CExpansion::attach_device(CExpansionDevice *dev) {

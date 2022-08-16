@@ -15,24 +15,25 @@ class CMemoryBus: public CMemoryDevice {
 	public:
 		CMemoryBus();
 		virtual ~CMemoryBus();
-		
+
 		uint8_t read(uint16_t addr);
-		void    write(uint16_t addr, uint8_t data);
-		
-		void    add(CMemoryDevice *dev, uint16_t start, uint16_t size);
-		
-		void    set_fallback(CMemoryDevice *dev);
-		
+		bool write(uint16_t addr, uint8_t data);
+
+		void add(CMemoryDevice *dev, uint16_t start, uint16_t size, const char *name);
+
+		void set_fallback(CMemoryDevice *dev);
+
 	private:
 		class CMemoryBusEntry {
 			public:
 				CMemoryDevice *p_device;
 				uint16_t i_start;
 				uint16_t i_size;
+				char *name;
 		};
-		
+
 		CMemoryDevice *p_fallback;
-		
+
 		std::vector<CMemoryBusEntry*> *entries;
 };
 

@@ -19,7 +19,7 @@ class CIOController: public CMemoryDevice {
 		void    reset();
 
 		uint8_t read(uint16_t addr);
-		void    write(uint16_t addr, uint8_t data);
+		bool    write(uint16_t addr, uint8_t data);
 
 		void    set_lcd_controller(uint8_t n, CLCDController *c);
 

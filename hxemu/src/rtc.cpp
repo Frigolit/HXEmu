@@ -47,7 +47,7 @@ uint8_t CRTC::read(uint16_t addr) {
 	}
 }
 
-void CRTC::write(uint16_t addr, uint8_t data) {
+bool CRTC::write(uint16_t addr, uint8_t data) {
 	if (addr > 63) {
 		printf("Assertion failed: addr < 64 in CRTC::read()\n");
 		exit(1);
@@ -59,5 +59,7 @@ void CRTC::write(uint16_t addr, uint8_t data) {
 		#endif
 		ram[addr - 0x0E] = data;
 	}
+
+	return true;
 }
 

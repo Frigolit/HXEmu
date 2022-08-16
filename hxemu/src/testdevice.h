@@ -10,13 +10,13 @@ class CTestDevice : public CExpansionDevice {
 		~CTestDevice();
 
 		uint8_t read(uint16_t addr, CMemoryDevice *mem);
-		void    write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
+		bool write(uint16_t addr, uint8_t data, CMemoryDevice *mem);
 
 	private:
-		int     state;
-		int     test_no;
+		int state;
+		int test_no;
 
-		CROM    *rom;
+		CROM *rom;
 		uint8_t *dynrom;
 };
 

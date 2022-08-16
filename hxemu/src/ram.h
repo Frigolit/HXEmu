@@ -9,18 +9,19 @@
 #include <stdint.h>
 
 #include "memorydevice.h"
+#include "stateful.h"
 
-class CRAM : public CMemoryDevice {
+class CRAM : public CMemoryDevice, public CStateful {
 	public:
 		CRAM(uint16_t size);
 		virtual ~CRAM();
-		
+
 		uint8_t read(uint16_t addr);
-		void    write(uint16_t addr, uint8_t data);
-		
+		bool write(uint16_t addr, uint8_t data);
+
 	private:
 		uint16_t size;
-		uint8_t  *ram;
+		uint8_t *ram;
 };
 
 #endif

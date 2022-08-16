@@ -35,32 +35,32 @@ CHX20::CHX20() {
 
 	// Link serial endpoints
 	mcu_master->serial0->set_endpoint(mcu_slave->serial0);
-	
+
 	// Initialize keyboard
 	keyboard_pressed = 0;
 	keyboard_repeat = 0;
-	
+
 	// Initialize RTC
 	rtc = new CRTC();
-	
+
 	// Initialize RAM
 	ram0 = new CRAM(16128);
 	ram1 = new CRAM(128);
-	
+
 	// Initialize I/O select
 	ioctl = new CIOController();
-	
+
 	// Initialize ROMs
 	for (int i = 0; i < 4; i++) {
 		roms[i] = new CROM(8192);
 	}
 	optionrom = new CROM(8192);
-	
+
 	#ifdef REALSLAVE
 		mcu_slave->maskrom = new CROM(4096);
-		mcu_slave->maskrom->load_from_file((char *)"data/roms/test/slave.bin");
+		mcu_slave->maskrom->load_from_file((char *)"data/roms/firmware/v1.1-swe/secondary.bin");
 	#endif
-	
+
 	// Initialize LCD and controllers
 	lcd = new CLCD();
 	for (int i = 0; i < 6; i++) {
@@ -69,24 +69,24 @@ CHX20::CHX20() {
 	}
 
 	// Add master MCU memory devices
-	membus->add(ioctl,     0x0020, 32);
-	membus->add(rtc,       0x0040, 64);
-	membus->add(ram1,      0x0080, 128);
-	membus->add(ram0,      0x0100, 16128);
+	membus->add(ioctl, 0x0020, 32, "I/O Controller");
+	membus->add(rtc, 0x0040, 64, "RTC");
+	membus->add(ram1, 0x0080, 128, "RAM 1");
+	membus->add(ram0, 0x0100, 16128, "RAM 0");
 
-	membus->add(optionrom, 0x6000, 8192);
-	membus->add(roms[3],   0x8000, 8192);
-	membus->add(roms[2],   0xA000, 8192);
-	membus->add(roms[1],   0xC000, 8192);
-	membus->add(roms[0],   0xE000, 8192);
+	membus->add(optionrom, 0x6000, 8192, "Option ROM");
+	membus->add(roms[3], 0x8000, 8192, "ROM 3");
+	membus->add(roms[2], 0xA000, 8192, "ROM 2");
+	membus->add(roms[1], 0xC000, 8192, "ROM 1");
+	membus->add(roms[0], 0xE000, 8192, "ROM 0");
 
 	// Attach hardware to I/O controller
 	for (int i = 0; i < 6; i++) {
 		ioctl->set_lcd_controller(i, lcd_ctls[i]);
 	}
-	
+
 	// Checksum ROMs
-	
+
 	#ifdef REALSLAVE
 		CHash *hash = new CHash();
 		uint8_t buf[4096];
@@ -98,7 +98,7 @@ CHX20::CHX20() {
 		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
 		delete hash;
 	#endif
-	
+
 	printf("Master CPU reset vector is 0x%02X%02X\n", membus->read(0xFFFE), membus->read(0xFFFF));
 	#ifdef REALSLAVE
 		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
@@ -142,13 +142,23 @@ void CHX20::load_option_rom(char *path) {
 }
 
 void CHX20::keyboard_down(uint8_t c) {
+	if (ioctl->keyboard_map[c]) {
+		return;
+	}
+
 	keyboard_pressed++;
 	ioctl->keyboard_map[c] = 1;
+	printf("CHX20:keyboard_down(): Key pressed: %d\n", c);
 }
 
 void CHX20::keyboard_up(uint8_t c) {
+	if (!ioctl->keyboard_map[c]) {
+		return;
+	}
+
 	keyboard_pressed--;
 	ioctl->keyboard_map[c] = 0;
+	printf("CHX20:keyboard_up(): Key depressed: %d\n", c);
 }
 
 CHX20::~CHX20() {
@@ -163,11 +173,16 @@ CHX20::~CHX20() {
 	delete(ram1);
 
 	CExpansionDevice *e = expansion->detach_device();
-	if (e != NULL) delete(e);
+	if (e != NULL) {
+		delete(e);
+	}
 
 	delete(expansion);
 
-	for (int i = 0; i < 4; i++) delete(roms[i]);
+	for (int i = 0; i < 4; i++) {
+		delete(roms[i]);
+	}
+
 	delete(optionrom);
 
 	for (int i = 0; i < 6; i++) {
@@ -185,7 +200,7 @@ void CHX20::reset() {
 	mcu_master->reset();
 	mcu_slave->reset();
 	ioctl->reset();
-	
+
 	// Set operating mode for CPUs
 	mcu_master->set_port2(0x80);
 	#ifdef REALSLAVE
@@ -197,7 +212,7 @@ void CHX20::think() {
 	bool irq_power = false;
 	bool irq_keyboard = keyboard_pressed > 0 && (ioctl->r_9g & 0x10);
 	mcu_master->b_irq1 = irq_keyboard | irq_power;
-	
+
 	/*
 	=== Port 1 ===
 	P10    In     Data Set Ready (DSR)
@@ -208,9 +223,9 @@ void CHX20::think() {
 	P15    In     Keyboard input interrupt (active low)
 	P16    In     Peripheral status (Serial option, low = on)
 	P17    In     Cartridge option flag (low = ROM, high = microcassette)
-	
+
 	Note: P13-15 means that the specified interrupt has triggered
-	
+
 	=== Port 2 ===
 	P20    In     Barcode data
 	P21    Out    Wired to CN2.2 (TXD)
@@ -220,10 +235,10 @@ void CHX20::think() {
 	P25    [In]	  Mode selection bit 0
 	P26    [In]	  Mode selection bit 1
 	P27    [In]	  Mode selection bit 2
-	
+
 	Note: P25-27 cannot be changed to outputs.
 	*/
-	
+
 	bool b_rs232_dsr = false;
 	bool b_rs232_cts = false;
 	bool b_irq_ext = true;
@@ -231,9 +246,9 @@ void CHX20::think() {
 	bool b_irq_keyb = !irq_keyboard;
 	bool b_opt_active = true;
 	bool b_opt_type = false;
-	
+
 	mcu_master->set_port1((b_opt_type << 7) | (b_opt_active << 6) | (b_irq_keyb << 5) | (b_irq_pwr << 4) | (b_irq_ext << 3) | (b_rs232_cts << 1) | b_rs232_dsr);
-	
+
 	mcu_master->step();
 	mcu_slave->step();
 }

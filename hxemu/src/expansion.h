@@ -15,7 +15,7 @@ class CExpansion : public CMemoryDevice {
 		virtual ~CExpansion();
 
 		virtual uint8_t read(uint16_t addr);
-		virtual void write(uint16_t addr, uint8_t data);
+		virtual bool write(uint16_t addr, uint8_t data);
 
 		void attach_device(CExpansionDevice *dev);
 		CExpansionDevice * detach_device();
