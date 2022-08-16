@@ -3,24 +3,24 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __FAKESLAVE_H__
-#define __FAKESLAVE_H__
+#ifndef __FAKESECONDARY_H__
+#define __FAKESECONDARY_H__
 
 #include <stdint.h>
 
 #include "virtualserial.h"
 
-class FakeSlave {
+class FakeSecondary {
 	public:
-		FakeSlave();
-		~FakeSlave();
-		
+		FakeSecondary();
+		~FakeSecondary();
+
 		void reset();
 		void step();
-		
+
 		VirtualSerial *serial0;
 		VirtualSerial *serial1;
-		
+
 	private:
 		int state;
 };

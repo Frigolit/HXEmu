@@ -25,16 +25,16 @@ CHX20::CHX20() {
 
 	// Initialize CPUs
 	mcu_master = new C6301();
-	#ifdef REALSLAVE
-		mcu_slave = new C6301();
+	#ifdef REALSECONDARY
+		mcu_secondary = new C6301();
 	#else
-		mcu_slave = new FakeSlave();
+		mcu_secondary = new FakeSecondary();
 	#endif
 
 	mcu_master->membus = (CMemoryDevice *)expansion;
 
 	// Link serial endpoints
-	mcu_master->serial0->set_endpoint(mcu_slave->serial0);
+	mcu_master->serial0->set_endpoint(mcu_secondary->serial0);
 
 	// Initialize keyboard
 	keyboard_pressed = 0;
@@ -56,9 +56,9 @@ CHX20::CHX20() {
 	}
 	optionrom = new CROM(8192);
 
-	#ifdef REALSLAVE
-		mcu_slave->maskrom = new CROM(4096);
-		mcu_slave->maskrom->load_from_file((char *)"data/roms/firmware/v1.1-swe/secondary.bin");
+	#ifdef REALSECONDARY
+		mcu_secondary->maskrom = new CROM(4096);
+		mcu_secondary->maskrom->load_from_file((char *)"data/roms/firmware/v1.1-swe/secondary.bin");
 	#endif
 
 	// Initialize LCD and controllers
@@ -87,12 +87,12 @@ CHX20::CHX20() {
 
 	// Checksum ROMs
 
-	#ifdef REALSLAVE
+	#ifdef REALSECONDARY
 		CHash *hash = new CHash();
 		uint8_t buf[4096];
 
 		for (int n = 0; n < 4096; n++) {
-			buf[n] = mcu_slave->maskrom->read(n);
+			buf[n] = mcu_secondary->maskrom->read(n);
 		}
 
 		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
@@ -100,8 +100,8 @@ CHX20::CHX20() {
 	#endif
 
 	printf("Master CPU reset vector is 0x%02X%02X\n", membus->read(0xFFFE), membus->read(0xFFFF));
-	#ifdef REALSLAVE
-		printf("Slave CPU reset vector is 0x%02X%02X\n", mcu_slave->maskrom->read(0x0FFE), mcu_slave->maskrom->read(0x0FFF));
+	#ifdef REALSECONDARY
+		printf("Secondary CPU reset vector is 0x%02X%02X\n", mcu_secondary->maskrom->read(0x0FFE), mcu_secondary->maskrom->read(0x0FFF));
 	#endif
 
 	// Reset
@@ -163,7 +163,7 @@ void CHX20::keyboard_up(uint8_t c) {
 
 CHX20::~CHX20() {
 	delete(mcu_master);
-	delete(mcu_slave);
+	delete(mcu_secondary);
 
 	delete(rtc);
 	delete(lcd);
@@ -198,13 +198,13 @@ void CHX20::poweroff() {
 
 void CHX20::reset() {
 	mcu_master->reset();
-	mcu_slave->reset();
+	mcu_secondary->reset();
 	ioctl->reset();
 
 	// Set operating mode for CPUs
 	mcu_master->set_port2(0x80);
-	#ifdef REALSLAVE
-		mcu_slave->set_port2(0xF0);
+	#ifdef REALSECONDARY
+		mcu_secondary->set_port2(0xF0);
 	#endif
 }
 
@@ -217,7 +217,7 @@ void CHX20::think() {
 	=== Port 1 ===
 	P10    In     Data Set Ready (DSR)
 	P11    In     Clear To Send (CTS)
-	P12    Out    Slave CPU R/W control
+	P12    Out    Secondary CPU R/W control
 	P13    In     External port interrupt (active low)
 	P14    In     Power abnormal interrupt (active low)
 	P15    In     Keyboard input interrupt (active low)
@@ -229,7 +229,7 @@ void CHX20::think() {
 	=== Port 2 ===
 	P20    In     Barcode data
 	P21    Out    Wired to CN2.2 (TXD)
-	P22	   Out    Serial channel selection (4D, 0 = Slave CPU, 1 = Serial Port)
+	P22	   Out    Serial channel selection (4D, 0 = Secondary CPU, 1 = Serial Port)
 	P23    In     Serial receive (4D)
 	P24    Out    Serial transmit (4D)
 	P25    [In]	  Mode selection bit 0
@@ -250,7 +250,7 @@ void CHX20::think() {
 	mcu_master->set_port1((b_opt_type << 7) | (b_opt_active << 6) | (b_irq_keyb << 5) | (b_irq_pwr << 4) | (b_irq_ext << 3) | (b_rs232_cts << 1) | b_rs232_dsr);
 
 	mcu_master->step();
-	mcu_slave->step();
+	mcu_secondary->step();
 }
 
 void CHX20::draw(SDL_Surface *dest, int x, int y) {

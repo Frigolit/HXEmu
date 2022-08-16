@@ -12,7 +12,7 @@
 #include "rtc.h"
 #include "lcd.h"
 #include "lcdcontroller.h"
-#include "fakeslave.h"
+#include "fakesecondary.h"
 #include "iocontroller.h"
 #include "controls.h"
 #include "expansion.h"
@@ -39,13 +39,13 @@ class CHX20 {
 		void keyboard_up(uint8_t c);
 
 	private:
-		uint8_t  keyboard_pressed;
+		uint8_t keyboard_pressed;
 		uint16_t keyboard_repeat;
 
-		#ifdef REALSLAVE
-			C6301     *mcu_slave;
+		#ifdef REALSECONDARY
+			C6301 *mcu_secondary;
 		#else
-			FakeSlave *mcu_slave;
+			FakeSecondary *mcu_secondary;
 		#endif
 
 		CLCD *lcd;
