@@ -14,18 +14,15 @@
 #include "lcdcontroller.h"
 #include "fakesecondary.h"
 #include "iocontroller.h"
-#include "controls.h"
 #include "expansion.h"
-
-class CControls;
 
 class CHX20 {
 	public:
 		CHX20();
 		~CHX20();
 
-		CControls *controls;
 		C6301 *mcu_master;	// FIXME: This isn't supposed to be public
+		CLCD *lcd;
 
 		void think();
 		void poweroff();
@@ -48,7 +45,6 @@ class CHX20 {
 			FakeSecondary *mcu_secondary;
 		#endif
 
-		CLCD *lcd;
 		CLCDController *lcd_ctls[6];
 
 		CRTC *rtc;

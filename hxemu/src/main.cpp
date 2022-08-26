@@ -19,9 +19,10 @@ using namespace std;
 #include "hx20.h"
 #include "fonts.h"
 
-#include "ui.h"
+#include "ui/hx20_interface.h"
 
 CHX20 *hx20_machine;
+CHX20InterfaceWidget *hx20_interface;
 SDL_Thread *hx20_thread;
 
 SDL_Window *sdl_window;
@@ -76,6 +77,8 @@ int main(int argc, char **argv) {
 		hx20_machine->load_option_rom(optionrompath);
 	}
 
+	hx20_interface = new CHX20InterfaceWidget(hx20_machine, 0, 0);
+
 	hx20_thread = SDL_CreateThread(hx20_run, "", hx20_machine);
 
 	// Bind process termination handler
@@ -84,7 +87,7 @@ int main(int argc, char **argv) {
 	// Main loop
 	SDL_Event event;
 	while (1) {
-		hx20_machine->draw(screen, 0, 0);
+		hx20_interface->draw(screen);
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -185,25 +188,11 @@ int main(int argc, char **argv) {
 					break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					{
-						int mx = event.button.x;
-						int my = event.button.y;
-
-						if (mx >= 480) {
-							hx20_machine->controls->mousedown(mx - 480, my % 128);
-						}
-					}
+					hx20_interface->mousedown(event.button.x, event.button.y);
 					break;
 
 				case SDL_MOUSEBUTTONUP:
-					{
-						int mx = event.button.x;
-						int my = event.button.y;
-
-						if (mx >= 480) {
-							hx20_machine->controls->mouseup(mx - 480, my % 128);
-						}
-					}
+					hx20_interface->mouseup(event.button.x, event.button.y);
 					break;
 
 				case SDL_QUIT:
@@ -248,15 +237,20 @@ void sdl_init() {
 	char s_wintitle[256];
 	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
 
-	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 480 + 256, 128, 0);
+	int ui_width = 480 + 256 + 256;
+	int ui_height = 128 + 400;
+
+	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ui_width, ui_height, 0);
 	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	screen = SDL_CreateRGBSurface(SDL_RLEACCEL, 480 + 256, 128, 32, 0, 0, 0, 0);
+	screen = SDL_CreateRGBSurface(SDL_RLEACCEL, ui_width, ui_height, 32, 0, 0, 0, 0);
 
 	if (screen == NULL) {
 		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
+
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0xAA, 0xAA, 0xAA));
 }
 
 void shutdown() {

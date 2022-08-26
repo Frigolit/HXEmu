@@ -15,9 +15,6 @@
 #include "testdevice.h"
 
 CHX20::CHX20() {
-	// Create controls
-	controls = new CControls(this);
-
 	// Initialize memory bus
 	membus = new CMemoryBus();
 	expansion = new CExpansion(membus);
@@ -251,10 +248,5 @@ void CHX20::think() {
 
 	mcu_master->step();
 	mcu_secondary->step();
-}
-
-void CHX20::draw(SDL_Surface *dest, int x, int y) {
-	lcd->draw(dest, x, y);
-	controls->render(dest, x + 480, y);
 }
 

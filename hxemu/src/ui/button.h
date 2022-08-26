@@ -1,5 +1,5 @@
-#ifndef __BUTTON_H__
-#define __BUTTON_H__
+#ifndef __UI_BUTTON_H__
+#define __UI_BUTTON_H__
 
 #include "widget.h"
 #include <functional>

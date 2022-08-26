@@ -1,5 +1,5 @@
-#ifndef __WIDGET_H__
-#define __WIDGET_H__
+#ifndef __UI_WIDGET_H__
+#define __UI_WIDGET_H__
 
 #include <SDL2/SDL.h>
 
