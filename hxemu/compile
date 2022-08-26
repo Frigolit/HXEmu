@@ -1,34 +1,38 @@
 #!/bin/bash
 
-BUILDPATH="$BUILDROOT/work/hxemu"
-if [ ! -d "$BUILDPATH" ]; then mkdir $BUILDPATH; fi
+BUILDPATH="${BUILDROOT}/work/hxemu"
+if [ ! -d "${BUILDPATH}" ]; then mkdir ${BUILDPATH}; fi
 
+REBUILD_ALL="no"
 NEEDS_LINKING="no"
+
+# Check header files
+for i in `ls hxemu/src/*.h hxemu/src/ui/*.h`; do
+	if [ "${BUILDPATH}/${HXEMUFILENAME}" -ot "${i}" ]; then
+		REBUILD_ALL="yes"
+	fi
+done
 
 # Compile
 for i in `ls hxemu/src/*.cpp hxemu/src/ui/*.cpp`; do
 	SRCFILE="`basename ${i}`"
-	
-	if [ "$BUILDPATH/${SRCFILE}.o" -ot "${i}" ]; then
-		echo "$CXX $CXXFLAGS -c -o $BUILDPATH/${SRCFILE}.o ${i}"
-		$CXX $CXXFLAGS -c -o $BUILDPATH/${SRCFILE}.o ${i}
-		
-		if [ "$?" != "0" ]; then exit 1; fi
+
+	if [ "${REBUILD_ALL}" == "yes" ] || [ "${BUILDPATH}/${SRCFILE}.o" -ot "${i}" ]; then
+		echo "${CXX} ${CXXFLAGS} -c -o ${BUILDPATH}/${SRCFILE}.o ${i}"
+		${CXX} ${CXXFLAGS} -c -o ${BUILDPATH}/${SRCFILE}.o ${i} || exit 1
 	fi
-	
-	if [ "$BUILDPATH/$HXEMUFILENAME" -ot "${i}" ]; then
-		rm -f $BUILDPATH/$HXEMUFILENAME
+
+	if [ "${BUILDPATH}/${HXEMUFILENAME}" -ot "${BUILDPATH}/${SRCFILE}.o" ]; then
+		NEEDS_LINKING="yes"
 	fi
 done
 
 # Link
-if [ ! -e "$BUILDPATH/$HXEMUFILENAME" ]; then
-	echo "$CXX $LDFLAGS -o $BUILDPATH/$HXEMUFILENAME $BUILDPATH/*.o $POSTLDFLAGS"
-	$CXX $LDFLAGS -o $BUILDPATH/$HXEMUFILENAME $BUILDPATH/*.o $POSTLDFLAGS
-	
-	if [ "$?" != "0" ]; then exit 1; fi
-	
-	echo "cp $BUILDPATH/$HXEMUFILENAME $BUILDROOT/release/"
-	cp $BUILDPATH/$HXEMUFILENAME $BUILDROOT/release/
+if [ ! -e "${BUILDPATH}/${HXEMUFILENAME}" ] || [ "${NEEDS_LINKING}" == "yes" ]; then
+	echo "${CXX} ${LDFLAGS} -o ${BUILDPATH}/${HXEMUFILENAME} ${BUILDPATH}/*.o ${POSTLDFLAGS}"
+	${CXX} ${LDFLAGS} -o ${BUILDPATH}/${HXEMUFILENAME} ${BUILDPATH}/*.o ${POSTLDFLAGS} || exit 1
+
+	echo "cp ${BUILDPATH}/${HXEMUFILENAME} ${BUILDROOT}/release/"
+	cp ${BUILDPATH}/${HXEMUFILENAME} ${BUILDROOT}/release/
 fi
 
