@@ -62,6 +62,7 @@ bool CMemoryBus::write(uint16_t addr, uint8_t data) {
 		if (addr >= e->i_start && addr < e->i_start + e->i_size) {
 			if (!e->p_device->write(addr - e->i_start, data)) {
 				fprintf(stderr, "CMemoryBus::write(0x%04X [%s], %d): warning: write failed\n", addr, (e->name != NULL ? e->name : "n/a"), data);
+				return false;
 			}
 
 			return true;
