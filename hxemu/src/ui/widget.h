@@ -1,7 +1,7 @@
 #ifndef __WIDGET_H__
 #define __WIDGET_H__
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 class CWidget {
 	public:

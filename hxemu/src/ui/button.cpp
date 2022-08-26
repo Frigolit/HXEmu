@@ -30,6 +30,8 @@ bool CButton::update() {
 	text_fg.r = text_fg.g = text_fg.b = 0;
 	text_bg.r = text_bg.g = text_bg.b = 0xC9;
 
+	text_fg.a = text_bg.a = 255;
+
 	uint32_t c0 = SDL_MapRGB(surface->format, 0xDD, 0xDD, 0xDD);
 	uint32_t c1 = SDL_MapRGB(surface->format, 0xC9, 0xC9, 0xC9);
 	uint32_t c2 = SDL_MapRGB(surface->format, 0xB3, 0xB3, 0xB3);
@@ -57,6 +59,7 @@ bool CButton::update() {
 	rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0));
 
 	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+	SDL_FreeSurface(surf_text);
 
 	updated = true;
 	return true;

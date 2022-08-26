@@ -9,8 +9,9 @@ using namespace std;
 
 #include <stdio.h>
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_timer.h>
 
 #include "hash.h"
 #include "config.h"
@@ -20,10 +21,12 @@ using namespace std;
 
 #include "ui.h"
 
-SDL_Surface *screen;
-
 CHX20 *hx20_machine;
 SDL_Thread *hx20_thread;
+
+SDL_Window *sdl_window;
+SDL_Renderer *sdl_renderer;
+SDL_Surface *screen;
 
 void sdl_init();
 int hx20_run(void *data);
@@ -73,7 +76,7 @@ int main(int argc, char **argv) {
 		hx20_machine->load_option_rom(optionrompath);
 	}
 
-	hx20_thread = SDL_CreateThread(hx20_run, hx20_machine);
+	hx20_thread = SDL_CreateThread(hx20_run, "", hx20_machine);
 
 	// Bind process termination handler
 	atexit(shutdown);
@@ -212,8 +215,14 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		// Flip and wait
-		SDL_Flip(screen);
+		// Render
+		SDL_RenderClear(sdl_renderer);
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
+		SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
+		SDL_RenderPresent(sdl_renderer);
+		SDL_DestroyTexture(texture);
+
+		// Wait a little bit (TODO: improve me)
 		SDL_Delay(10);
 	}
 
@@ -221,7 +230,7 @@ int main(int argc, char **argv) {
 }
 
 void sdl_init() {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -236,21 +245,23 @@ void sdl_init() {
 	}
 
 	// Create window
-	screen = SDL_SetVideoMode(480 + 256, 128, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
-	if (!screen) {
+	char s_wintitle[256];
+	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
+
+	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 480 + 256, 128, 0);
+	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+	screen = SDL_CreateRGBSurface(SDL_RLEACCEL, 480 + 256, 128, 32, 0, 0, 0, 0);
+
+	if (screen == NULL) {
 		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
-
-	// Set window title
-	char buf[256];
-	sprintf(buf, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
-	SDL_WM_SetCaption(buf, "");
 }
 
 void shutdown() {
-	SDL_KillThread(hx20_thread);
-	delete(hx20_machine);
+	//SDL_KillThread(hx20_thread);
+	//delete(hx20_machine);
 
 	fonts_quit();
 	TTF_Quit();
