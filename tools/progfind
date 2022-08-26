@@ -1,0 +1,95 @@
+#!/usr/bin/env pike
+
+int main(int argc, array argv) {
+	array files = Getopt.get_args(argv)[1..];
+	
+	if (!sizeof(files)) {
+		werror("Usage: %s [optinos] <rom file> [rom file]  [...]\n");
+		return 1;
+	}
+	
+	foreach (files, string fn) {
+		multiset(int) address_blocks = (< >);
+		
+		int base_address = 0;
+		
+		Stdio.File f = Stdio.File(fn, "r");
+		int f_size = f->stat()->size;
+		
+		write("=== %s (%s) ===\n", fn, nicesize(f_size));
+		
+		while (f->tell() < f_size) {
+			address_blocks[f->tell()] = 1;
+			
+			int a = f->read(1)[0];
+			
+			if ((a & 0x7F) != ':') {
+				f->seek((f->tell() / 8192) * 8192 + 8192);
+				continue;
+			}
+			
+			int b_hide_next = (a & 0x80) >> 7;
+			
+			int i_type;
+			int i_next_header;
+			int i_entrypoint;
+			string s_filename;
+			
+			sscanf(f->read(22), "%c%2c%2c%17s", i_type, i_next_header, i_entrypoint, s_filename);
+			
+			int i_entrypoint_relative = (i_type & 0x80) >> 7;
+			i_type &= 0x7F;
+			
+			// Base address auto-detection - Could potentially fail horribly with some headers, but it's better than nothing :)
+			if (!base_address && !i_entrypoint_relative) {
+				base_address = (i_entrypoint / 8192) * 8192;
+			}
+			
+			// Clean up filename a bit
+			s_filename = String.trim_all_whites((s_filename / "\0")[0]);
+			
+			// Print program information
+			write("[%s] Type: ", s_filename);
+			if (i_type == 'A') write("Application");
+			else if (i_type == 'B') write("BASIC interpreter");
+			else if (i_type == 'E') write("End of link");
+			else write("Unknown (%02X)", i_type);
+			
+			if (i_next_header != 0xFFFF) write(" - Next header: 0x%04X", i_next_header);
+			
+			if (i_entrypoint_relative) write(" - Entrypoint: +%dB", i_entrypoint);
+			else write(" - Entrypoint: 0x%04X", i_entrypoint);
+			
+			write("\n");
+			
+			// Go to next header or 8KiB block
+			if (!base_address || i_next_header == 0xFFFF || i_type == 'E') {
+				// Skip to next 8KiB block
+				f->seek((f->tell() / 8192) * 8192 + 8192);
+			}
+			else {
+				// We know the ROM's location in memory, go to next header (note: untested)
+				int a = i_next_header - base_address;
+				if (a < 0 || a > f_size) {
+					write("Warning: Next header outside file range\n");
+					break;
+				}
+				
+				if (address_blocks[a]) {
+					// Anti-infinite-loop
+					write("Warning: Infinite header link loop detected!\n");
+					break;
+				}
+				
+				f->seek(a);
+			}
+		}
+	}
+}
+
+string nicesize(int s) {
+	if (s >= 1024 * 1000) return sprintf("%.1fMiB", s / 1024.0 / 1024.0);
+	else if (s >= 1000) return sprintf("%.1fKiB", s / 1024.0);
+	else return s + "B";
+}
+

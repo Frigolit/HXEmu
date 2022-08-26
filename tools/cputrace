@@ -1,0 +1,457 @@
+#!/usr/bin/env pike
+
+string output_mode = "text";
+
+string datapath;
+string rompath;
+string romdata;
+
+mapping(int:mapping) opcodes = ([ ]);
+array areas = ({ });
+
+int main(int argc, array argv) {
+	datapath = combine_path(getcwd(), "data");
+
+	// Process command-line arguments
+	if (Getopt.find_option(argv, "h", "help")) {
+		print_usage();
+		return 0;
+	}
+
+	if (Getopt.find_option(argv, "", "html")) output_mode = "html";
+
+	datapath = Getopt.find_option(argv, "d", "datapath", UNDEFINED, "data");
+	rompath  = Getopt.find_option(argv, "r", "rompath", UNDEFINED, combine_path(datapath, "roms/test"));
+
+	// Get tracefile
+	array a = Getopt.get_args(argv)[1..];
+	if (!sizeof(a)) {
+		print_usage();
+		return 1;
+	}
+
+	string tracefile = a[0];
+
+	// Load data
+	load_addresses();
+	load_opcodes();
+	load_roms();
+
+	// Write headers for specific modes
+	if (output_mode == "html") {
+		write("<!DOCTYPE html>\n");
+		write("<html lang=\"en\">\n");
+			write("<head>\n");
+				write("<title>HXEmu CPU trace - " + htmlents(tracefile) + "</title>\n");
+				write("<meta charset=\"utf-8\"/>\n");
+				write("<link rel='stylesheet' href='https://static.frigolit.net/css/hxemu-cputrace.css'/>\n");
+			write("</head>\n");
+			write("<body>\n");
+				write("<h1>HXEmu CPU trace</h1>");
+				write("Source file: " + htmlents(tracefile) + "<br/>");
+				write("<br/>");
+
+				write("<table id='tbl_trace'>");
+					write("<thead>");
+						write("<tr>");
+							write("<th colspan='2'>PC</th>");
+							write("<th>A</th>");
+							write("<th>B</th>");
+							write("<th>X</th>");
+							write("<th>SP</th>");
+							write("<th colspan='6'>CCR</th>");
+							write("<th colspan='2'>Opcode</th>");
+							write("<th>Operation</th>");
+						write("</tr>");
+					write("</thead>");
+					write("<tbody>");
+	}
+
+	// Process trace
+	array d = Stdio.read_file(tracefile) / "\n";
+	foreach (d, string n) {
+		n = String.trim_all_whites(n);
+		if (n == "") continue;
+
+		array e = (n / " ")[*] / "=";
+		mapping x = ([ ]);
+
+		foreach (e, array f) {
+			x[f[0]] = f[1];
+		}
+
+		process(([
+			"r_a":  String.hex2string(x->A)[0],
+			"r_b":  String.hex2string(x->B)[0],
+			"r_pc": array_sscanf(String.hex2string(x->PC), "%2c")[0],
+			"r_sp": array_sscanf(String.hex2string(x->SP), "%2c")[0],
+			"r_x":  array_sscanf(String.hex2string(x->X), "%2c")[0],
+
+			"ccr": x->CCR,
+			"ccr_h": x->CCR[0] == 'H',
+			"ccr_i": x->CCR[1] == 'I',
+			"ccr_n": x->CCR[2] == 'N',
+			"ccr_z": x->CCR[3] == 'Z',
+			"ccr_v": x->CCR[4] == 'V',
+			"ccr_c": x->CCR[5] == 'C',
+
+			"op": String.hex2string(x->OP)[0],
+		]));
+	}
+
+	// Write trailer for specific modes
+	if (output_mode == "html") {
+					write("</tbody>");
+				write("</table>");
+			write("</body>");
+		write("</html>");
+	}
+
+	return 0;
+}
+
+void print_usage() {
+	//     ................................................................................
+	write("-h|--help          Displays this help screen.\n");
+	write("-r|--roms <n>      Specifies the path to the ROMs.\n");
+	write("   --html          Outputs HTML.\n");
+}
+
+void load_roms() {
+	if (!Stdio.is_file(combine_path(rompath, "rom0.bin"))) return;
+
+	romdata = "\xFF" * 0x8000;
+	romdata += Stdio.read_file(combine_path(rompath, "rom3.bin"));
+	romdata += Stdio.read_file(combine_path(rompath, "rom2.bin"));
+	romdata += Stdio.read_file(combine_path(rompath, "rom1.bin"));
+	romdata += Stdio.read_file(combine_path(rompath, "rom0.bin"));
+
+	if (sizeof(romdata) != 65536) {
+		werror("ERROR: ROM data != 32KiB\n");
+		return;
+	}
+}
+
+void load_addresses() {
+	string f = Stdio.read_file(combine_path(datapath, "addresses.txt"));
+	if (!f) {
+		werror("ERROR: Couldn't load addresses from %s\n", combine_path(datapath, "addresses.txt"));
+		return;
+	}
+
+	/*
+	# Syntax:
+	#     <start>;<end>;<section>;<name>;<abbr>;<type>;<id>
+	#     start     = Starting address
+	#     end       = Ending address
+	#     section   = Section name
+	#     name      = Name/Summary
+	#     abbr      = Abbreviation (taken from HX-20 documentation)
+	#     type      = v (variable)
+	#                 f (function/subroutine)
+	#                 a (address vector)
+	#                 r (register)
+	#                 i (I/O)
+	#     id        = ID used for unique identification
+	*/
+
+	array a = f / "\n";
+	foreach (a, string b) {
+		b = String.trim_all_whites((b / "#")[0]);
+		if (!glob("*;*;*;*;*;*;*", b)) continue;
+
+		/*
+			0 = start address
+			1 = end address
+			2 = section name
+			3 = name
+			4 = abbreviation
+			5 = type
+			6 = id
+		*/
+		array c = b / ";";
+
+		areas += ({
+			([
+				"start": array_sscanf(String.hex2string(c[0]), "%2c")[0],
+				"end": array_sscanf(String.hex2string(c[1]), "%2c")[0],
+				"section": c[2],
+				"name": c[3],
+			])
+		});
+	}
+}
+
+void load_opcodes() {
+	opcodes[0x0A] = ([ "abbr": "CLV" ]);
+	opcodes[0x0B] = ([ "abbr": "SEV" ]);
+	opcodes[0x0C] = ([ "abbr": "CLC" ]);
+	opcodes[0x0D] = ([ "abbr": "SEC" ]);
+	opcodes[0x0E] = ([ "abbr": "CLI" ]);
+	opcodes[0x0F] = ([ "abbr": "SEI" ]);
+
+	opcodes[0x20] = ([ "abbr": "BRA" ]);
+	opcodes[0x21] = ([ "abbr": "BRN" ]);
+	opcodes[0x22] = ([ "abbr": "BHI" ]);
+	opcodes[0x23] = ([ "abbr": "BLS" ]);
+	opcodes[0x24] = ([ "abbr": "BCC" ]);
+	opcodes[0x25] = ([ "abbr": "BCS" ]);
+	opcodes[0x26] = ([ "abbr": "BNE" ]);
+	opcodes[0x27] = ([ "abbr": "BEQ" ]);
+	opcodes[0x28] = ([ "abbr": "BVC" ]);
+	opcodes[0x29] = ([ "abbr": "BVS" ]);
+	opcodes[0x2A] = ([ "abbr": "BPL" ]);
+	opcodes[0x2B] = ([ "abbr": "BMI" ]);
+	opcodes[0x2C] = ([ "abbr": "BGE" ]);
+	opcodes[0x2D] = ([ "abbr": "BLT" ]);
+	opcodes[0x2E] = ([ "abbr": "BGT" ]);
+	opcodes[0x2F] = ([ "abbr": "BLE" ]);
+
+	opcodes[0x4F] = ([ "abbr": "CLRA" ]);
+	opcodes[0x71] = ([ "abbr": "AIM DIR" ]);
+	opcodes[0x7B] = ([ "abbr": "TIM DIR" ]);
+	opcodes[0x81] = ([ "abbr": "CMPA IMM" ]);
+	opcodes[0xAD] = ([ "abbr": "JSR IND" ]);
+	opcodes[0xCE] = ([ "abbr": "LDX IMM" ]);
+	opcodes[0xDE] = ([ "abbr": "LDX DIR" ]);
+	opcodes[0xEE] = ([ "abbr": "LDX IND" ]);
+	opcodes[0xFE] = ([ "abbr": "LDX EXT" ]);
+}
+
+string htmlents(string d) {
+	return replace(d, ({ "<", ">", "&" }), ({ "&lt;", "&gt;", "&amp;" }));
+}
+
+void process(mapping m) {
+	if (output_mode == "text") {
+		string area_pc = "";
+
+		foreach (areas, mapping n) {
+			if (m->r_pc >= n->start && m->r_pc <= n->end) {
+				if (area_pc == "") area_pc = n->name;
+				else area_pc = ", " + n->name;
+			}
+		}
+
+		write("%04X %-32s | A=%02X B=%02X X=%04X SP=%04X | %02X\n", m->r_pc, area_pc, m->r_a, m->r_b, m->r_x, m->r_sp, m->op);
+	}
+	else if (output_mode == "html") {
+		string area_pc = "";
+
+		foreach (areas, mapping n) {
+			if (m->r_pc >= n->start && m->r_pc <= n->end) {
+				if (area_pc == "") area_pc = n->section;
+				else area_pc += ", " + n->section;
+
+				if (n->name != "") area_pc += " <em>" + n->name + "</em>";
+			}
+		}
+
+		write("<tr>");
+			write("<td>%04[0]X</td>", m->r_pc);
+			write("<td>%s</td>", area_pc);
+			write("<td>%02X</td>", m->r_a);
+			write("<td>%02X</td>", m->r_b);
+			write("<td>%04X</td>", m->r_x);
+			write("<td>%04X</td>", m->r_sp);
+			write("<td>%s</td>", m->ccr_h ? "H" : "");
+			write("<td>%s</td>", m->ccr_i ? "I" : "");
+			write("<td>%s</td>", m->ccr_n ? "N" : "");
+			write("<td>%s</td>", m->ccr_z ? "Z" : "");
+			write("<td>%s</td>", m->ccr_v ? "V" : "");
+			write("<td>%s</td>", m->ccr_c ? "C" : "");
+			write("<td>%02X</td>", m->op);
+			write("<td>%s</td>", opcodes[m->op] ? opcodes[m->op]->abbr : "-");
+			write("<td>");
+
+			switch (m->op) {
+				case 0x0A:	// CLV
+					write("V <= 0");
+					break;
+
+				case 0x0B:	// SEV
+					write("V <= 1");
+					break;
+
+				case 0x0C:	// CLC
+					write("C <= 0");
+					break;
+
+				case 0x0D:	// SEC
+					write("C <= 1");
+					break;
+
+				case 0x0E:	// CLI
+					write("I <= 0");
+					break;
+
+				case 0x0F:	// SEI
+					write("I <= 1");
+					break;
+
+				case 0x26:	// BNE
+					write("If Not Equal: PC &lt;= %s ? %s", html_insert_rel(m->r_pc, m->r_pc + 2), !m->ccr_z ? "<span class='bry'>Yes</span>" : "<span class='brn'>No</span>");
+					break;
+
+				case 0x27:	// BEQ
+					write("If Equal: PC &lt;= %s ? %s", html_insert_rel(m->r_pc, m->r_pc + 2), m->ccr_z ? "<span class='bry'>Yes</span>" : "<span class='brn'>No</span>");
+					break;
+
+				case 0x86:	// LDAA (IMM)
+					write("A &lt;= %s", html_insert_imm8(m->r_pc));
+					break;
+
+				case 0xC6:	// LDAB (IMM)
+					write("B &lt;= %s", html_insert_imm8(m->r_pc));
+					break;
+
+				case 0xCE:	// LDAX (IMM)
+					write("X &lt;= %s", html_insert_imm16(m->r_pc));
+					break;
+
+				case 0x71:	// AIM (DIR)
+					write("%s &lt;= %[0]s & %s", html_insert_dir(m->r_pc), html_insert_imm8(m->r_pc + 1));
+					break;
+
+				case 0x7E:	// JMP (EXT)
+					write("PC &lt;= %s", html_insert_imm16a(m->r_pc));
+					break;
+
+				case 0x81:	// CMPA (IMM)
+					write("A[<span>%02X</span>] - %s", m->r_a, html_insert_imm8(m->r_pc));
+					break;
+
+				case 0xAD:	// JSR (IND)
+					write("PUSH(PC), PC &lt;= %s", html_insert_xa(m->r_x));
+					break;
+
+				case 0xFE:	// LDX (EXT)
+					write("X &lt;= %s", html_insert_ext16(m->r_pc));
+					break;
+			}
+
+			write("</td>");
+		write("</tr>");
+	}
+}
+
+string html_insert_imm8(int pc) {
+	if (romdata && pc >= 0x8000) return "IM[<span>" + sprintf("%02X", romdata[pc + 1]) + "</span>]";
+	else return "IM";
+}
+
+string html_insert_dir(int pc) {
+	if (romdata && pc >= 0x8000) return "M[<span>" + sprintf("%04X", romdata[pc + 1]) + "</span>]";
+	else return "M";
+}
+
+string html_insert_rel(int pc, int offset) {
+	if (romdata && pc >= 0x8000) {
+		int a = offset + array_sscanf(romdata[pc + 1..pc + 1], "%+1c")[0];
+		if (a < 0) a = 0xFFFF - a;
+		else if (a > 0xFFFF) a -= 0xFFFF;
+
+		string area;
+
+		foreach (areas, mapping n) {
+			if (a >= n->start && a <= n->end) {
+				if (!area) area = n->section;
+				else area += ", " + n->section;
+
+				if (n->name != "") area += " <em>" + n->name + "</em>";
+			}
+		}
+
+		return "REL[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + "</span>]";
+	}
+	else return "REL";
+}
+
+string html_insert_imm16(int pc) {
+	if (romdata && pc >= 0x8000) return "IM[<span>" + upper_case(String.string2hex(romdata[pc + 1..pc + 2])) + "</span>]";
+	else return "IM";
+}
+
+string html_insert_imm16a(int pc) {
+	if (romdata && pc >= 0x8000) {
+		string area;
+
+		int a = array_sscanf(romdata[pc + 1..pc + 2], "%2c")[0];
+
+		foreach (areas, mapping n) {
+			if (a >= n->start && a <= n->end) {
+				if (!area) area = n->section;
+				else area += ", " + n->section;
+
+				if (n->name != "") area += " <em>" + n->name + "</em>";
+			}
+		}
+
+		return "IM[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + "</span>]";
+	}
+	else return "IM";
+}
+
+string html_insert_xa(int x) {
+	if (romdata && x >= 0x8000) {
+		string area;
+
+		int a = x;
+
+		foreach (areas, mapping n) {
+			if (a >= n->start && a <= n->end) {
+				if (!area) area = n->section;
+				else area += ", " + n->section;
+
+				if (n->name != "") area += " <em>" + n->name + "</em>";
+			}
+		}
+
+		return "X[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + "</span>]";
+	}
+	else return "X";
+}
+
+string html_insert_ext(int pc) {
+	if (romdata && pc >= 0x8000) {
+		string area;
+
+		int a = array_sscanf(romdata[pc + 1..pc + 2], "%2c")[0];
+
+		foreach (areas, mapping n) {
+			if (a >= n->start && a <= n->end) {
+				if (!area) area = n->section;
+				else area += ", " + n->section;
+
+				if (n->name != "") area += " <em>" + n->name + "</em>";
+			}
+		}
+
+		if (a >= 0x8000) return "M[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + " = " + sprintf("%02X", romdata[a]) + "</span>]";
+		else return "M[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + "</span>]";
+	}
+	else return "M";
+}
+
+string html_insert_ext16(int pc) {
+	if (romdata && pc >= 0x8000) {
+		string area;
+
+		int a = array_sscanf(romdata[pc + 1..pc + 2], "%2c")[0];
+
+		foreach (areas, mapping n) {
+			if (a >= n->start && a <= n->end) {
+				if (!area) area = n->section;
+				else area += ", " + n->section;
+
+				if (n->name != "") area += " <em>" + n->name + "</em>";
+			}
+		}
+
+		if (a >= 0x8000) return "M[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + " = " + upper_case(String.string2hex(romdata[a..a + 1])) + "</span>]";
+		else return "M[<span>" + sprintf("%04X", a) + (area ? " (<span>" + area + "</span>)" : "") + "</span>]";
+	}
+	else return "M";
+}
+
+
