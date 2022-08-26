@@ -1,0 +1,115 @@
+#!/usr/bin/env pike
+
+#define KBD_X (16 * 2)
+#define KBD_Y (115 * 2)
+
+#define KEY_W (30.0 * 2.0)
+#define KEY_H (24.0 * 2.0)
+
+array colors = ({
+	({ 64, 64, 64 }),
+	({ 128, 128, 128 }),
+	({ 128, 16, 16 }),
+});
+
+int main(int argc, array(string) argv) {
+	string path_keymap = combine_path(getcwd(), argv[1]);
+
+	cd(dirname(argv[0]));
+	cd("..");
+
+	// Load keymap
+	array keys = Standards.JSON.decode(utf8_to_string(Stdio.read_file(path_keymap)));
+
+	// Initialize fonts
+	Image.Fonts.set_font_dirs(({ "data/bin/fonts" }));
+	Image.Fonts.Font font = Image.Fonts.open_font("Bitstream Vera Sans", 16, 0);
+
+	// Load background image
+	Image.Image img = Image.PNG.decode(Stdio.read_file("data/bin/ui/device.png"))->bitscale(2.0);
+
+	int screen_width = img->xsize();
+	int screen_height = img->ysize();
+
+	// Draw keys
+	foreach (keys, mapping m) {
+		string key_label = m->l;
+		float key_x = m->x;
+		int key_y = m->y;
+		float key_w = m->w || 1.0;
+
+		int x0 = KBD_X + (int)(key_x * KEY_W);
+		int y0 = KBD_Y + (int)(key_y * KEY_H);
+		int x1 = x0 + (int)(KEY_W * key_w) - 1;
+		int y1 = y0 + (int)(KEY_H) - 1;
+
+		// Draw button
+		img->box(x0, y0, x1, y1, @colors[m->c || 0]);
+
+		img->setcolor(255, 255, 255, 200);
+		img->line(x0, y0, x1, y0);
+		img->line(x0, y0, x0, y1);
+
+		img->setcolor(0, 0, 0, 200);
+		img->line(x0, y1, x1, y1);
+		img->line(x1, y0, x1, y1);
+
+		// Draw text
+		if (key_label && sizeof(key_label)) {
+			array parts = map(key_label / "\n", font->write);
+
+			int w = max(@parts->xsize());
+			int h = Array.sum(parts->ysize());
+
+			Image.Image img_parts = Image.Image(w, h, 0, 0, 0);
+			int cur_y = 0;
+			for (int i = 0; i < sizeof(parts); i++) {
+				img_parts->paste(parts[i], (int)(w / 2.0 - parts[i]->xsize() / 2.0), cur_y);
+				cur_y += parts[i]->ysize();
+			}
+
+			if (w > x1 - x0 - 6) {
+				img_parts = img_parts->scale(x1 - x0 - 6, 0);
+				w = img_parts->xsize();
+				h = img_parts->ysize();
+			}
+
+			if (h > y1 - y0 - 6) {
+				img_parts = img_parts->scale(0, y1 - y0 - 6);
+				w = img_parts->xsize();
+				h = img_parts->ysize();
+			}
+
+			int x = x0 + (int)((x1 - x0) / 2.0 - w / 2.0);
+			int y = y0 + (int)((y1 - y0) / 2.0 - h / 2.0);
+
+			img->paste_alpha_color(img_parts, 255, 255, 255, x, y);
+		}
+	}
+
+	// Initialize SDL
+	SDL.init(SDL.INIT_VIDEO);
+	SDL.Surface screen = SDL.set_video_mode(screen_width, screen_height, 32, SDL.HWSURFACE | SDL.DOUBLEBUF | SDL.HWACCEL | SDL.RLEACCEL);
+	SDL.set_caption("HXEmu Keymap Previewer - " + argv[1], "");
+
+	SDL.Surface surface_bg = SDL.Surface()->set_image(img, SDL.HWSURFACE)->display_format();
+
+	// Main loop
+	SDL.Event ev = SDL.Event();
+
+	while (true) {
+		while (ev->get()) {
+			if (ev->type == SDL.QUIT) {
+				exit(0);
+			}
+		}
+
+		surface_bg->blit(screen);
+		SDL.flip();
+
+		Pike.DefaultBackend(0.0);
+		Pike.DefaultBackend(0.0);
+
+		sleep(0.01);
+	}
+}
