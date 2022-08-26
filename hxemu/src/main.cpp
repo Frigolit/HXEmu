@@ -237,8 +237,8 @@ void sdl_init() {
 	char s_wintitle[256];
 	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
 
-	int ui_width = 480 + 256 + 256;
-	int ui_height = 128 + 400;
+	int ui_width = 992;
+	int ui_height = 528;
 
 	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ui_width, ui_height, 0);
 	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);

@@ -65,7 +65,10 @@ cp -r data/bin/roms/firmware $BUILDROOT/release/data/roms/ || exit 1
 
 # Copy binary files
 echo "Installing fonts..."
-cp -r data/bin/fonts ${BUILDROOT}/release/data/  || exit 1
+cp -r data/bin/fonts ${BUILDROOT}/release/data/ || exit 1
+
+echo "Installing UI assets..."
+cp -r data/bin/ui ${BUILDROOT}/release/data/ || exit 1
 
 # Ensure the target folder is read/write
 chmod -R u+rw $BUILDROOT/release/data/

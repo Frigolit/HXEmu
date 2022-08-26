@@ -186,19 +186,19 @@ if [ "${KERNEL}" == "SunOS" ]; then
 			exit 1
 		fi
 
-		LDFLAGS="${LDFLAGS} -lxnet -lSDL2"
+		LDFLAGS="${LDFLAGS} -lxnet -lSDL2 -lSDL2_ttf -lSDL2_image"
 	fi
 elif [ "${KERNEL}" == "Linux" ]; then
 	if [ "${TARGET}" != "" ]; then
-		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf 2>/dev/null`"
+		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf SDL2_image 2>/dev/null`"
 		CXXFLAGS="${CXXFLAGS} $(${TARGET}-pkg-config --cflags sdl2 SDL2_ttf)"
 	else
-		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf 2>/dev/null`"
-		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl2 SDL2_ttf)"
+		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf SDL2_image 2>/dev/null`"
+		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl2 SDL2_ttf SDL2_image)"
 	fi
 
 	if [ "${PKG_SDL}" == "" ]; then
-		echo "ERROR: Cannot find SDL2 and/or SDL2_ttf!"
+		echo "ERROR: Cannot find one or more of the following libraries: SDL2, SDL2_image, SDL2_ttf"
 		exit 1
 	fi
 
@@ -214,7 +214,7 @@ elif [ "${KERNEL}" == "Darwin" ]; then
 	CXXFLAGS="${CXXFLAGS} $(sdl2-config --cflags)"
 else
 	if [ "${PKG_SDL}" == "" ]; then
-		echo "ERROR: Unhandled auto-detection for SDL2 and SDL2_ttf on ${KERNEL}! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
+		echo "ERROR: Unhandled auto-detection for SDL2, SDL2_image and SDL2_ttf on ${KERNEL}! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
 		exit 1
 	fi
 fi
