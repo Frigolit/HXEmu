@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
 }
 
 void sdl_init() {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
