@@ -186,15 +186,15 @@ if [ "${KERNEL}" == "SunOS" ]; then
 			exit 1
 		fi
 
-		LDFLAGS="${LDFLAGS} -lxnet -lSDL2 -lSDL2_ttf -lSDL2_image"
+		LDFLAGS="${LDFLAGS} -lxnet -lSDL2 -lSDL2_ttf -lSDL2_image -ljsoncpp"
 	fi
 elif [ "${KERNEL}" == "Linux" ]; then
 	if [ "${TARGET}" != "" ]; then
-		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf SDL2_image 2>/dev/null`"
-		CXXFLAGS="${CXXFLAGS} $(${TARGET}-pkg-config --cflags sdl2 SDL2_ttf)"
+		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf SDL2_image jsoncpp 2>/dev/null`"
+		CXXFLAGS="${CXXFLAGS} $(${TARGET}-pkg-config --cflags sdl2 SDL2_ttf SDL2_image jsoncpp)"
 	else
-		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf SDL2_image 2>/dev/null`"
-		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl2 SDL2_ttf SDL2_image)"
+		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf SDL2_image jsoncpp 2>/dev/null`"
+		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl2 SDL2_ttf SDL2_image jsoncpp)"
 	fi
 
 	if [ "${PKG_SDL}" == "" ]; then
@@ -204,9 +204,9 @@ elif [ "${KERNEL}" == "Linux" ]; then
 
 	LDFLAGS="${LDFLAGS} ${PKG_SDL}"
 elif [ "${KERNEL}" == "Darwin" ]; then
-	# TODO: Add support for SDL_ttf
+	# TODO: Add support for SDL2_ttf and SDL2_image
 	if [ "`xwhich sdl2-config 2>/dev/null`" == "" ]; then
-		echo "ERROR: Cannot find SDL!"
+		echo "ERROR: Cannot find SDL2!"
 		exit 1
 	fi
 

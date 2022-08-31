@@ -3,7 +3,7 @@
 TTF_Font *font_buttons;
 
 void fonts_init() {
-	font_buttons = TTF_OpenFont("data/fonts/bitstream-vera.ttf", 10);
+	font_buttons = TTF_OpenFont("data/fonts/LiberationSans-Regular.ttf", 16);
 }
 
 void fonts_quit() {

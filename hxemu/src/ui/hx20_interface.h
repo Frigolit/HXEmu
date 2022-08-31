@@ -1,8 +1,10 @@
 #ifndef __UI_HX20_H__
 #define __UI_HX20_H__
 
-#include "widget.h"
 #include <functional>
+
+#include "widget.h"
+#include "keyboard.h"
 
 #include "../hx20.h"
 
@@ -16,6 +18,7 @@ class CHX20InterfaceWidget : public CWidget {
 
 	protected:
 		CHX20 *hx20;
+		CKeyboardWidget *keyboard;
 };
 
 #endif

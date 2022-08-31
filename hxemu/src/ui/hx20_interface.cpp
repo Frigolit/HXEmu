@@ -1,7 +1,8 @@
-#include "hx20_interface.h"
-
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
+
+#include "hx20_interface.h"
+#include "keyboard.h"
 
 CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	::CWidget();
@@ -25,6 +26,14 @@ CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	SDL_Surface *bg_surface = IMG_Load("data/ui/device.png");
 	SDL_BlitScaled(bg_surface, NULL, surface, &bg_rect);
 	SDL_FreeSurface(bg_surface);
+
+	keyboard = new CKeyboardWidget(hx20, 32, 230, w - 32, h - 230);
+}
+
+CHX20InterfaceWidget::~CHX20InterfaceWidget() {
+	SDL_FreeSurface(surface);
+
+	delete(keyboard);
 }
 
 bool CHX20InterfaceWidget::update() {
@@ -33,6 +42,7 @@ bool CHX20InterfaceWidget::update() {
 
 void CHX20InterfaceWidget::draw(SDL_Surface *dest) {
 	hx20->lcd->draw(surface, 288, 28);
+	keyboard->draw(surface);
 
 	CWidget::draw(dest);
 }

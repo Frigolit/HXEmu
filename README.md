@@ -8,7 +8,10 @@ How to compile
 You can easily compile HXEmu by running the ./compile script which performs some basic auto-detection of the platform and build environment.
 It requires a compiler (e.g. GCC, Clang) with support for the C++11 standard.
 It also requires the following libraries (in some Linux distributions these will be "-dev" packages):
-- SDL2 + SDL2_ttf
+- SDL2
+- SDL2_ttf
+- SDL2_image
+- jsoncpp
 - pthreads
 
 Contributors
