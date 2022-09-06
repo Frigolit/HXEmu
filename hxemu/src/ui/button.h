@@ -6,6 +6,8 @@
 
 #include "widget.h"
 
+#include "../colors.h"
+
 class CButton : public CWidget {
 	public:
 		CButton(std::string c, int x, int y, int w, int h);
@@ -21,7 +23,7 @@ class CButton : public CWidget {
 		void set_click_callback(std::function<void(CWidget*)> callback);
 
 	protected:
-		void init(int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b);
+		void init(int x, int y, int w, int h, RgbColor &rgb);
 
 		char *caption;
 		bool updated;

@@ -1,6 +1,6 @@
 #include "button.h"
+
 #include "../fonts.h"
-#include <stdio.h>
 
 CButton::CButton(std::string c, int x, int y, int w, int h) {
 	::CWidget();
@@ -9,7 +9,13 @@ CButton::CButton(std::string c, int x, int y, int w, int h) {
 	caption[255] = 0;
 	strncpy(caption, c.c_str(), 255);
 
-	init(x, y, w, h, 0xC9, 0xC9, 0xC9);
+	RgbColor rgb {
+		.r = 0xC9,
+		.g = 0xC9,
+		.b = 0xC9
+	};
+
+	init(x, y, w, h, rgb);
 }
 
 CButton::CButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) {
@@ -19,10 +25,16 @@ CButton::CButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g
 	caption[255] = 0;
 	strncpy(caption, c.c_str(), 255);
 
-	init(x, y, w, h, r, g, b);
+	RgbColor rgb {
+		.r = r,
+		.g = g,
+		.b = b
+	};
+
+	init(x, y, w, h, rgb);
 }
 
-void CButton::init(int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) {
+void CButton::init(int x, int y, int w, int h, RgbColor &rgb) {
 	cb_click = NULL;
 
 	CWidget::x = x;
@@ -32,10 +44,27 @@ void CButton::init(int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) 
 
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, w, h, 32, 0, 0, 0, 0);
 
-	button_color = SDL_MapRGB(surface->format, r, g, b);
+	button_color = SDL_MapRGB(surface->format, rgb.r, rgb.g, rgb.b);
 
-	button_color_lit = SDL_MapRGB(surface->format, r + 16, g + 16, b + 16);
-	button_color_dim = SDL_MapRGB(surface->format, r - 16, g - 16, b - 16);
+	HsvColor hsv;
+	rgb_to_hsv(rgb, hsv);
+
+	HsvColor c_lit_hsv = hsv;
+	HsvColor c_dim_hsv = hsv;
+
+	c_lit_hsv.v += 0.05;
+	c_dim_hsv.v -= 0.05;
+
+	if (c_lit_hsv.v > 1.0) { c_lit_hsv.v = 1.0; }
+	if (c_dim_hsv.v < 0.0) { c_dim_hsv.v = 0.0; }
+
+	RgbColor c_lit;
+	RgbColor c_dim;
+	hsv_to_rgb(c_lit_hsv, c_lit);
+	hsv_to_rgb(c_dim_hsv, c_dim);
+
+	button_color_lit = SDL_MapRGB(surface->format, c_lit.r, c_lit.g, c_lit.b);
+	button_color_dim = SDL_MapRGB(surface->format, c_dim.r, c_dim.g, c_dim.b);
 
 	updated = false;
 }
@@ -52,9 +81,13 @@ bool CButton::update() {
 	text_fg.r = text_fg.g = text_fg.b = 255;
 	text_fg.a = 255;
 
-	SDL_Rect r;
+	SDL_Rect r {
+		.x = 0,
+		.y = 0,
+		.w = w,
+		.h = h
+	};
 
-	r.x = 0; r.y = 0; r.w = w; r.h = h;
 	SDL_FillRect(surface, &r, button_color_lit);
 
 	r.x++;
