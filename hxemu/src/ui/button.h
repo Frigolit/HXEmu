@@ -17,10 +17,11 @@ class CButton : public CWidget {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
+		virtual void mousedown(int x, int y);
 		virtual void mouseup(int x, int y);
 
 		void set_caption(const char *new_caption);
-		void set_click_callback(std::function<void(CWidget*)> callback);
+		void set_click_callback(std::function<void(CButton*, int, int)> callback);
 
 	protected:
 		void init(int x, int y, int w, int h, RgbColor &rgb);
@@ -28,7 +29,7 @@ class CButton : public CWidget {
 		char *caption;
 		bool updated;
 
-		std::function<void(CWidget*)> cb_click;
+		std::function<void(CButton*, int, int)> cb_click;
 		uint32_t button_color;
 		uint32_t button_color_lit;
 		uint32_t button_color_dim;

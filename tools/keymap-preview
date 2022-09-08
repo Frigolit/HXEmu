@@ -23,7 +23,7 @@ int main(int argc, array(string) argv) {
 
 	// Initialize fonts
 	Image.Fonts.set_font_dirs(({ "data/bin/fonts" }));
-	Image.Fonts.Font font = Image.Fonts.open_font("Bitstream Vera Sans", 16, 0);
+	Image.Fonts.Font font = Image.Fonts.open_font("Liberation Sans", 16, 0);
 
 	// Load background image
 	Image.Image img = Image.PNG.decode(Stdio.read_file("data/bin/ui/device.png"))->bitscale(2.0);
@@ -33,10 +33,13 @@ int main(int argc, array(string) argv) {
 
 	// Draw keys
 	foreach (keys, mapping m) {
-		string key_label = m->l;
+		string key_label = m->label;
 		float key_x = m->x;
 		int key_y = m->y;
 		float key_w = m->w || 1.0;
+
+		int key_line = m->line;
+		int key_bit = m->bit;
 
 		int x0 = KBD_X + (int)(key_x * KEY_W);
 		int y0 = KBD_Y + (int)(key_y * KEY_H);
@@ -44,7 +47,7 @@ int main(int argc, array(string) argv) {
 		int y1 = y0 + (int)(KEY_H) - 1;
 
 		// Draw button
-		img->box(x0, y0, x1, y1, @colors[m->c || 0]);
+		img->box(x0, y0, x1, y1, @colors[m->color || 0]);
 
 		img->setcolor(255, 255, 255, 200);
 		img->line(x0, y0, x1, y0);

@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
+				/*
 				case SDL_KEYDOWN:
 					if (event.key.keysym.sym == SDLK_ESCAPE) {
 						SDL_Quit();
@@ -186,6 +187,7 @@ int main(int argc, char **argv) {
 					else if (event.key.keysym.sym == SDLK_LCTRL) hx20_machine->keyboard_up(0x02);
 					else if (event.key.keysym.sym == SDLK_RCTRL) hx20_machine->keyboard_up('[');
 					break;
+				*/
 
 				case SDL_MOUSEBUTTONDOWN:
 					hx20_interface->mousedown(event.button.x, event.button.y);

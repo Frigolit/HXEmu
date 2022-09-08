@@ -121,12 +121,18 @@ void CButton::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void CButton::set_click_callback(std::function<void(CWidget*)> callback) {
+void CButton::set_click_callback(std::function<void(CButton*, int, int)> callback) {
 	cb_click = callback;
+}
+
+void CButton::mousedown(int cx, int cy) {
+	if (cb_click != NULL) {
+		cb_click(this, 0, 0);
+	}
 }
 
 void CButton::mouseup(int cx, int cy) {
 	if (cb_click != NULL) {
-		cb_click(this);
+		cb_click(this, 1, 0);
 	}
 }

@@ -16,17 +16,17 @@ class CIOController: public CMemoryDevice {
 		CIOController();
 		virtual ~CIOController();
 
-		void    reset();
+		void reset();
 
 		uint8_t read(uint16_t addr);
-		bool    write(uint16_t addr, uint8_t data);
+		bool write(uint16_t addr, uint8_t data);
 
-		void    set_lcd_controller(uint8_t n, CLCDController *c);
+		void set_lcd_controller(uint8_t n, CLCDController *c);
 
-		void    set_power_button(bool p);
-		bool    get_power_button();
+		void set_power_button(bool p);
+		bool get_power_button();
 
-		char    keyboard_map[256];
+		uint16_t krtn_map[8];
 
 		/**
 		 * LCD chip select

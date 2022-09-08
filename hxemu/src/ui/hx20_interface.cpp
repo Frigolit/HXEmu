@@ -47,3 +47,18 @@ void CHX20InterfaceWidget::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
+void CHX20InterfaceWidget::mousedown(int x, int y) {
+	CWidget *w = keyboard;
+	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+		w->mousedown(x - w->x, y - w->y);
+		return;
+	}
+}
+
+void CHX20InterfaceWidget::mouseup(int x, int y) {
+	CWidget *w = keyboard;
+	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+		w->mouseup(x - w->x, y - w->y);
+		return;
+	}
+}

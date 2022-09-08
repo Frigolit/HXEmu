@@ -24,7 +24,7 @@ CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
 	bg_rect.h = h;
 	*/
 
-	keys = new std::vector<CButton *>();
+	keys = new std::vector<CKeyboardButton *>();
 	update();
 
 	// FIXME: Should be called by creator
@@ -94,10 +94,17 @@ void CKeyboardWidget::load_keymap(const char *path) {
 	for (int i = 0; i < root.size(); i++) {
 		Json::Value key = root[i];
 
+		if (key["line"].empty() || key["bit"].empty()) {
+			continue;
+		}
+
 		float x = key["x"].asFloat() * 60.0;
 		int y = key["y"].asInt();
 		float w = (key["w"].empty() ? 1.0 : key["w"].asFloat()) * 60.0;
-		int c = key["c"].empty() ? 0 : key["c"].asInt();
+		int c = key["color"].empty() ? 0 : key["color"].asInt();
+
+		uint8_t krtn = (uint8_t)(key["line"].asInt());
+		uint16_t value = 1 << (uint16_t)(key["bit"].asInt());
 
 		uint8_t c_r = 64;
 		uint8_t c_g = 64;
@@ -111,13 +118,58 @@ void CKeyboardWidget::load_keymap(const char *path) {
 			c_g = c_b = 16;
 		}
 
-		CButton *btn = new CButton(key["l"].asString(), (int)x, y * 48, (int)w, 48, c_r, c_g, c_b);
+		CKeyboardButton *btn = new CKeyboardButton(key["label"].asString(), (int)x, y * 48, (int)w, 48, c_r, c_g, c_b);
+		btn->set_keycode(krtn, value);
+		btn->set_click_callback(std::bind(&CKeyboardWidget::button_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 		keys->push_back(btn);
 	}
 
 	std::cout << "Loaded " << keys->size() << " key(s)" << std::endl;
 
 	update();
+}
+
+void CKeyboardWidget::button_callback(CButton *widget, int released, int discard) {
+	CKeyboardButton *btn = (CKeyboardButton*)widget;
+
+	int line, bitmask;
+	btn->get_keycode(line, bitmask);
+
+	printf("keyboard - released=%d, line=%d, bitmask=0x%04X\n", released, line, bitmask);
+
+	if (released) {
+		hx20->ioctl->krtn_map[line] &= ~bitmask;
+		hx20->keyboard_up(0);
+	}
+	else {
+		hx20->ioctl->krtn_map[line] |= bitmask;
+		hx20->keyboard_down(0);
+	}
+}
+
+void CKeyboardWidget::mousedown(int x, int y) {
+	int sz = keys->size();
+
+	for (int i = 0; i < sz; i++) {
+		CWidget *w = keys->at(i);
+		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+			w->mousedown(x - w->x, y - w->y);
+			return;
+		}
+	}
+}
+
+void CKeyboardWidget::mouseup(int x, int y) {
+	int sz = keys->size();
+
+	for (int i = 0; i < sz; i++) {
+		CWidget *w = keys->at(i);
+		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+			w->mouseup(x - w->x, y - w->y);
+			return;
+		}
+	}
 }
 
 /*

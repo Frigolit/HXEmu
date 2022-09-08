@@ -23,6 +23,7 @@ class CHX20 {
 
 		C6301 *mcu_master;	// FIXME: This isn't supposed to be public
 		CLCD *lcd;
+		CIOController *ioctl;
 
 		void think();
 		void poweroff();
@@ -51,8 +52,6 @@ class CHX20 {
 
 		CRAM *ram0;
 		CRAM *ram1;
-
-		CIOController *ioctl;
 
 		CROM *roms[4];
 		CROM *optionrom;

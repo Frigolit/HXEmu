@@ -139,23 +139,19 @@ void CHX20::load_option_rom(char *path) {
 }
 
 void CHX20::keyboard_down(uint8_t c) {
-	if (ioctl->keyboard_map[c]) {
-		return;
-	}
-
 	keyboard_pressed++;
-	ioctl->keyboard_map[c] = 1;
-	printf("CHX20:keyboard_down(): Key pressed: %d\n", c);
+	//ioctl->keyboard_map[c]++;
+	//printf("CHX20:keyboard_down(): Key pressed: %d (%d)\n", c, ioctl->keyboard_map[c]);
 }
 
 void CHX20::keyboard_up(uint8_t c) {
-	if (!ioctl->keyboard_map[c]) {
-		return;
-	}
+	//if (!ioctl->keyboard_map[c]) {
+	//	return;
+	//}
 
 	keyboard_pressed--;
-	ioctl->keyboard_map[c] = 0;
-	printf("CHX20:keyboard_up(): Key depressed: %d\n", c);
+	//ioctl->keyboard_map[c]--;
+	//printf("CHX20:keyboard_up(): Key depressed: %d (%d)\n", c, ioctl->keyboard_map[c]);
 }
 
 CHX20::~CHX20() {
