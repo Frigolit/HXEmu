@@ -91,103 +91,19 @@ int main(int argc, char **argv) {
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
-				/*
 				case SDL_KEYDOWN:
 					if (event.key.keysym.sym == SDLK_ESCAPE) {
 						SDL_Quit();
 						return 0;
 					}
-					else if (event.key.keysym.sym == SDLK_RETURN) hx20_machine->keyboard_down('\n');
-					else if (event.key.keysym.sym == SDLK_0) hx20_machine->keyboard_down('0');
-					else if (event.key.keysym.sym == SDLK_1) hx20_machine->keyboard_down('1');
-					else if (event.key.keysym.sym == SDLK_2) hx20_machine->keyboard_down('2');
-					else if (event.key.keysym.sym == SDLK_3) hx20_machine->keyboard_down('3');
-					else if (event.key.keysym.sym == SDLK_4) hx20_machine->keyboard_down('4');
-					else if (event.key.keysym.sym == SDLK_5) hx20_machine->keyboard_down('5');
-					else if (event.key.keysym.sym == SDLK_6) hx20_machine->keyboard_down('6');
-					else if (event.key.keysym.sym == SDLK_7) hx20_machine->keyboard_down('7');
-					else if (event.key.keysym.sym == SDLK_8) hx20_machine->keyboard_down('8');
-					else if (event.key.keysym.sym == SDLK_9) hx20_machine->keyboard_down('9');
-					else if (event.key.keysym.sym == SDLK_a) hx20_machine->keyboard_down('a');
-					else if (event.key.keysym.sym == SDLK_b) hx20_machine->keyboard_down('b');
-					else if (event.key.keysym.sym == SDLK_c) hx20_machine->keyboard_down('c');
-					else if (event.key.keysym.sym == SDLK_d) hx20_machine->keyboard_down('d');
-					else if (event.key.keysym.sym == SDLK_e) hx20_machine->keyboard_down('e');
-					else if (event.key.keysym.sym == SDLK_f) hx20_machine->keyboard_down('f');
-					else if (event.key.keysym.sym == SDLK_g) hx20_machine->keyboard_down('g');
-					else if (event.key.keysym.sym == SDLK_h) hx20_machine->keyboard_down('h');
-					else if (event.key.keysym.sym == SDLK_i) hx20_machine->keyboard_down('i');
-					else if (event.key.keysym.sym == SDLK_j) hx20_machine->keyboard_down('j');
-					else if (event.key.keysym.sym == SDLK_k) hx20_machine->keyboard_down('k');
-					else if (event.key.keysym.sym == SDLK_l) hx20_machine->keyboard_down('l');
-					else if (event.key.keysym.sym == SDLK_m) hx20_machine->keyboard_down('m');
-					else if (event.key.keysym.sym == SDLK_n) hx20_machine->keyboard_down('n');
-					else if (event.key.keysym.sym == SDLK_o) hx20_machine->keyboard_down('o');
-					else if (event.key.keysym.sym == SDLK_p) hx20_machine->keyboard_down('p');
-					else if (event.key.keysym.sym == SDLK_q) hx20_machine->keyboard_down('q');
-					else if (event.key.keysym.sym == SDLK_r) hx20_machine->keyboard_down('r');
-					else if (event.key.keysym.sym == SDLK_s) hx20_machine->keyboard_down('s');
-					else if (event.key.keysym.sym == SDLK_t) hx20_machine->keyboard_down('t');
-					else if (event.key.keysym.sym == SDLK_u) hx20_machine->keyboard_down('u');
-					else if (event.key.keysym.sym == SDLK_v) hx20_machine->keyboard_down('v');
-					else if (event.key.keysym.sym == SDLK_w) hx20_machine->keyboard_down('w');
-					else if (event.key.keysym.sym == SDLK_x) hx20_machine->keyboard_down('x');
-					else if (event.key.keysym.sym == SDLK_y) hx20_machine->keyboard_down('y');
-					else if (event.key.keysym.sym == SDLK_z) hx20_machine->keyboard_down('z');
-					else if (event.key.keysym.sym == SDLK_SPACE) hx20_machine->keyboard_down(' ');
-					else if (event.key.keysym.sym == SDLK_PERIOD) hx20_machine->keyboard_down('.');
-					else if (event.key.keysym.sym == SDLK_LSHIFT) hx20_machine->keyboard_down(0x00);
-					else if (event.key.keysym.sym == SDLK_RSHIFT) hx20_machine->keyboard_down(0x01);
-					else if (event.key.keysym.sym == SDLK_LCTRL) hx20_machine->keyboard_down(0x02);
-					else if (event.key.keysym.sym == SDLK_RCTRL) hx20_machine->keyboard_down('[');
+					else {
+						hx20_interface->sdl_keydown(event.key.keysym.sym);
+					}
 					break;
 
 				case SDL_KEYUP:
-					if (event.key.keysym.sym == SDLK_RETURN) hx20_machine->keyboard_up('\n');
-					else if (event.key.keysym.sym == SDLK_0) hx20_machine->keyboard_up('0');
-					else if (event.key.keysym.sym == SDLK_1) hx20_machine->keyboard_up('1');
-					else if (event.key.keysym.sym == SDLK_2) hx20_machine->keyboard_up('2');
-					else if (event.key.keysym.sym == SDLK_3) hx20_machine->keyboard_up('3');
-					else if (event.key.keysym.sym == SDLK_4) hx20_machine->keyboard_up('4');
-					else if (event.key.keysym.sym == SDLK_5) hx20_machine->keyboard_up('5');
-					else if (event.key.keysym.sym == SDLK_6) hx20_machine->keyboard_up('6');
-					else if (event.key.keysym.sym == SDLK_7) hx20_machine->keyboard_up('7');
-					else if (event.key.keysym.sym == SDLK_8) hx20_machine->keyboard_up('8');
-					else if (event.key.keysym.sym == SDLK_9) hx20_machine->keyboard_up('9');
-					else if (event.key.keysym.sym == SDLK_a) hx20_machine->keyboard_up('a');
-					else if (event.key.keysym.sym == SDLK_b) hx20_machine->keyboard_up('b');
-					else if (event.key.keysym.sym == SDLK_c) hx20_machine->keyboard_up('c');
-					else if (event.key.keysym.sym == SDLK_d) hx20_machine->keyboard_up('d');
-					else if (event.key.keysym.sym == SDLK_e) hx20_machine->keyboard_up('e');
-					else if (event.key.keysym.sym == SDLK_f) hx20_machine->keyboard_up('f');
-					else if (event.key.keysym.sym == SDLK_g) hx20_machine->keyboard_up('g');
-					else if (event.key.keysym.sym == SDLK_h) hx20_machine->keyboard_up('h');
-					else if (event.key.keysym.sym == SDLK_i) hx20_machine->keyboard_up('i');
-					else if (event.key.keysym.sym == SDLK_j) hx20_machine->keyboard_up('j');
-					else if (event.key.keysym.sym == SDLK_k) hx20_machine->keyboard_up('k');
-					else if (event.key.keysym.sym == SDLK_l) hx20_machine->keyboard_up('l');
-					else if (event.key.keysym.sym == SDLK_m) hx20_machine->keyboard_up('m');
-					else if (event.key.keysym.sym == SDLK_n) hx20_machine->keyboard_up('n');
-					else if (event.key.keysym.sym == SDLK_o) hx20_machine->keyboard_up('o');
-					else if (event.key.keysym.sym == SDLK_p) hx20_machine->keyboard_up('p');
-					else if (event.key.keysym.sym == SDLK_q) hx20_machine->keyboard_up('q');
-					else if (event.key.keysym.sym == SDLK_r) hx20_machine->keyboard_up('r');
-					else if (event.key.keysym.sym == SDLK_s) hx20_machine->keyboard_up('s');
-					else if (event.key.keysym.sym == SDLK_t) hx20_machine->keyboard_up('t');
-					else if (event.key.keysym.sym == SDLK_u) hx20_machine->keyboard_up('u');
-					else if (event.key.keysym.sym == SDLK_v) hx20_machine->keyboard_up('v');
-					else if (event.key.keysym.sym == SDLK_w) hx20_machine->keyboard_up('w');
-					else if (event.key.keysym.sym == SDLK_x) hx20_machine->keyboard_up('x');
-					else if (event.key.keysym.sym == SDLK_y) hx20_machine->keyboard_up('y');
-					else if (event.key.keysym.sym == SDLK_z) hx20_machine->keyboard_up('z');
-					else if (event.key.keysym.sym == SDLK_SPACE) hx20_machine->keyboard_up(' ');
-					else if (event.key.keysym.sym == SDLK_PERIOD) hx20_machine->keyboard_up('.');
-					else if (event.key.keysym.sym == SDLK_LSHIFT) hx20_machine->keyboard_up(0x00);
-					else if (event.key.keysym.sym == SDLK_RSHIFT) hx20_machine->keyboard_up(0x01);
-					else if (event.key.keysym.sym == SDLK_LCTRL) hx20_machine->keyboard_up(0x02);
-					else if (event.key.keysym.sym == SDLK_RCTRL) hx20_machine->keyboard_up('[');
+					hx20_interface->sdl_keyup(event.key.keysym.sym);
 					break;
-				*/
 
 				case SDL_MOUSEBUTTONDOWN:
 					hx20_interface->mousedown(event.button.x, event.button.y);

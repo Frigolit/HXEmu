@@ -2,6 +2,7 @@
 #define __UI_KEYBOARD_H__
 
 #include <vector>
+#include <unordered_map>
 
 #include "widget.h"
 #include "keyboard_button.h"
@@ -12,6 +13,9 @@ class CKeyboardWidget : public CWidget {
 	public:
 		CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h);
 		~CKeyboardWidget();
+
+		void sdl_keydown(int keysym);
+		void sdl_keyup(int keysym);
 
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
@@ -24,6 +28,7 @@ class CKeyboardWidget : public CWidget {
 	protected:
 		CHX20 *hx20;
 		std::vector<CKeyboardButton*> *keys;
+		std::unordered_map<int, CKeyboardButton*> *sdl_keymap;
 
 		void button_callback(CButton *widget, int released, int);
 };

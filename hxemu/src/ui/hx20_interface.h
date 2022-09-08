@@ -13,6 +13,9 @@ class CHX20InterfaceWidget : public CWidget {
 		CHX20InterfaceWidget(CHX20 *hx20, int x, int y);
 		~CHX20InterfaceWidget();
 
+		void sdl_keydown(int keysym);
+		void sdl_keyup(int keysym);
+
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 

@@ -25,6 +25,7 @@ CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
 	*/
 
 	keys = new std::vector<CKeyboardButton *>();
+	sdl_keymap = new std::unordered_map<int, CKeyboardButton*>();
 	update();
 
 	// FIXME: Should be called by creator
@@ -68,6 +69,8 @@ void CKeyboardWidget::load_keymap(const char *path) {
 		keys->pop_back();
 		delete(btn);
 	}
+
+	sdl_keymap->clear();
 
 	update();
 
@@ -122,6 +125,11 @@ void CKeyboardWidget::load_keymap(const char *path) {
 		btn->set_keycode(krtn, value);
 		btn->set_click_callback(std::bind(&CKeyboardWidget::button_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
+		if (!key["sdlkey"].empty()) {
+			int keysym = key["sdlkey"].asInt();
+			sdl_keymap->emplace(keysym, btn);
+		}
+
 		keys->push_back(btn);
 	}
 
@@ -172,10 +180,17 @@ void CKeyboardWidget::mouseup(int x, int y) {
 	}
 }
 
-/*
-array colors = ({
-	({ 64, 64, 64 }),
-	({ 128, 128, 128 }),
-	({ 128, 16, 16 }),
-});
-*/
+void CKeyboardWidget::sdl_keydown(int keysym) {
+	if (sdl_keymap->count(keysym) == 1) {
+		button_callback(sdl_keymap->at(keysym), 0, 0);
+	}
+	else {
+		printf("CKeyboardWidget::sdl_keydown(): debug: unhandled keysym %d\n", keysym);
+	}
+}
+
+void CKeyboardWidget::sdl_keyup(int keysym) {
+	if (sdl_keymap->count(keysym) == 1) {
+		button_callback(sdl_keymap->at(keysym), 1, 0);
+	}
+}

@@ -62,3 +62,11 @@ void CHX20InterfaceWidget::mouseup(int x, int y) {
 		return;
 	}
 }
+
+void CHX20InterfaceWidget::sdl_keydown(int keysym) {
+	keyboard->sdl_keydown(keysym);
+}
+
+void CHX20InterfaceWidget::sdl_keyup(int keysym) {
+	keyboard->sdl_keyup(keysym);
+}
