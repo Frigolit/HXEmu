@@ -1,8 +1,18 @@
 [
+	{ "label": "PAUSE", "line": 7, "bit": 3, "x": 0.0, "w": 1.5, "y": 0, "color": 1 },
+	{ "label": "MENU", "line": 7, "bit": 5, "x": 1.5, "w": 1.5, "y": 0, "color": 1 },
+	{ "label": "BREAK", "line": 7, "bit": 2, "x": 3.0, "w": 1.5, "y": 0, "color": 2 },
+
+	{ "label": "PF1", "line": 0, "bit": 8, "sdlkey": 1073741882, "x": 4.5, "y": 0, "color": 1 },
+	{ "label": "PF2", "line": 1, "bit": 8, "sdlkey": 1073741883, "x": 5.5, "y": 0, "color": 1 },
+	{ "label": "PF3", "line": 2, "bit": 8, "sdlkey": 1073741884, "x": 6.5, "y": 0, "color": 1 },
+	{ "label": "PF4", "line": 3, "bit": 8, "sdlkey": 1073741885, "x": 7.5, "y": 0, "color": 1 },
+	{ "label": "PF5", "line": 4, "bit": 8, "sdlkey": 1073741886, "x": 8.5, "y": 0, "color": 1 },
+
 	{ "label": ">\n<", "line": 6, "bit": 5, "x": 10.0, "y": 0, "color": 1 },
-	{ "label": "HOME\nCLR", "line": 7, "bit": 0, "x": 11.0, "y": 0, "color": 1 },
+	{ "label": "HOME\nCLR", "line": 7, "bit": 0, "sdlkey": 1073741898, "x": 11.0, "y": 0, "color": 1 },
 	{ "label": "↓\nSCRN\n↑", "line": 7, "bit": 1, "x": 12.0, "y": 0, "color": 1 },
-	{ "label": "INS\nDEL", "line": 7, "bit": 4, "x": 13.0, "y": 0, "color": 1 },
+	{ "label": "INS\nDEL", "line": 7, "bit": 4, "sdlkey": 127, "x": 13.0, "y": 0, "color": 1 },
 
 	{ "label": "!\n1", "line": 0, "bit": 1, "sdlkey": 49, "x": 0.5, "y": 1 },
 	{ "label": "\"\n2", "line": 0, "bit": 2, "sdlkey": 50, "x": 1.5, "y": 1 },
@@ -44,8 +54,8 @@
 	{ "label": "J", "line": 3, "bit": 2, "sdlkey": 106, "x": 7.25, "y": 3 },
 	{ "label": "K", "line": 3, "bit": 3, "sdlkey": 107, "x": 8.25, "y": 3 },
 	{ "label": "L", "line": 3, "bit": 4, "sdlkey": 108, "x": 9.25, "y": 3 },
-	{ "label": "Ö", "line": 0, "bit": 0, "x": 10.25, "y": 3 },
-	{ "label": "Ä", "line": 0, "bit": 0, "x": 11.25, "y": 3 },
+	{ "label": "Ö", "line": 1, "bit": 3, "x": 10.25, "y": 3 },
+	{ "label": "Ä", "line": 1, "bit": 2, "x": 11.25, "y": 3 },
 	{ "label": "RETURN", "line": 6, "bit": 0, "sdlkey": 13, "x": 12.25, "y": 3, "w": 1.75, "color": 2 },
 
 	{ "label": "SHIFT", "line": 5, "bit": 9, "x": 0.25, "y": 4, "w": 1.25, "color": 1 },

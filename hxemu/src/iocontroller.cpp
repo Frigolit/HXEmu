@@ -22,6 +22,8 @@ CIOController::CIOController() {
 	for (int i = 0; i < 8; i++) {
 		krtn_map[i] = 0;
 	}
+
+	krtn_map[2] |= (1 << 9);
 }
 
 CIOController::~CIOController() {
@@ -148,8 +150,6 @@ uint8_t CIOController::_read(uint16_t addr) {
 		if (l & 0x80) {
 			n |= (krtn_map[7] >> 8) & 0x03;
 		}
-
-		//printf("%02X\n", n);
 
 		n |= (!b_power << 7) | (!b_busy << 6);
 
