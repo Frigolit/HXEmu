@@ -58,7 +58,7 @@
 	{ "label": "Ä", "line": 1, "bit": 2, "x": 11.25, "y": 3 },
 	{ "label": "RETURN", "line": 6, "bit": 0, "sdlkey": 13, "x": 12.25, "y": 3, "w": 1.75, "color": 2 },
 
-	{ "label": "SHIFT", "line": 5, "bit": 9, "x": 0.25, "y": 4, "w": 1.25, "color": 1 },
+	{ "label": "SHIFT", "line": 5, "bit": 9, "sdlkey": 1073742049, "x": 0.25, "y": 4, "w": 1.25, "color": 1 },
 	{ "label": "Z", "line": 5, "bit": 2, "sdlkey": 122, "x": 1.5, "y": 4 },
 	{ "label": "X", "line": 5, "bit": 0, "sdlkey": 120, "x": 2.5, "y": 4 },
 	{ "label": "C", "line": 2, "bit": 3, "sdlkey": 99, "x": 3.5, "y": 4 },
@@ -69,7 +69,7 @@
 	{ "label": ";\n,", "line": 1, "bit": 4, "sdlkey": 44, "x": 8.5, "y": 4 },
 	{ "label": ":\n.", "line": 1, "bit": 3, "sdlkey": 46, "x": 9.5, "y": 4 },
 	{ "label": "-\n_", "line": 1, "bit": 6, "sdlkey": 45, "x": 10.5, "y": 4 },
-	{ "label": "SHIFT", "line": 5, "bit": 9, "sdlkey": 1073742049, "x": 11.5, "y": 4, "w": 1.75, "color": 1 },
+	{ "label": "SHIFT", "line": 5, "bit": 9, "sdlkey": 1073742053, "x": 11.5, "y": 4, "w": 1.75, "color": 1 },
 	{ "label": "GRPH", "line": 0, "bit": 0, "x": 13.25, "y": 4, "color": 1 },
 
 	{ "label": "NUM\nCAPS", "line": 6, "bit": 8, "x": 3.5, "y": 5, "color": 1 },
