@@ -16,14 +16,6 @@ CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
 
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, w, h, 32, 0, 0, 0, 0);
 
-	/*
-	SDL_Rect bg_rect;
-	bg_rect.x = 0;
-	bg_rect.y = 0;
-	bg_rect.w = w;
-	bg_rect.h = h;
-	*/
-
 	keys = new std::vector<CKeyboardButton *>();
 	sdl_keymap = new std::unordered_map<int, CKeyboardButton*>();
 	update();
@@ -49,7 +41,7 @@ bool CKeyboardWidget::update() {
 	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xA2, 0xA2, 0xA2));
 
 	// Draw all keys
-	for (int i = 0; i < keys->size(); i++) {
+	for (int i = 0; i < (int)keys->size(); i++) {
 		keys->at(i)->draw(surface);
 	}
 
@@ -94,7 +86,7 @@ void CKeyboardWidget::load_keymap(const char *path) {
 
 	// Loop through keys
 	// TODO: Improve value checks
-	for (int i = 0; i < root.size(); i++) {
+	for (unsigned int i = 0; i < root.size(); i++) {
 		Json::Value key = root[i];
 
 		if (key["line"].empty() || key["bit"].empty()) {
