@@ -23,7 +23,20 @@ CIOController::CIOController() {
 		krtn_map[i] = 0;
 	}
 
+	// TODO: Allow this to be configured via the graphical interface
+	// But for now, set DIP3 for the Swedish character set.
 	krtn_map[2] |= (1 << 9);
+
+	// DIP1-3 = Character set selection
+	//          000 = ASCII (Swedish)
+	//          001 = Swedish
+	//          010 = ASCII (French)
+	//          011 = French
+	//          100 = ASCII (German)
+	//          101 = German
+	//          110 = Danish
+	//          111 = Norwegian
+	// DIP4 = Terminal Floppy connected
 }
 
 CIOController::~CIOController() {

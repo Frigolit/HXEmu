@@ -21,7 +21,7 @@ CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
 	update();
 
 	// FIXME: Should be called by creator
-	load_keymap("data/ui/keymaps/eu.json");
+	load_keymap("data/ui/keymaps/se.json");
 }
 
 CKeyboardWidget::~CKeyboardWidget() {
