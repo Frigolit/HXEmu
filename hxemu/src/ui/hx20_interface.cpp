@@ -9,7 +9,7 @@
 CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	::CWidget();
 
-	lcd = new CLCD();
+	lcd = new Sdl2LcdInterface();
 
 	this->hx20 = hx20;
 	hx20->set_lcd_interface(lcd);

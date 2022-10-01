@@ -9,7 +9,7 @@
 #include "keyboard.h"
 
 #include "../hx20.h"
-#include "../lcd.h"
+#include "../frontends/sdl2/lcd_interface.h"
 
 class CHX20InterfaceWidget : public CWidget {
 	public:
@@ -28,7 +28,7 @@ class CHX20InterfaceWidget : public CWidget {
 	protected:
 		CHX20 *hx20;
 		CKeyboardWidget *keyboard;
-		CLCD *lcd;
+		Sdl2LcdInterface *lcd;
 };
 
 #endif

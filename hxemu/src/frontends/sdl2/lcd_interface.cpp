@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lcd.h"
+#include "lcd_interface.h"
 
-CLCD::CLCD() {
+Sdl2LcdInterface::Sdl2LcdInterface() {
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, 120 * 4, 32 * 4, 32, 0, 0, 0, 0);
 	mtx = SDL_CreateMutex();
 
@@ -26,12 +26,12 @@ CLCD::CLCD() {
 	SDL_FillRect(surface, &r, color_set);
 }
 
-CLCD::~CLCD() {
+Sdl2LcdInterface::~Sdl2LcdInterface() {
 	SDL_FreeSurface(surface);
 	SDL_DestroyMutex(mtx);
 }
 
-void CLCD::draw(SDL_Surface *dest, int x, int y) {
+void Sdl2LcdInterface::draw(SDL_Surface *dest, int x, int y) {
 	SDL_Rect dst;
 
 	dst.x = x;
@@ -44,7 +44,7 @@ void CLCD::draw(SDL_Surface *dest, int x, int y) {
 	SDL_mutexV(mtx);
 }
 
-void CLCD::set_pixel(uint8_t x, uint8_t y) {
+void Sdl2LcdInterface::set_pixel(uint8_t x, uint8_t y) {
 	SDL_Rect r;
 	r.x = x * 4;
 	r.y = y * 4;
@@ -56,7 +56,7 @@ void CLCD::set_pixel(uint8_t x, uint8_t y) {
 	SDL_mutexV(mtx);
 }
 
-void CLCD::clear_pixel(uint8_t x, uint8_t y) {
+void Sdl2LcdInterface::clear_pixel(uint8_t x, uint8_t y) {
 	SDL_Rect r;
 	r.x = x * 4;
 	r.y = y * 4;
