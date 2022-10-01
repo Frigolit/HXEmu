@@ -9,9 +9,13 @@ using namespace std;
 
 #include <stdio.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_timer.h>
+#ifdef FRONTEND_SDL2
+#include "frontends/sdl2.h"
+#endif
+
+#ifdef FRONTEND_CLI
+#include "frontends/cli.h"
+#endif
 
 #include "hash.h"
 #include "config.h"
@@ -21,15 +25,13 @@ using namespace std;
 
 #include "ui/hx20_interface.h"
 
+#include <SDL2/SDL.h>
+
+Frontend *frontend;
+
 CHX20 *hx20_machine;
-CHX20InterfaceWidget *hx20_interface;
 SDL_Thread *hx20_thread;
 
-SDL_Window *sdl_window;
-SDL_Renderer *sdl_renderer;
-SDL_Surface *screen;
-
-void sdl_init();
 int hx20_run(void *data);
 void shutdown();
 
@@ -61,13 +63,15 @@ int main(int argc, char **argv) {
 		optionrompath[0] = 0;
 	}
 
-	printf("HXEmu v%d.%d.%d\n", APP_MAJOR, APP_MINOR, APP_REVISION);
+	#ifdef FRONTEND_SDL2
+	frontend = new FrontendSdl2();
+	#elif FRONTEND_CLI
+	frontend = new FrontendCli();
+	#endif
+
+	printf("HXEmu v%d.%d.%d (%s)\n", APP_MAJOR, APP_MINOR, APP_REVISION, frontend->name);
 	printf("Firmware path: %s\n", rompath);
 	putchar('\n');
-
-	// Initialize
-	sdl_init();
-	fonts_init();
 
 	// Set up HX-20 instance
 	hx20_machine = new CHX20();
@@ -77,111 +81,30 @@ int main(int argc, char **argv) {
 		hx20_machine->load_option_rom(optionrompath);
 	}
 
-	hx20_interface = new CHX20InterfaceWidget(hx20_machine, 0, 0);
-
-	hx20_thread = SDL_CreateThread(hx20_run, "", hx20_machine);
-
 	// Bind process termination handler
 	atexit(shutdown);
 
-	// Main loop
-	SDL_Event event;
-	while (1) {
-		hx20_interface->draw(screen);
+	// Start frontend
+	frontend->start(hx20_machine);
 
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE) {
-						SDL_Quit();
-						return 0;
-					}
-					else {
-						hx20_interface->sdl_keydown(event.key.keysym.sym);
-					}
-					break;
+	// Start HX-20 processing thread
+	hx20_thread = SDL_CreateThread(hx20_run, "", hx20_machine);
 
-				case SDL_KEYUP:
-					hx20_interface->sdl_keyup(event.key.keysym.sym);
-					break;
+	// Run frontend (blocking)
+	frontend->run();
 
-				case SDL_MOUSEBUTTONDOWN:
-					hx20_interface->mousedown(event.button.x, event.button.y);
-					break;
-
-				case SDL_MOUSEBUTTONUP:
-					hx20_interface->mouseup(event.button.x, event.button.y);
-					break;
-
-				case SDL_QUIT:
-					SDL_Quit();
-					return 0;
-
-				default:
-					break;
-			}
-		}
-
-		// Render
-		SDL_RenderClear(sdl_renderer);
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
-		SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
-		SDL_RenderPresent(sdl_renderer);
-		SDL_DestroyTexture(texture);
-
-		// Wait a little bit (TODO: improve me)
-		SDL_Delay(10);
-	}
-
+	// We're done
 	return 0;
 }
 
-void sdl_init() {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	// Clean up nicely on exit
-	atexit(SDL_Quit);
-
-	// Initialize SDL_ttf
-	if (TTF_Init() < 0) {
-		fprintf(stderr, "Unable to initialize SDL_ttf\n");
-		exit(1);
-	}
-
-	// Create window
-	char s_wintitle[256];
-	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
-
-	int ui_width = 992;
-	int ui_height = 528;
-
-	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ui_width, ui_height, 0);
-	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-	screen = SDL_CreateRGBSurface(SDL_RLEACCEL, ui_width, ui_height, 32, 0, 0, 0, 0);
-
-	if (screen == NULL) {
-		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0xAA, 0xAA, 0xAA));
-}
-
 void shutdown() {
+	frontend->stop();
 	//SDL_KillThread(hx20_thread);
 	//delete(hx20_machine);
-
-	fonts_quit();
-	TTF_Quit();
-	SDL_Quit();
 }
 
 int hx20_run(void *data) {
-	CHX20 *hx20 = (CHX20*)data;
+	CHX20 *hx20 = (CHX20 *)data;
 
 	int i;
 	while (1) {
@@ -194,4 +117,3 @@ int hx20_run(void *data) {
 
 	return 0;
 }
-
