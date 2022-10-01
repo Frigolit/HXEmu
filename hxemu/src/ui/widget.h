@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #ifndef __UI_WIDGET_H__
 #define __UI_WIDGET_H__
 
@@ -25,4 +27,4 @@ class CWidget {
 };
 
 #endif
-
+#endif

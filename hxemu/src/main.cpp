@@ -5,7 +5,9 @@
 // =============================================================================
 
 #include <iostream>
-using namespace std;
+#include <cstring>
+#include <thread>
+#include <chrono>
 
 #include <stdio.h>
 
@@ -23,16 +25,12 @@ using namespace std;
 #include "hx20.h"
 #include "fonts.h"
 
-#include "ui/hx20_interface.h"
-
-#include <SDL2/SDL.h>
-
 Frontend *frontend;
 
 CHX20 *hx20_machine;
-SDL_Thread *hx20_thread;
+std::thread *hx20_thread;
 
-int hx20_run(void *data);
+int hx20_run(void);
 void shutdown();
 
 int main(int argc, char **argv) {
@@ -69,7 +67,7 @@ int main(int argc, char **argv) {
 	frontend = new FrontendCli();
 	#endif
 
-	printf("HXEmu v%d.%d.%d (%s)\n", APP_MAJOR, APP_MINOR, APP_REVISION, frontend->name);
+	printf("HXEmu v%d.%d.%d\n", APP_MAJOR, APP_MINOR, APP_REVISION);
 	printf("Firmware path: %s\n", rompath);
 	putchar('\n');
 
@@ -88,7 +86,7 @@ int main(int argc, char **argv) {
 	frontend->start(hx20_machine);
 
 	// Start HX-20 processing thread
-	hx20_thread = SDL_CreateThread(hx20_run, "", hx20_machine);
+	std::thread hx20_thread(hx20_run);
 
 	// Run frontend (blocking)
 	frontend->run();
@@ -103,16 +101,14 @@ void shutdown() {
 	//delete(hx20_machine);
 }
 
-int hx20_run(void *data) {
-	CHX20 *hx20 = (CHX20 *)data;
-
+int hx20_run(void) {
 	int i;
 	while (1) {
 		for (i = 0; i < 3200; i++) {
-			hx20->think();
+			hx20_machine->think();
 		}
 
-		SDL_Delay(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
 	return 0;

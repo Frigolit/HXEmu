@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #include "button.h"
 
 #include "../fonts.h"
@@ -136,3 +138,5 @@ void CButton::mouseup(int cx, int cy) {
 		cb_click(this, 1, 0);
 	}
 }
+
+#endif

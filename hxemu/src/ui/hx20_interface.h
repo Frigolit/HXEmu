@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #ifndef __UI_HX20_H__
 #define __UI_HX20_H__
 
@@ -28,4 +30,4 @@ class CHX20InterfaceWidget : public CWidget {
 };
 
 #endif
-
+#endif

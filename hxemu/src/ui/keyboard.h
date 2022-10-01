@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #ifndef __UI_KEYBOARD_H__
 #define __UI_KEYBOARD_H__
 
@@ -34,4 +36,4 @@ class CKeyboardWidget : public CWidget {
 };
 
 #endif
-
+#endif

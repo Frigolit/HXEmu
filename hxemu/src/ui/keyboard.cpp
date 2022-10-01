@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #include "keyboard.h"
 
 #include "jsoncpp/json/json.h"
@@ -186,3 +188,5 @@ void CKeyboardWidget::sdl_keyup(int keysym) {
 		button_callback(sdl_keymap->at(keysym), 1, 0);
 	}
 }
+
+#endif

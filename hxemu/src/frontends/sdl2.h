@@ -15,8 +15,6 @@ class FrontendSdl2 : public Frontend {
 		virtual void stop();
 		virtual void run();
 
-		char name[32] = "SDL2";
-
 	protected:
 		SDL_Window *sdl_window;
 		SDL_Renderer *sdl_renderer;

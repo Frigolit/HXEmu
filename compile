@@ -6,7 +6,7 @@ mapping frontends = ([
 		"libs": ({ "sdl2", "SDL2_ttf", "SDL2_image" }),
 	]),
 	"cli": ([
-		"caption": "Command-Line Interface (CLI)"
+		"caption": "Command-Line Interface (CLI)",
 	])
 ]);
 
@@ -134,6 +134,8 @@ int main(int argc, array(string) argv) {
 	// Add library dependencies
 	array libs = ({ "jsoncpp" });
 	libs += frontends[flags->frontend->value]->libs || ({ });
+
+	s_ldflags += " -lpthread";
 
 	foreach (libs, string lib) {
 		mapping m = Process.run(s_pkgconfig + " --libs " + lib);

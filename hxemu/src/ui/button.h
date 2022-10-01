@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #ifndef __UI_BUTTON_H__
 #define __UI_BUTTON_H__
 
@@ -36,4 +38,4 @@ class CButton : public CWidget {
 };
 
 #endif
-
+#endif

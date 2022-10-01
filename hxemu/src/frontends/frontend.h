@@ -8,8 +8,6 @@ class Frontend {
 		virtual void start(CHX20 *) {};
 		virtual void stop() {};
 		virtual void run() {};
-
-		char name[32];
 };
 
 #endif

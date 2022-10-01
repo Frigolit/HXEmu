@@ -4,6 +4,7 @@
 // @info https://frigolit.net/archive/datasheets/PD7227.pdf
 // =============================================================================
 
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
 

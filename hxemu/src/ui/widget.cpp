@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #include "widget.h"
 
 CWidget::CWidget() {
@@ -31,3 +33,4 @@ bool CWidget::update() {
 	return true;
 }
 
+#endif

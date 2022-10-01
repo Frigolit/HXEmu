@@ -1,9 +1,13 @@
+#ifdef FRONTEND_SDL2
+
 #include "sdl2.h"
 
 #include "../fonts.h"
 #include "../version.h"
 
 void FrontendSdl2::start(CHX20 *hx20) {
+	printf("Initializing SDL2 frontend...\n");
+
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 		exit(1);
@@ -100,3 +104,5 @@ void FrontendSdl2::run() {
 		SDL_Delay(10);
 	}
 }
+
+#endif

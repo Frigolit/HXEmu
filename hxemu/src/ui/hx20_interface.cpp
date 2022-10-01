@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
 
@@ -70,3 +72,5 @@ void CHX20InterfaceWidget::sdl_keydown(int keysym) {
 void CHX20InterfaceWidget::sdl_keyup(int keysym) {
 	keyboard->sdl_keyup(keysym);
 }
+
+#endif

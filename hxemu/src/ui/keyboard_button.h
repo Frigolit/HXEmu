@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #ifndef __UI_KEYBOARD_BUTTON_H__
 #define __UI_KEYBOARD_BUTTON_H__
 
@@ -17,4 +19,4 @@ class CKeyboardButton : public CButton {
 };
 
 #endif
-
+#endif
