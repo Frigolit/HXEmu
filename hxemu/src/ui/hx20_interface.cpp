@@ -9,7 +9,10 @@
 CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	::CWidget();
 
+	lcd = new CLCD();
+
 	this->hx20 = hx20;
+	hx20->set_lcd_interface(lcd);
 
 	CWidget::x = x;
 	CWidget::y = y;
@@ -43,7 +46,7 @@ bool CHX20InterfaceWidget::update() {
 }
 
 void CHX20InterfaceWidget::draw(SDL_Surface *dest) {
-	hx20->lcd->draw(surface, 288, 28);
+	lcd->draw(surface, 288, 28);
 	keyboard->draw(surface);
 
 	CWidget::draw(dest);
