@@ -5,13 +5,11 @@
 
 #include <stdio.h>
 
-#include "6301.h"
 #include "hx20.h"
+
 #include "hash.h"
 #include "rtc.h"
 #include "iocontroller.h"
-#include "lcd.h"
-#include "lcdcontroller.h"
 #include "testdevice.h"
 
 CHX20::CHX20() {
@@ -59,10 +57,8 @@ CHX20::CHX20() {
 	#endif
 
 	// Initialize LCD and controllers
-	lcd = new CLCD();
 	for (int i = 0; i < 6; i++) {
-		lcd_ctls[i] = new CLCDController();
-		lcd_ctls[i]->set_lcd(lcd, (i % 3) * 40, (i / 3) * 16);
+		lcd_ctls[i] = new CLCDController((i % 3) * 40, (i / 3) * 16);
 	}
 
 	// Add master MCU memory devices
@@ -103,6 +99,12 @@ CHX20::CHX20() {
 
 	// Reset
 	reset();
+}
+
+void CHX20::set_lcd_interface(LcdInterface *lcdif) {
+	for (int i = 0; i < 6; i++) {
+		lcd_ctls[i]->set_lcd(lcdif);
+	}
 }
 
 void CHX20::load_roms(char *dirname) {
@@ -159,7 +161,6 @@ CHX20::~CHX20() {
 	delete(mcu_secondary);
 
 	delete(rtc);
-	delete(lcd);
 	delete(ioctl);
 
 	delete(ram0);

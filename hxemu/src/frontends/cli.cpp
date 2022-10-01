@@ -7,16 +7,18 @@
 
 void FrontendCli::start(CHX20 *hx20) {
 	printf("Initializing CLI frontend...\n");
+	lcd = new CliLcdInterface();
+	hx20->set_lcd_interface(lcd);
 }
 
 void FrontendCli::stop() {
 }
 
 void FrontendCli::run() {
-	printf("\e[2J\e[1;1H");
-
 	while (1) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		printf("\e[2J\e[1;1H");
+		lcd->redraw();
+		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	}
 }
 

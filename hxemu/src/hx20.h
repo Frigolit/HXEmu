@@ -10,7 +10,7 @@
 #include "ram.h"
 #include "rom.h"
 #include "rtc.h"
-#include "lcd.h"
+#include "lcd_interface.h"
 #include "lcdcontroller.h"
 #include "fakesecondary.h"
 #include "iocontroller.h"
@@ -22,12 +22,13 @@ class CHX20 {
 		~CHX20();
 
 		C6301 *mcu_master;	// FIXME: This isn't supposed to be public
-		CLCD *lcd;
 		CIOController *ioctl;
 
 		void think();
 		void poweroff();
 		void reset();
+
+		void set_lcd_interface(LcdInterface *);
 
 		void load_roms(char *dirname);
 		void load_option_rom(char *path);

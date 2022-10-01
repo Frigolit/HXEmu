@@ -9,10 +9,13 @@
 #include <stdlib.h>
 
 #include "lcdcontroller.h"
-#include "lcd.h"
+#include "lcd_interface.h"
 
-CLCDController::CLCDController() {
+CLCDController::CLCDController(uint8_t x, uint8_t y) {
 	lcd = NULL;
+	lcd_x = x;
+	lcd_y = y;
+
 	ram = (uint8_t *)malloc(128);
 
 	reset();
@@ -29,10 +32,8 @@ void CLCDController::reset() {
 	mode = 0;
 }
 
-void CLCDController::set_lcd(CLCD *l, uint8_t x, uint8_t y) {
+void CLCDController::set_lcd(LcdInterface *l) {
 	lcd = l;
-	lcd_x = x;
-	lcd_y = y;
 }
 
 void CLCDController::apply_ptr_op(uint8_t n) {
@@ -137,8 +138,12 @@ void CLCDController::command(uint8_t n) {
 			uint8_t n = (ram[ptr] |= (1 << bt));
 
 			for (uint8_t y = 0; y < 8; y++) {
-				if (n & (1 << y)) lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
-				else lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				if (n & (1 << y)) {
+					lcd->set_pixel(lcd_x + x, lcd_y + y + yb);
+				}
+				else {
+					lcd->clear_pixel(lcd_x + x, lcd_y + y + yb);
+				}
 			}
 		}
 

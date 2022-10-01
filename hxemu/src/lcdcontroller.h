@@ -8,22 +8,22 @@
 
 #include <stdint.h>
 
-#include "lcd.h"
+#include "lcd_interface.h"
 
 class CLCDController {
 	public:
-		CLCDController();
+		CLCDController(uint8_t x, uint8_t y);
 		~CLCDController();
 
 		void reset();
 
-		void set_lcd(CLCD *l, uint8_t x, uint8_t y);
+		void set_lcd(LcdInterface *);
 
 		void data(uint8_t n);
 		void command(uint8_t n);
 
 	private:
-		CLCD *lcd;
+		LcdInterface *lcd;
 		uint8_t lcd_x;
 		uint8_t lcd_y;
 
