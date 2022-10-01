@@ -1,264 +1,496 @@
-#!/bin/bash
+#!/usr/bin/env pike
 
-xwhich() {
-	R="`which ${1} 2>/dev/null`"
-	if [ "$?" == "0" ]; then echo "${R}"; fi
+mapping frontends = ([
+	"sdl2": ([
+		"caption": "SDL2",
+		"libs": ({ "sdl2", "SDL2_ttf", "SDL2_image" }),
+	]),
+	"cli": ([
+		"caption": "Command-Line Interface (CLI)"
+	])
+]);
+
+mapping flags = ([
+	"static": ([
+		"description": "Statically link the executable.",
+		"type": "bool",
+		"default": 0,
+		"ldflags": lambda(mapping flag) {
+			return flag->value && "-static";
+		},
+		"buildroot_suffix": lambda(mapping flag) {
+			return flag->value && "static";
+		},
+	]),
+	"frontend": ([
+		"description": "Specifies the frontend to build.",
+		"type": "enum",
+		"values": (< "sdl2", "cli" >),
+		"default": "sdl2",
+		"cxxflags": lambda(mapping flag) {
+			return "-DFRONTEND_" + upper_case(flag->value);
+		},
+		"buildroot_suffix": lambda(mapping flag) {
+			return flag->value;
+		},
+		"hxemu_suffix": lambda(mapping flag) {
+			return (flag->value != flag->default) && flag->value;
+		},
+	]),
+]);
+
+int main(int argc, array(string) argv) {
+	array a_flagkeys = sort(indices(flags));
+	mapping env = getenv();
+
+	// Parse command-line arguments
+	string|void s_host = Getopt.find_option(argv, "", "host", "HOST", "");
+
+	string|void s_cxx = Getopt.find_option(argv, "", "cxx", "CXX", "");
+	string|void s_ld = Getopt.find_option(argv, "", "ld", "LD", "");
+	string|void s_pkgconfig = Getopt.find_option(argv, "", "pkgconfig", "pkg-config", "");
+
+	string|void s_as02 = Getopt.find_option(argv, "", "as02", "AS02", "");
+
+	string|void s_cxxflags = Getopt.find_option(argv, "", "cxxflags", "CXXFLAGS", "");
+	string|void s_ldflags = Getopt.find_option(argv, "", "ldflags", "LDFLAGS", "");
+
+	int f_nolink = Getopt.find_option(argv, "", "no-link");
+
+	foreach (flags; string flag; mapping m) {
+		if (m->type == "bool") {
+			m->value = m->default;
+
+			if (Getopt.find_option(argv, "", flag)) {
+				m->value = 1;
+			}
+
+			if (Getopt.find_option(argv, "", "no-" + flag)) {
+				m->value = 0;
+			}
+		}
+		else if (m->type == "enum") {
+			m->value = Getopt.find_option(argv, "", flag, UNDEFINED, m->default);
+			if (!m->values[m->value]) {
+				werror("error: invalid argument %O for --%s.\n", m->value, flag);
+				return 1;
+			}
+		}
+	}
+
+	// Clear some potentially blank values
+	if (s_host == "") { s_host = UNDEFINED; }
+	if (s_cxx == "") { s_cxx = UNDEFINED; }
+	if (s_ld == "") { s_ld = UNDEFINED; }
+	if (s_pkgconfig == "") { s_pkgconfig = UNDEFINED; }
+	if (s_as02 == "") { s_as02 = UNDEFINED; }
+
+	// Auto-detect compilation environment as needed
+	if (!s_cxx) {
+		if (!(s_cxx = find_bin(s_host, ({ "g++", "clang++", "cpp" })))) {
+			werror("error: failed finding a c++ compiler, please specify with --cxx or the CXX environment variable.\n");
+			return 1;
+		}
+	}
+
+	if (!s_ld) {
+		if (!(s_ld = find_bin(s_host, ({ "g++", "clang++", "cpp", "ld" })))) {
+			werror("error: failed finding a linker, please specify with --ld or the LD environment variable.\n");
+			return 1;
+		}
+	}
+
+	if (!s_pkgconfig) {
+		if (!(s_pkgconfig = find_bin(s_host, ({ "pkg-config" })))) {
+			werror("error: failed finding pkg-config, please specify with --pkgconfig or the PKGCONFIG environment variable.\n");
+			return 1;
+		}
+	}
+
+	if (!s_as02) {
+		// Build HOST prefix not necessary, this is executed under the local architecture
+		string arch = uname()->machine;
+
+		if (arch == "i686" || arch == "x86_64") {
+			s_as02 = find_bin(UNDEFINED, ({ "as02", "as02-linux-x86" }));
+			if (!s_as02) {
+				s_as02 = find_bin(s_host, ({ "as02", "as02-linux-x86" }));
+			}
+		}
+		else {
+			s_as02 = find_bin(UNDEFINED, ({ "as02" }));
+			if (!s_as02) {
+				s_as02 = find_bin(s_host, ({ "as02" }));
+			}
+		}
+	}
+
+	// Ensure compiler supports C++11
+	if (Process.run(s_cxx + " -std=c++11 -dM -E -x c++ /dev/null")->exitcode) {
+		werror("error: %O doesn't support c++11, please specify a compatible compiler using --cxx or the CXX environment variable.\n");
+		return 1;
+	}
+
+	// Add library dependencies
+	array libs = ({ "jsoncpp" });
+	libs += frontends[flags->frontend->value]->libs || ({ });
+
+	foreach (libs, string lib) {
+		mapping m = Process.run(s_pkgconfig + " --libs " + lib);
+		if (m->exitcode) {
+			werror("error: pkg-config failed for %O\n", lib);
+			return 1;
+		}
+
+		s_ldflags += " " + String.trim_all_whites(m->stdout);
+
+		m = Process.run(s_pkgconfig + " --cflags " + lib);
+		if (m->exitcode) {
+			werror("error: pkg-config failed for %O\n", lib);
+			return 1;
+		}
+
+		s_cxxflags += " " + String.trim_all_whites(m->stdout);
+	}
+
+	// Update CXXFLAGS and LDFLAGS from flags
+	foreach (a_flagkeys, string k) {
+		if (flags[k]->cxxflags) {
+			string x = flags[k]->cxxflags(flags[k]);
+			if (x && x != "") {
+				s_cxxflags += " " + x;
+			}
+		}
+
+		if (flags[k]->ldflags) {
+			string x = flags[k]->ldflags(flags[k]);
+			if (x && x != "") {
+				s_ldflags += " " + x;
+			}
+		}
+	}
+
+	// Reconstruct CXXFLAGS and LDFLAGS
+	s_cxxflags = Array.uniq((s_cxxflags / " ") - ({ "" })) * " ";
+	s_ldflags = Array.uniq((s_ldflags / " ") - ({ "" })) * " ";
+
+	// Detect host prefix from C++ compiler if unspecified
+	if (!s_host) {
+		mapping m = Process.run(s_cxx + " -dumpmachine");
+		if (m->exitcode) {
+			werror("error: failed executing c++ compiler.\n");
+			return 1;
+		}
+
+		s_host = String.trim_all_whites(m->stdout);
+	}
+
+	// Determine build directory
+	string buildroot = "build/" + (s_host / "-")[0];
+
+	foreach (a_flagkeys, string k) {
+		if (flags[k]->buildroot_suffix) {
+			string x = flags[k]->buildroot_suffix(flags[k]);
+			if (x && x != "") {
+				buildroot += "-" + x;
+			}
+		}
+	}
+
+	// Determine executable filename
+	string hxemu_filename = combine_path(buildroot, "release/hxemu");
+
+	foreach (a_flagkeys, string k) {
+		if (flags[k]->hxemu_suffix) {
+			string x = flags[k]->hxemu_suffix(flags[k]);
+			if (x && x != "") {
+				hxemu_filename += "-" + x;
+			}
+		}
+	}
+
+	// Detect HXEmu version
+	string hxemu_version;
+	{
+		string local_cc = find_bin(s_host, ({ "g++", "clang++", "cpp", "gcc", "clang", "cc" }));
+		string code = "#include \"hxemu/src/version.h\"\n#include <stdio.h>\nint main() { printf(\"%d.%d.%d\", APP_MAJOR, APP_MINOR, APP_REVISION); }";
+		string tmpfile = "/tmp/hxemuc-" + String.string2hex(random_string(8));
+
+		mapping m = Process.run(local_cc + " -x c -o \"" + tmpfile + "\" -", ([ "stdin": code ]));
+		if (m->exitcode) {
+			if (Stdio.is_file(tmpfile)) {
+				rm(tmpfile);
+			}
+
+			werror("error: failed retrieving hxemu version (compile)\n%s", m->stderr);
+			return 1;
+		}
+
+		m = Process.run(tmpfile);
+		if (m->exitcode) {
+			if (Stdio.is_file(tmpfile)) {
+				rm(tmpfile);
+			}
+
+			werror("error: failed retrieving hxemu version (execute)\n%s", m->stderr);
+			return 1;
+		}
+
+		hxemu_version = String.trim_all_whites(m->stdout);
+
+		rm(tmpfile);
+	}
+
+	// Print information
+	write("%s\n", "=" * 80);
+	write("HXEmu v%s\n", hxemu_version);
+	write("%s\n", "-" * 80);
+	write("Host:           %s\n", s_host);
+	write("Frontend:       %s\n", frontends[flags->frontend->value]->caption);
+	write("Build path:     %s\n", buildroot);
+	write("Executable:     %s\n", hxemu_filename);
+	write("%s\n", "-" * 80);
+	write("AS02 assembler: %s\n", s_as02 || "(n/a)");
+	write("C++ compiler:   %s\n", s_cxx);
+	write("Linker:         %s\n", s_ld);
+	write("%s\n", "-" * 80);
+	write("CXXFLAGS:       %s\n", s_cxxflags);
+	write("LDFLAGS:        %s\n", s_ldflags);
+	write("%s\n", "=" * 80);
+	write("\n");
+
+	// Create directories
+	string path_work = combine_path(buildroot, "work");
+	string path_release = combine_path(buildroot, "release");
+
+	string path_cache = combine_path(path_work, "cache.bin");
+
+	if (!Stdio.is_dir(path_work)) { Stdio.mkdirhier(path_work); }
+	if (!Stdio.is_dir(path_release)) { Stdio.mkdirhier(path_release); }
+
+	// Load or initialize cache
+	mapping cache;
+	if (Stdio.is_file(path_cache)) {
+		catch { cache = decode_value(Stdio.read_file(path_cache)); };
+		if (cache->version != 1) {
+			cache = UNDEFINED;
+		}
+	}
+
+	if (!cache) {
+		cache = ([
+			"version": 1,
+			"sources": ([ ]),
+			"headers": ([ ]),
+		]);
+	}
+
+	// Define some build variables
+	multiset m_compile = (< >);
+	bool do_link = false;
+
+	// Detect sources file
+	write("Detecting source files... ");
+	array sources = find_files(({ "*.cpp", "*.c" }), "hxemu");
+	write("OK [%d file(s)]\n", sizeof(sources));
+
+	// Detect missing source files, force linking if any
+	foreach (cache->sources; string s; mapping src) {
+		if (!Stdio.is_file(s)) {
+			m_delete(cache->sources, s);
+			do_link = true;
+		}
+	}
+
+	// Clean up modified/missing header dependencies
+	foreach (sort(indices(cache->headers)), string h) {
+		mapping hdr = cache->headers[h];
+		Stdio.Stat s = file_stat(h);
+
+		if (!s || s->mtime != hdr->mtime || s->size != hdr->size) {
+			write("- Modified dependency: %s\n", h);
+			m_delete(cache->headers, h);
+		}
+	}
+
+	// Update source file dependencies and cache records
+	for (int i = 0; i < sizeof(sources); i++) {
+		mapping fc = cache->sources[sources[i]];
+
+		Stdio.Stat s = file_stat(sources[i]);
+
+		bool build = true;
+
+		if (fc && fc->mtime == s->mtime && fc->size == s->size) {
+			build = false;
+
+			foreach (fc->headers, string h) {
+				if (!cache->headers[h]) {
+					build = true;
+					break;
+				}
+			}
+		}
+
+		if (!build) {
+			continue;
+		}
+
+		float p = ((float)(i + 1) / (float)sizeof(sources)) * 100.0;
+		write("\rUpdating source file dependencies... %d%%", (int)p);
+
+		mapping m = Process.run(s_cxx + " -c -H -std=c++11 -o /dev/null " + sources[i]);
+		array a = Array.uniq(sort(map(filter(m->stderr / "\n", Function.curry(glob)(".*")), lambda(string x) { return (x / ". ")[1]; })));
+		foreach (a, string b) {
+			if (!cache->headers[b]) {
+				Stdio.Stat fh = file_stat(b);
+
+				cache->headers[b] = ([
+					"sources": ({ sources[i] }),
+					"mtime": fh->mtime,
+					"size": fh->size,
+				]);
+			}
+			else {
+				cache->headers[b]->sources += ({ sources[i] });
+			}
+		}
+
+		cache->sources[sources[i]] = ([
+			"mtime": s->mtime,
+			"size": s->size,
+			"headers": a,
+		]);
+
+		m_compile[sources[i]] = 1;
+	}
+	write("\rUpdating source file dependencies... OK  \n");
+
+	// Check for missing or outdated objects
+	array objs = ({ });
+	foreach (sources, string src) {
+		string objfile = combine_path(path_work, "objs", ((src / ".")[0..<1] * ".") + ".o");
+		cache->sources[src]->obj = objfile;
+		objs += ({ objfile });
+
+		Stdio.Stat sx = file_stat(src);
+		Stdio.Stat sy = file_stat(objfile);
+
+		if (!sy || sx->mtime > sy->mtime) {
+			m_compile[src] = 1;
+		}
+	}
+
+	// Write cache file
+	Stdio.write_file(path_cache, encode_value_canonic(cache));
+
+	// Compile source files
+	if (sizeof(m_compile)) {
+		write("Compiling objects...\n");
+		int build_fail = 0;
+		foreach (sort(indices(m_compile)), string src) {
+			string objfile = cache->sources[src]->obj;
+			write(">> %s\n", src);
+
+			if (!Stdio.is_dir(dirname(objfile))) {
+				Stdio.mkdirhier(dirname(objfile));
+			}
+
+			array args = ({ s_cxx }) + (s_cxxflags / " ") + ({ "-c", "-o", objfile, src });
+			build_fail |= Process.create_process(args)->wait();
+			do_link = true;
+		}
+
+		if (build_fail) {
+			werror("error: compilation failed\n");
+			return 1;
+		}
+	}
+
+	// Should we link the executable?
+	if (!do_link) {
+		if (!Stdio.is_file(hxemu_filename)) {
+			do_link = true;
+		}
+		else {
+			int hxemu_mtime = file_stat(hxemu_filename)->mtime;
+
+			foreach (objs, string n) {
+				int m = file_stat(n)->mtime;
+				if (m > hxemu_mtime) {
+					do_link = true;
+					break;
+				}
+			}
+		}
+	}
+
+	// Link executable
+	if (do_link && !f_nolink) {
+		write("Linking HXEmu... ");
+
+		if (!Stdio.is_dir(dirname(hxemu_filename))) {
+			Stdio.mkdirhier(dirname(hxemu_filename));
+		}
+
+		array args = ({ s_ld }) + (s_ldflags / " ") + ({ "-o", hxemu_filename }) + objs;
+
+		if (Process.create_process(args)->wait()) {
+			werror("Linker command: %s\n", args * " ");
+			return 1;
+		}
+
+		write("OK\n");
+	}
+
+	// TODO: Build assets
+	return Process.create_process(({ "./data/compile" }), ([ "env": ([ "BUILDROOT": buildroot ]) ]))->wait();
 }
 
-export PATH="${PATH}:`pwd`/bin"
+string find_bin(string|void prefix, array(string) names) {
+	string d;
 
-# ================================================
-# Set some default values
-# ================================================
-export HXEMUFILENAME="hxemu"
+	if (prefix && prefix != "") {
+		prefix += "-";
+	}
+	else {
+		prefix = "";
+	}
 
-# ================================================
-# Clean up old build
-# ================================================
-if [ ! -d "build" ]; then mkdir build; fi
+	foreach (names, string n) {
+		if (d = Process.search_path(prefix + n)) {
+			return d;
+		}
+	}
 
-# ================================================
-# Fix executables
-# ================================================
-chmod +x hxemu/compile
-chmod +x data/compile
-if [ -d "bin" ]; then chmod +x bin/*; fi
+	return UNDEFINED;
+}
 
-# ================================================
-# Hacks for special targets
-# ================================================
-if [ "${TARGET}" == "i686-mingw32" ] || [ "${TARGET}" == "mingw32" ] || [ "${TARGET}" == "x86_64-w64-mingw32" ]; then
-	CXXFLAGS="${CXXFLAGS} -DNOTESTDEVICE"
-	LDFLAGS="-static-libgcc -static-libstdc++ ${LDFLAGS}"
-	export POSTLDFLAGS="${POSTLDFLAGS} -lSDL2"
-	export HXEMUFILENAME="hxemu.exe"
-fi
+array find_files(array(string) exts, string path) {
+	array r = ({ });
 
-# ================================================
-# Get machine info
-# ================================================
-if [ "${ARCH}" == "" ]; then
-	export ARCH="`arch 2>/dev/null || uname -m 2>/dev/null || echo unknown`"
-fi
+	array a = sort(get_dir(path));
+	array dirs = ({ });
 
-if [ "${KERNEL}" == "" ]; then
-	export KERNEL="`uname -s 2>/dev/null || echo unknown`"
-fi
+	foreach (a, string b) {
+		string p = combine_path(path, b);
+		Stdio.Stat s = file_stat(p);
 
-if [ "${KERNEL_VERSION}" == "" ]; then
-	export KERNEL_VERSION="`uname -r 2>/dev/null || echo unknown`"
-fi
+		if (s->isreg) {
+			foreach (exts, string ext) {
+				if (glob(ext, b)) {
+					r += ({ p });
+				}
+			}
+		}
+		else if (s->isdir) {
+			dirs += ({ p });
+		}
+	}
 
-# ================================================
-# Find executables
-# ================================================
-if [ "${AS02}" == "" ]; then
-	export AS02="`xwhich as02 2>/dev/null`"
+	foreach (dirs, string p) {
+		r += find_files(exts, p);
+	}
 
-	if [ "${AS02}" == "" ]; then
-		if [ "${KERNEL}" == "Linux" ]; then
-			if [ "${ARCH}" == "i686" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
-			if [ "${ARCH}" == "x86_64" ]; then export AS02="`xwhich as02-linux-x86 2>/dev/null`"; fi
-		fi
-	fi
-fi
-
-if [ "${CC}" == "" ]; then
-	if [ "${TARGET}" != "" ]; then
-		export CC="`xwhich ${TARGET}-gcc 2>/dev/null`"
-	else
-		if [ "${CHOST}" != "" ]; then
-			export CC="`xwhich ${CHOST}-gcc 2>/dev/null`"
-		fi
-
-		if [ "${CC}" == "" ]; then
-			export CC="`xwhich gcc 2>/dev/null`"
-		fi
-
-		if [ "${CC}" == "" ]; then
-			export CC="`xwhich cc 2>/dev/null`"
-		fi
-	fi
-
-	if [ "${CC}" == "" ]; then
-		echo "ERROR: No C compiler found :("
-		exit 1
-	fi
-fi
-
-if [ "${CXX}" == "" ]; then
-	if [ "${TARGET}" != "" ]; then
-		export CXX="`xwhich ${TARGET}-g++ 2>/dev/null`"
-	else
-		if [ "${CHOST}" != "" ]; then
-			export CXX="`xwhich ${CHOST}-g++ 2>/dev/null`"
-		fi
-
-		if [ "${CXX}" == "" ]; then
-			export CXX="`xwhich g++ 2>/dev/null`"
-		fi
-
-		if [ "${CXX}" == "" ]; then
-			export CXX="`xwhich cpp 2>/dev/null`"
-		fi
-	fi
-
-	if [ "${CXX}" == "" ]; then
-		echo "ERROR: No C++ compiler found :("
-		exit 1
-	fi
-fi
-
-if [ "${PIKE}" == "" ]; then
-	export PIKE="`xwhich pike 2>/dev/null`"
-fi
-
-if [ "${HOST_CC}" == "" ]; then
-	if [ "${TARGET}" == "" ]; then
-		export HOST_CC="${CC}";
-	else
-		export HOST_CC="`xwhich gcc 2>/dev/null`"
-
-		if [ "${HOST_CC}" == "" ]; then
-			echo "ERROR: No host C compiler found :("
-			exit 1
-		fi
-	fi
-fi
-
-if [ "${HOST_CXX}" == "" ]; then
-	if [ "${TARGET}" == "" ]; then
-		export HOST_CXX="${CXX}";
-	else
-		export HOST_CXX="`xwhich g++ 2>/dev/null`"
-
-		if [ "${HOST_CXX}" == "" ]; then
-			echo "ERROR: No host C++ compiler found :("
-			exit 1
-		fi
-	fi
-fi
-
-# ================================================
-# Prepare build directory
-# ================================================
-if [ "${TARGET}" != "" ]; then
-	export BUILDROOT="build/${TARGET}"
-else
-	export BUILDROOT="build/${ARCH}"
-fi
-
-if [ ! -d "${BUILDROOT}" ]; then mkdir ${BUILDROOT}; fi
-if [ ! -d "${BUILDROOT}/release" ]; then mkdir ${BUILDROOT}/release; fi
-if [ ! -d "${BUILDROOT}/work" ]; then mkdir ${BUILDROOT}/work; fi
-
-# ================================================
-# Detect C++11 support
-# ================================================
-
-${CXX} -std=c++11 -dM -E -x c++ /dev/null 2>/dev/null >/dev/null
-if [ "$?" != "0" ]; then
-	echo "ERROR: ${CXX} doesn't support C++11!"
-	exit 1
-fi
-
-# ================================================
-# Find libraries
-# ================================================
-if [ "${KERNEL}" == "SunOS" ]; then
-	# TODO: Add support for SDL_ttf
-	if [ "${PKG_SDL}" == "" ]; then
-		pkg list developer/gcc-48 &>/dev/null
-		if [ "$?" == "1" ]; then
-			echo "ERROR: Missing package developer/gcc-48"
-			exit 1
-		fi
-
-		pkg list system/header &>/dev/null
-		if [ "$?" == "1" ]; then
-			echo "ERROR: Missing package system/header"
-			exit 1
-		fi
-
-		pkg list library/sdl2 &> /dev/null
-		if [ "$?" == "1" ]; then
-			echo "ERROR: Missing package library/sdl2"
-			exit 1
-		fi
-
-		LDFLAGS="${LDFLAGS} -lxnet -lSDL2 -lSDL2_ttf -lSDL2_image -ljsoncpp"
-	fi
-elif [ "${KERNEL}" == "Linux" ]; then
-	if [ "${TARGET}" != "" ]; then
-		PKG_SDL="`${TARGET}-pkg-config --libs sdl2 SDL2_ttf SDL2_image jsoncpp 2>/dev/null`"
-		CXXFLAGS="${CXXFLAGS} $(${TARGET}-pkg-config --cflags sdl2 SDL2_ttf SDL2_image jsoncpp)"
-	else
-		PKG_SDL="`pkg-config --libs sdl2 SDL2_ttf SDL2_image jsoncpp 2>/dev/null`"
-		CXXFLAGS="${CXXFLAGS} $(pkg-config --cflags sdl2 SDL2_ttf SDL2_image jsoncpp)"
-	fi
-
-	if [ "${PKG_SDL}" == "" ]; then
-		echo "ERROR: Cannot find one or more of the following libraries: SDL2, SDL2_image, SDL2_ttf"
-		exit 1
-	fi
-
-	LDFLAGS="${LDFLAGS} ${PKG_SDL}"
-elif [ "${KERNEL}" == "Darwin" ]; then
-	# TODO: Add support for SDL2_ttf and SDL2_image
-	if [ "`xwhich sdl2-config 2>/dev/null`" == "" ]; then
-		echo "ERROR: Cannot find SDL2!"
-		exit 1
-	fi
-
-	LDFLAGS="${LDFLAGS} $(sdl2-config --libs)"
-	CXXFLAGS="${CXXFLAGS} $(sdl2-config --cflags)"
-else
-	if [ "${PKG_SDL}" == "" ]; then
-		echo "ERROR: Unhandled auto-detection for SDL2, SDL2_image and SDL2_ttf on ${KERNEL}! Please set PKG_SDL=1 and set LDFLAGS/CXXFLAGS manually. Sorry :("
-		exit 1
-	fi
-fi
-
-export LDFLAGS
-export CXXFLAGS="-Wall -ffunction-sections -std=c++11 ${CXXFLAGS}"
-export CFLAGS="-Wall -ffunction-sections ${CFLAGS}"
-
-# ================================================
-# Print environment information
-# ================================================
-echo "Architecture:          ${ARCH}"
-echo "Kernel:                ${KERNEL} ${KERNEL_VERSION}"
-echo "Build root:            ${BUILDROOT}"
-echo "--------------------------------------------------------------------------------"
-echo "6301 Assembler:        ${AS02}"
-
-if [ "${CC}" == "${HOST_CC}" ]; then
-	echo "C compiler:            ${CC}"
-else
-	echo "C compiler (target):   ${CC}"
-	echo "C compiler (host):     ${HOST_CC}"
-fi
-if [ "${CXX}" == "${HOST_CXX}" ]; then
-	echo "C++ compiler:          ${CXX}"
-else
-	echo "C++ compiler (target): ${CXX}"
-	echo "C++ compiler (host):   ${HOST_CXX}"
-fi
-
-echo "Pike executable:       ${PIKE}"
-echo "--------------------------------------------------------------------------------"
-echo "C flags:               ${CFLAGS}"
-echo "C++ flags:             ${CXXFLAGS}"
-echo "Libraries:             ${LDFLAGS}"
-echo ""
-
-# ================================================
-# Build HXEmu
-# ================================================
-./hxemu/compile || exit 1
-
-# ================================================
-# Build and install data files
-# ================================================
-./data/compile || exit 1
-
+	return r;
+}
