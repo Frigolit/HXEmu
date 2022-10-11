@@ -10,6 +10,8 @@
 #include <chrono>
 
 #include <stdio.h>
+#include <unistd.h>
+#include <libgen.h>
 
 #ifdef FRONTEND_SDL2
 #include "frontends/sdl2.h"
@@ -34,6 +36,12 @@ int hx20_run(void);
 void shutdown();
 
 int main(int argc, char **argv) {
+	if (argc >= 1 && strlen(argv[0]) < 256) {
+		char basepath[256];
+		strncpy(basepath, argv[0], 256);
+		chdir(dirname(basepath));
+	}
+
 	char rompath[256];
 	char optionrompath[256];
 
