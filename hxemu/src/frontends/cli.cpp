@@ -7,11 +7,15 @@
 
 void FrontendCli::start(CHX20 *hx20) {
 	printf("Initializing CLI frontend...\n");
+	std::cout << "\e[?1049h\e[2J\e[1;1H";
+	std::cout << "\e[?25l";
 	lcd = new CliLcdInterface();
 	hx20->set_lcd_interface(lcd);
 }
 
 void FrontendCli::stop() {
+	std::cout << "\e[?1049l";
+	std::cout << "\e[?25h";
 }
 
 void FrontendCli::run() {

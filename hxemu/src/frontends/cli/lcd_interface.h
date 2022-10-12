@@ -3,11 +3,14 @@
 #ifndef __FRONTENDS_CLI_LCD_INTERFACE_H__
 #define __FRONTENDS_CLI_LCD_INTERFACE_H__
 
+#include <mutex>
+
 #include "../../lcd_interface.h"
 
 class CliLcdInterface : public LcdInterface {
 	public:
 		CliLcdInterface();
+		~CliLcdInterface();
 
 		virtual void set_pixel(uint8_t x, uint8_t y);
 		virtual void clear_pixel(uint8_t x, uint8_t y);
@@ -18,6 +21,7 @@ class CliLcdInterface : public LcdInterface {
 	private:
 		uint8_t pixels[480];
 		uint8_t changes[120];
+		std::mutex *mtx;
 };
 
 #endif

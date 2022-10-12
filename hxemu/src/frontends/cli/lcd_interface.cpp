@@ -2,39 +2,57 @@
 
 #include <cstring>
 #include <iostream>
+#include <mutex>
 
 #include "lcd_interface.h"
 
 #define PIXEL(x, y) (!!(pixels[((x) + ((y) * 120)) / 8] & (1 << ((x) % 8))))
 
 CliLcdInterface::CliLcdInterface() {
+	mtx = new std::mutex();
+
 	memset(pixels, 0xFF, 480);
-	memset(changes, 0, 120);
+	memset(changes, 0xFF, 120);
+}
+
+CliLcdInterface::~CliLcdInterface() {
+	delete(mtx);
 }
 
 void CliLcdInterface::set_pixel(uint8_t x, uint8_t y) {
 	int pn = (x + (y * 120)) / 8;
 	int cn = ((x / 2) + ((y / 2) * 60)) / 8;
 
+	mtx->lock();
+
 	pixels[pn] |= (1 << (x % 8));
 	changes[cn] |= (1 << ((x / 2) % 8));
+
+	mtx->unlock();
 }
 
 void CliLcdInterface::clear_pixel(uint8_t x, uint8_t y) {
 	int pn = (x + (y * 120)) / 8;
 	int cn = ((x / 2) + ((y / 2) * 60)) / 8;
 
+	mtx->lock();
+
 	pixels[pn] &= ~(1 << (x % 8));
 	changes[cn] |= (1 << ((x / 2) % 8));
+
+	mtx->unlock();
 }
 
 void CliLcdInterface::update() {
 	bool did_draw = false;
-
 	int px, py;
+
+	mtx->lock();
+
 	for (int y = 0; y < 16; y++) {
 		for (int x = 0; x < 60; x++) {
 			int cn = ((x / 2) + ((y / 2) * 60)) / 8;
+
 			if (changes[cn] & (1 << ((x / 2) % 8))) {
 				if (!did_draw) {
 					did_draw = true;
@@ -45,7 +63,7 @@ void CliLcdInterface::update() {
 				px = x * 2;
 				py = y * 2;
 
-				std::cout << "\e[" << (y + 2) << ";" << (x + 1) << "H";
+				std::cout << "\e[" << (y + 2) << ";" << (x + 2) << "H";
 
 				uint8_t c =
 					(PIXEL(px, py))
@@ -110,6 +128,8 @@ void CliLcdInterface::update() {
 	}
 
 	memset(changes, 0, 120);
+
+	mtx->unlock();
 }
 
 void CliLcdInterface::redraw() {
@@ -122,6 +142,8 @@ void CliLcdInterface::redraw() {
 		std::cout << "\xE2\x96\x91";
 	}
 	std::cout << std::endl;
+
+	mtx->lock();
 
 	int px, py;
 	for (int y = 0; y < 16; y++) {
@@ -195,6 +217,8 @@ void CliLcdInterface::redraw() {
 	std::cout << "\e[0m" << std::endl;
 
 	memset(changes, 0, 120);
+
+	mtx->unlock();
 }
 
 #endif

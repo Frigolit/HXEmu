@@ -9,9 +9,9 @@
 #include <thread>
 #include <chrono>
 
-#include <stdio.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <signal.h>
 
 #ifdef FRONTEND_SDL2
 #include "frontends/sdl2.h"
@@ -20,6 +20,10 @@
 #ifdef FRONTEND_CLI
 #include "frontends/cli.h"
 #endif
+
+#include "logging/logger.h"
+#include "logging/console_logger.h"
+#include "logging/null_logger.h"
 
 #include "hash.h"
 #include "config.h"
@@ -33,7 +37,9 @@ CHX20 *hx20_machine;
 std::thread *hx20_thread;
 
 int hx20_run(void);
-void shutdown();
+void shutdown(int);
+
+Logger *logger;
 
 int main(int argc, char **argv) {
 	if (argc >= 1 && strlen(argv[0]) < 256) {
@@ -47,7 +53,7 @@ int main(int argc, char **argv) {
 
 	if (argc > 1) {
 		if (strlen(argv[1]) > 255) {
-			fprintf(stderr, "error: argument 1 (firmware path) is too long (max 255 chars).\n");
+			std::cerr << "error: argument 1 (firmware path) is too long (max 255 chars)." << std::endl;
 			return 1;
 		}
 
@@ -59,7 +65,7 @@ int main(int argc, char **argv) {
 
 	if (argc > 2) {
 		if (strlen(argv[2]) > 255) {
-			fprintf(stderr, "error: argument 2 (option rom path) is too long (max 255 chars).\n");
+			std::cerr << "error: argument 2 (option rom path) is too long (max 255 chars)." << std::endl;
 			return 1;
 		}
 
@@ -70,14 +76,23 @@ int main(int argc, char **argv) {
 	}
 
 	#ifdef FRONTEND_SDL2
+	logger = new ConsoleLogger();
+	#elif FRONTEND_CLI
+	logger = new NullLogger();
+	#endif
+
+	#ifdef FRONTEND_SDL2
 	frontend = new FrontendSdl2();
 	#elif FRONTEND_CLI
 	frontend = new FrontendCli();
 	#endif
 
-	printf("HXEmu v%d.%d.%d\n", APP_MAJOR, APP_MINOR, APP_REVISION);
-	printf("Firmware path: %s\n", rompath);
-	putchar('\n');
+	char logbuf[256];
+
+	sprintf(logbuf, "HXEmu v%d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
+	logger->info(logbuf);
+	sprintf(logbuf, "Firmware path: %s", rompath);
+	logger->info(logbuf);
 
 	// Set up HX-20 instance
 	hx20_machine = new CHX20();
@@ -88,7 +103,8 @@ int main(int argc, char **argv) {
 	}
 
 	// Bind process termination handler
-	atexit(shutdown);
+	signal(2, shutdown);
+	signal(15, shutdown);
 
 	// Start frontend
 	frontend->start(hx20_machine);
@@ -99,14 +115,18 @@ int main(int argc, char **argv) {
 	// Run frontend (blocking)
 	frontend->run();
 
+	// Shutdown
+	shutdown(0);
+
 	// We're done
 	return 0;
 }
 
-void shutdown() {
+void shutdown(int sig) {
 	frontend->stop();
 	//SDL_KillThread(hx20_thread);
 	//delete(hx20_machine);
+	exit(0);
 }
 
 int hx20_run(void) {

@@ -3,9 +3,9 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdio>
+
+#include "logging/logger.h"
 
 #include "fakesecondary.h"
 
@@ -30,7 +30,9 @@ void FakeSecondary::step() {
 
 	uint8_t c = serial0->recv();
 
-	printf("FakeSecondary::think(): debug: received command %02X\n", c);
+	char logbuf[256];
+	sprintf(logbuf, "FakeSecondary::think(): debug: received command %02X", c);
+	logger->debug(logbuf);
 
 	if (state == 0) {
 		if (c == 0x00) {
@@ -61,20 +63,21 @@ void FakeSecondary::step() {
 
 		else if (c == 0x50) {
 			// Detect plug-in options
-			printf("FakeSecondary::think(): fixme: plugin options are not yet supported\n");
+			logger->notice("FakeSecondary::think(): fixme: plugin options are not yet supported");
 			serial0->send(0x00);
 		}
 
 		// Unknown command
 		else {
-			printf("FakeSecondary::think(): fixme: unhandled command %02X\n", c);
+			sprintf(logbuf, "FakeSecondary::think(): fixme: unhandled command %02X", c);
+			logger->warn(logbuf);
 		}
 	}
 	else if (state == 1) {
 		state = 0;
 
 		if (c == 0xAA) {
-			printf("FakeSecondary::think(): debug: power supply cut-off requested\n");
+			logger->debug("FakeSecondary::think(): power supply cut-off requested");
 			serial0->send(0x01);
 		}
 	}

@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#include "logging/logger.h"
+
 #include "hx20.h"
 
 #include "hash.h"
@@ -92,9 +94,13 @@ CHX20::CHX20() {
 		delete hash;
 	#endif
 
-	printf("Master CPU reset vector is 0x%02X%02X\n", membus->read(0xFFFE), membus->read(0xFFFF));
+	char logbuf[256];
+	sprintf(logbuf, "Master CPU reset vector is 0x%02X%02X", membus->read(0xFFFE), membus->read(0xFFFF));
+	logger->debug(logbuf);
+
 	#ifdef REALSECONDARY
-		printf("Secondary CPU reset vector is 0x%02X%02X\n", mcu_secondary->maskrom->read(0x0FFE), mcu_secondary->maskrom->read(0x0FFF));
+		sprintf(logbuf, "Secondary CPU reset vector is 0x%02X%02X", mcu_secondary->maskrom->read(0x0FFE), mcu_secondary->maskrom->read(0x0FFF));
+		logger->debug(logbuf);
 	#endif
 
 	// Reset
@@ -116,27 +122,38 @@ void CHX20::load_roms(char *dirname) {
 	}
 
 	// Checksum ROMs
+	char logbuf[256];
+
 	CHash *hash = new CHash();
 	uint8_t buf[8192];
+
 	for (int i = 0; i < 4; i++) {
 		for (int n = 0; n < 8192; n++) {
 			buf[n] = roms[i]->read(n);
 		}
-		printf("ROM #%d - Checksum: %08X\n", i, hash->crc32(buf, 8192));
+
+		sprintf(logbuf, "ROM #%d - Checksum: %08X", i, hash->crc32(buf, 8192));
+		logger->debug(logbuf);
 	}
+
 	delete hash;
 }
 
 void CHX20::load_option_rom(char *path) {
 	optionrom->load_from_file(path);
 
-	// Checksum ROMs
+	// Checksum ROM
+	char logbuf[256];
+
 	CHash *hash = new CHash();
 	uint8_t buf[8192];
 	for (int n = 0; n < 8192; n++) {
 		buf[n] = optionrom->read(n);
 	}
-	printf("Option ROM - Checksum: %08X\n", hash->crc32(buf, 8192));
+
+	sprintf(logbuf, "Option ROM - Checksum: %08X", hash->crc32(buf, 8192));
+	logger->debug(logbuf);
+
 	delete hash;
 }
 

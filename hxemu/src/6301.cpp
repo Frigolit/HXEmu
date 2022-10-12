@@ -3,7 +3,6 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -11,6 +10,8 @@
 
 #include "config.h"
 #include "6301.h"
+
+#include "logging/logger.h"
 
 C6301::C6301() {
 	// Initialize base stuff
@@ -83,7 +84,10 @@ void C6301::reset() {
 }
 
 void C6301::jump(uint16_t addr) {
-	printf("C6301::jump(0x%04X)\n", addr);
+	char logbuf[64];
+	sprintf(logbuf, "C6301::jump(0x%04X)", addr);
+	logger->trace(logbuf);
+
 	r_pc = addr;
 	b_halted = false;
 	b_sleep = false;
@@ -96,7 +100,10 @@ void C6301::nmi() {
 void C6301::step() {
 	if (!b_inited) {
 		opmode = r_port2_data >> 5;
-		printf("C6301::step(): debug: opmode = %d\n", opmode);
+
+		char logbuf[128];
+		sprintf(logbuf, "C6301::step(): debug: opmode = %d", opmode);
+		logger->debug(logbuf);
 
 		// Load reset vector
 		r_pc = (memread(0xFFFE) << 8) | memread(0xFFFF);
@@ -147,7 +154,7 @@ void C6301::step() {
 			}
 
 			if (!r_ccr_i) {
-				printf("C6301::step(): debug: triggering OCR interrupt\n");
+				logger->debug("C6301::step(): debug: triggering OCR interrupt");
 				interrupt_enter(0xFFF4, 0xFFF5);
 			}
 		}
@@ -162,7 +169,7 @@ void C6301::step() {
 			}
 
 			if (!r_ccr_i) {
-				printf("C6301::step(): debug: triggering TOF interrupt\n");
+				logger->debug("C6301::step(): debug: triggering TOF interrupt");
 				interrupt_enter(0xFFF2, 0xFFF3);
 			}
 		}
@@ -417,7 +424,7 @@ void C6301::step() {
 				{
 					//int8_t n = (int8_t)get_next_byte();
 
-					printf("C6301::step(): debug: BRANCH NEVAHR\n");
+					logger->debug("C6301::step(): debug: branch never");
 					get_next_byte();
 					// Just read the byte, don't do anything :P
 				}
@@ -1644,9 +1651,7 @@ void C6301::step() {
 
 			case 0x19:	// DAA - Decimal Adjust Accumulator A
 				{
-					#ifndef NOPRINTF
-						printf("C6301::step(): warning: instruction 0x19 (DAA) has hardly been tested at all, expect weird results\n");
-					#endif
+					logger->warn("C6301::step(): instruction 0x19 (DAA) has hardly been tested at all, expect weird results");
 
 					uint8_t m = r_a;
 					uint8_t hi = m >> 4;
@@ -1898,7 +1903,6 @@ void C6301::step() {
 				break;
 
 			case 0x1A:	// SLP - Sleep
-				//printf("C6301::step(): debug: entering sleep mode\n");
 				b_sleep = true;
 				break;
 
@@ -2772,9 +2776,10 @@ void C6301::step() {
 
 		// === Default ===
 			default:
-				#ifndef NOPRINTF
-					printf("C6301::step(): error: illegal instruction 0x%02X\n", op);
-				#endif
+				char logbuf[128];
+				sprintf(logbuf, "C6301::step(): illegal instruction 0x%02X", op);
+				logger->warn(logbuf);
+
 				trap();
 				break;
 	}
@@ -2928,57 +2933,73 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 
 	if (addr == 0x00) {
 		// Port 1 Data Direction Register
-		printf("Port 1 DDR:  ");
-
-		for (int i = 7; i >= 0; i--) {
-			putchar((data & (1 << i)) ? 'O' : 'I');
-		}
-
-		putchar('\n');
+		char logbuf[256];
+		sprintf(
+			logbuf,
+			"Port 1 DDR:  %c%c%c%c%c%c%c%c",
+			(data & 0x80) ? 'O' : 'I',
+			(data & 0x40) ? 'O' : 'I',
+			(data & 0x20) ? 'O' : 'I',
+			(data & 0x10) ? 'O' : 'I',
+			(data & 0x08) ? 'O' : 'I',
+			(data & 0x04) ? 'O' : 'I',
+			(data & 0x02) ? 'O' : 'I',
+			(data & 0x01) ? 'O' : 'I'
+		);
+		logger->debug(logbuf);
 
 		r_port1_ddr = data;
 		r_port1_data = r_port1_data & ~data;
 	}
 	else if (addr == 0x01) {
 		// Port 2 Data Direction Register
-		printf("Port 2 DDR:  ---");
-
-		for (int i = 4; i >= 0; i--) {
-			putchar((data & (1 << i)) ? 'O' : 'I');
-		}
-
-		putchar('\n');
+		char logbuf[256];
+		sprintf(
+			logbuf,
+			"Port 2 DDR:  ---%c%c%c%c%c",
+			(data & 0x10) ? 'O' : 'I',
+			(data & 0x08) ? 'O' : 'I',
+			(data & 0x04) ? 'O' : 'I',
+			(data & 0x02) ? 'O' : 'I',
+			(data & 0x01) ? 'O' : 'I'
+		);
+		logger->debug(logbuf);
 
 		r_port2_ddr = data & 0x1F;
 		r_port2_data = r_port2_data & ~data;
 	}
 	else if (addr == 0x02) {
-		// Port 2 Data Register
-		printf("Port 1 Data: ");
-
-		for (int i = 7; i >= 0; i--) {
-			if (r_port1_ddr & (1 << i)) {
-				putchar((data & (1 << i)) ? 'H' : 'L');
-			}
-			else putchar('-');
-		}
-
-		putchar('\n');
+		// Port 1 Data Register
+		char logbuf[256];
+		sprintf(
+			logbuf,
+			"Port 1 Data: %c%c%c%c%c%c%c%c",
+			r_port1_ddr & 0x80 ? ((data & 0x80) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x40 ? ((data & 0x40) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x20 ? ((data & 0x20) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x10 ? ((data & 0x10) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x08 ? ((data & 0x08) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x04 ? ((data & 0x04) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x02 ? ((data & 0x02) ? 'H' : 'L') : '-',
+			r_port1_ddr & 0x01 ? ((data & 0x01) ? 'H' : 'L') : '-'
+		);
+		logger->debug(logbuf);
 
 		r_port1_data = (r_port1_data & ~r_port1_ddr) | (data & r_port1_ddr);
 	}
 	else if (addr == 0x03) {
 		// Port 2 Data Register
-		printf("Port 2 Data: ---");
-
-		for (int i = 4; i >= 0; i--) {
-			if (r_port2_ddr & (1 << i)) {
-				putchar((data & (1 << i)) ? 'H' : 'L');
-			}
-			else putchar('-');
-		}
-
-		putchar('\n');
+		char logbuf[256];
+		sprintf(
+			logbuf,
+			"Port 2 Data: ---%c%c%c%c%c",
+			r_port2_ddr & 0x10 ? ((data & 0x10) ? 'H' : 'L') : '-',
+			r_port2_ddr & 0x08 ? ((data & 0x08) ? 'H' : 'L') : '-',
+			r_port2_ddr & 0x04 ? ((data & 0x04) ? 'H' : 'L') : '-',
+			r_port2_ddr & 0x02 ? ((data & 0x02) ? 'H' : 'L') : '-',
+			r_port2_ddr & 0x01 ? ((data & 0x01) ? 'H' : 'L') : '-'
+		);
+		logger->debug(logbuf);
 
 		r_port2_data = (r_port2_data & ~r_port2_ddr) | (data & r_port2_ddr);
 	}
@@ -3004,7 +3025,7 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 	}
 	else if (addr == 0x12) {
 		// Receive Data Register - Can't write here, TRAP!
-		printf("C6301::memwrite(): error: cannot write to receive data register (0x12)\n");
+		logger->warn("C6301::memwrite(): cannot write to receive data register (0x12)");
 		trap();
 	}
 	else if (addr == 0x13) {
@@ -3020,11 +3041,13 @@ void C6301::memwrite(uint16_t addr, uint8_t data) {
 		ram->write(addr & 0x007F, data);
 	}
 	else if (addr <= 0x1F) {
-		printf("\e[31mC6301::memwrite(): unhandled internal register 0x%02X (0x%02X)\e[0m\n", addr, data);
+		char logbuf[256];
+		sprintf(logbuf, "C6301::memwrite(): unhandled internal register 0x%02X (0x%02X)", addr, data);
+		logger->warn(logbuf);
 	}
 	else if (opmode == 7 && addr >= 0xF000) {
 		// Mask ROM
-		printf("\e[31mC6301::memwrite(): write to mask rom ignored\n");
+		logger->warn("C6301::memwrite(): write to mask rom ignored");
 	}
 	else {
 		// Write to external memory bus

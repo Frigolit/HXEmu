@@ -3,7 +3,7 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#include <stdio.h>
+#include "logging/logger.h"
 
 #include "iocontroller.h"
 
@@ -70,7 +70,9 @@ void CIOController::set_lcd_controller(uint8_t n, CLCDController *c) {
 uint8_t CIOController::read(uint16_t addr) {
 #ifdef DEBUG_IOCTL
 	uint8_t r = _read(addr);
-	printf("CIOController::read(0x%04X) = 0x%02X\n", addr + 0x20, r);
+	char logbuf[256];
+	sprintf(logbuf, "CIOController::read(0x%04X) = 0x%02X", addr + 0x20, r);
+	logger->debug(logbuf);
 	return r;
 }
 
@@ -79,7 +81,10 @@ uint8_t CIOController::_read(uint16_t addr) {
 	addr += 0x20;	// Makes it easier to follow the documentation.
 
 	if (addr == 0x20) {
-		printf("CIOController::_read(): Read from 0x20 (KRTN) = 0x%02X\n", ram[0x20]);
+		char logbuf[256];
+		sprintf(logbuf, "CIOController::_read(): Read from 0x20 (KRTN) = 0x%02X\n", ram[0x20]);
+		logger->debug(logbuf);
+
 		return ram[0x20];
 	}
 	else if (addr == 0x22) {
@@ -123,7 +128,7 @@ uint8_t CIOController::_read(uint16_t addr) {
 	}
 	else if (addr == 0x26) {
 		// Key interrupt mask
-		printf("CIOController()::read(): warning: address 0x26 (key interrupt mask) not implemented\n");
+		logger->warn("CIOController()::read(): address 0x26 (key interrupt mask) not implemented");
 	}
 	else if (addr == 0x28) {
 		// KRTN 8-9
@@ -208,7 +213,9 @@ bool CIOController::write(uint16_t addr, uint8_t data) {
 	addr += 0x20;	// Makes it easier to follow the documentation.
 
 	#ifdef DEBUG_IOCTL
-		printf("CIOController::write(0x%04X, 0x%02X)\n", addr, data);
+		char logbuf[256];
+		sprintf(logbuf, "CIOController::write(0x%04X, 0x%02X)", addr, data);
+		logger->debug(logbuf);
 	#endif
 
 	if (addr == 0x26) {

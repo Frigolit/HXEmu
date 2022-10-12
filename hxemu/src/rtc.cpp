@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "logging/logger.h"
+
 #include "rtc.h"
 
 CRTC::CRTC() {
@@ -19,7 +21,7 @@ CRTC::~CRTC() {
 // TODO!
 uint8_t CRTC::read(uint16_t addr) {
 	if (addr > 63) {
-		printf("Assertion failed: addr < 64 in CRTC::read()\n");
+		logger->fatal("Assertion failed: addr < 64 in CRTC::read()");
 		exit(1);
 	}
 
@@ -49,7 +51,7 @@ uint8_t CRTC::read(uint16_t addr) {
 
 bool CRTC::write(uint16_t addr, uint8_t data) {
 	if (addr > 63) {
-		printf("Assertion failed: addr < 64 in CRTC::read()\n");
+		logger->fatal("Assertion failed: addr < 64 in CRTC::read()");
 		exit(1);
 	}
 
