@@ -6,7 +6,7 @@
 
 #include "lcd_interface.h"
 
-#define PIXEL(x, y) (!!(pixels[((x) + ((y) * 120)) / 8] & (1 << ((x) % 8))))
+#define PIXEL(x, y) (!!(pixels[x] & (1 << (y))))
 
 CliLcdInterface::CliLcdInterface() {
 	mtx = new std::mutex();
@@ -20,25 +20,19 @@ CliLcdInterface::~CliLcdInterface() {
 }
 
 void CliLcdInterface::set_pixel(uint8_t x, uint8_t y) {
-	int pn = (x + (y * 120)) / 8;
-	int cn = ((x / 2) + ((y / 2) * 60)) / 8;
-
 	mtx->lock();
 
-	pixels[pn] |= (1 << (x % 8));
-	changes[cn] |= (1 << ((x / 2) % 8));
+	pixels[x] |= (1 << y);
+	changes[(x / 2)] |= ((uint16_t)1 << (y / 2));
 
 	mtx->unlock();
 }
 
 void CliLcdInterface::clear_pixel(uint8_t x, uint8_t y) {
-	int pn = (x + (y * 120)) / 8;
-	int cn = ((x / 2) + ((y / 2) * 60)) / 8;
-
 	mtx->lock();
 
-	pixels[pn] &= ~(1 << (x % 8));
-	changes[cn] |= (1 << ((x / 2) % 8));
+	pixels[x] &= ~((uint32_t)1 << y);
+	changes[(x / 2)] |= ((uint16_t)1 << (y / 2));
 
 	mtx->unlock();
 }
@@ -51,9 +45,7 @@ void CliLcdInterface::update() {
 
 	for (int y = 0; y < 16; y++) {
 		for (int x = 0; x < 60; x++) {
-			int cn = ((x / 2) + ((y / 2) * 60)) / 8;
-
-			if (changes[cn] & (1 << ((x / 2) % 8))) {
+			if (changes[x] & ((uint32_t)1 << y)) {
 				if (!did_draw) {
 					did_draw = true;
 					std::cout << "\e[38;2;18;21;19m";
@@ -124,7 +116,8 @@ void CliLcdInterface::update() {
 	}
 
 	if (did_draw) {
-		std::cout << "\e[0m";
+		// Clear colours and flush output
+		std::cout << "\e[0m" << std::flush;
 	}
 
 	memset(changes, 0, 120);
@@ -133,6 +126,8 @@ void CliLcdInterface::update() {
 }
 
 void CliLcdInterface::redraw() {
+	mtx->lock();
+
 	std::cout << "\e[1;1H";
 
 	std::cout << "\e[38;2;18;21;19m";
@@ -142,8 +137,6 @@ void CliLcdInterface::redraw() {
 		std::cout << "\xE2\x96\x91";
 	}
 	std::cout << std::endl;
-
-	mtx->lock();
 
 	int px, py;
 	for (int y = 0; y < 16; y++) {
@@ -214,7 +207,7 @@ void CliLcdInterface::redraw() {
 		std::cout << "\xE2\x96\x91";
 	}
 
-	std::cout << "\e[0m" << std::endl;
+	std::cout << "\e[0m" << std::flush;
 
 	memset(changes, 0, 120);
 

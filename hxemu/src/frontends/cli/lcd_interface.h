@@ -19,8 +19,8 @@ class CliLcdInterface : public LcdInterface {
 		void redraw();
 
 	private:
-		uint8_t pixels[480];
-		uint8_t changes[120];
+		uint32_t pixels[120];
+		uint16_t changes[60];
 		std::mutex *mtx;
 };
 
