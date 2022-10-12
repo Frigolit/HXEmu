@@ -435,7 +435,7 @@ int main(int argc, array(string) argv) {
 			Stdio.mkdirhier(dirname(hxemu_filename));
 		}
 
-		array args = ({ s_ld }) + (s_ldflags / " ") + ({ "-o", hxemu_filename }) + objs;
+		array args = ({ s_ld }) + objs + (s_ldflags / " ") + ({ "-o", hxemu_filename });
 
 		if (Process.create_process(args)->wait()) {
 			werror("Linker command: %s\n", args * " ");
