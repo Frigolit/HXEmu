@@ -45,6 +45,7 @@ int main(int argc, array(string) argv) {
 
 	// Parse command-line arguments
 	string|void s_host = Getopt.find_option(argv, "", "host", "HOST", "");
+	string|void s_buildroot = Getopt.find_option(argv, "", "buildroot", UNDEFINED, "");
 
 	string|void s_cxx = Getopt.find_option(argv, "", "cxx", "CXX", "");
 	string|void s_ld = Getopt.find_option(argv, "", "ld", "LD", "");
@@ -80,6 +81,7 @@ int main(int argc, array(string) argv) {
 
 	// Clear some potentially blank values
 	if (s_host == "") { s_host = UNDEFINED; }
+	if (s_buildroot == "") { s_buildroot = UNDEFINED; }
 	if (s_cxx == "") { s_cxx = UNDEFINED; }
 	if (s_ld == "") { s_ld = UNDEFINED; }
 	if (s_pkgconfig == "") { s_pkgconfig = UNDEFINED; }
@@ -193,20 +195,30 @@ int main(int argc, array(string) argv) {
 	s_ldflags = Array.uniq((s_ldflags / " ") - ({ "" })) * " ";
 
 	// Determine build directory
-	string buildroot = "build/" + s_host;
+	string buildroot = s_buildroot;
 
-	array(string) buildroot_suffixes = ({ });
-	foreach (a_flagkeys, string k) {
-		if (flags[k]->buildroot_suffix) {
-			string x = flags[k]->buildroot_suffix(flags[k]);
-			if (x && x != "") {
-				buildroot_suffixes += ({ x });
-			}
-		}
+	if (!buildroot && getenv("FLATPAK_ID")) {
+		// Use a predictable path for Flatpak builds
+		buildroot = "build/flatpak";
 	}
 
-	if (sizeof(buildroot_suffixes) > 0) {
-		buildroot += "_" + (buildroot_suffixes * "-");
+	if (!buildroot) {
+		// Auto-generate a path based
+		buildroot = "build/" + s_host;
+
+		array(string) buildroot_suffixes = ({ });
+		foreach (a_flagkeys, string k) {
+			if (flags[k]->buildroot_suffix) {
+				string x = flags[k]->buildroot_suffix(flags[k]);
+				if (x && x != "") {
+					buildroot_suffixes += ({ x });
+				}
+			}
+		}
+
+		if (sizeof(buildroot_suffixes) > 0) {
+			buildroot += "_" + (buildroot_suffixes * "-");
+		}
 	}
 
 	// Determine executable filename
