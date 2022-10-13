@@ -1,6 +1,7 @@
 #ifdef FRONTEND_SDL2
 
 #include "button.h"
+#include <cstring>
 
 #include "../fonts.h"
 

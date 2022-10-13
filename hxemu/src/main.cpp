@@ -36,7 +36,12 @@ Frontend *frontend;
 CHX20 *hx20_machine;
 std::thread *hx20_thread;
 
+#ifdef FRONTEND_SDL2
+int hx20_run(void *args);
+#else
 int hx20_run(void);
+#endif
+
 void shutdown(int);
 
 Logger *logger;
@@ -110,7 +115,11 @@ int main(int argc, char **argv) {
 	frontend->start(hx20_machine);
 
 	// Start HX-20 processing thread
+	#ifdef FRONTEND_SDL2
+	SDL_CreateThread(hx20_run, "HX-20 Main Thread", NULL);
+	#else
 	std::thread hx20_thread(hx20_run);
+	#endif
 
 	// Run frontend (blocking)
 	frontend->run();
@@ -129,7 +138,11 @@ void shutdown(int sig) {
 	exit(0);
 }
 
+#ifdef FRONTEND_SDL2
+int hx20_run(void *args) {
+#else
 int hx20_run(void) {
+#endif
 	int i;
 	while (1) {
 		for (i = 0; i < 3200; i++) {

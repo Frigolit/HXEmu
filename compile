@@ -157,7 +157,7 @@ int main(int argc, array(string) argv) {
 
 	// MinGW hacks
 	if (glob("*mingw32*", s_host)) {
-		s_ldflags = "-static-libgcc -static-libstdc++ " + s_ldflags;
+		s_ldflags = "-static-libgcc -static-libstdc++ -lmingw32 " + s_ldflags;
 	}
 
 	// Update CXXFLAGS and LDFLAGS from flags
