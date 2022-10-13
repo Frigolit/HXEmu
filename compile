@@ -131,6 +131,17 @@ int main(int argc, array(string) argv) {
 		return 1;
 	}
 
+	// Detect host prefix from C++ compiler if unspecified
+	if (!s_host) {
+		mapping m = Process.run(s_cxx + " -dumpmachine");
+		if (m->exitcode) {
+			werror("error: failed executing c++ compiler.\n");
+			return 1;
+		}
+
+		s_host = String.trim_all_whites(m->stdout);
+	}
+
 	// Add library dependencies
 	array libs = ({ "jsoncpp" });
 	libs += frontends[flags->frontend->value]->libs || ({ });
@@ -181,27 +192,21 @@ int main(int argc, array(string) argv) {
 	s_cxxflags = Array.uniq((s_cxxflags / " ") - ({ "" })) * " ";
 	s_ldflags = Array.uniq((s_ldflags / " ") - ({ "" })) * " ";
 
-	// Detect host prefix from C++ compiler if unspecified
-	if (!s_host) {
-		mapping m = Process.run(s_cxx + " -dumpmachine");
-		if (m->exitcode) {
-			werror("error: failed executing c++ compiler.\n");
-			return 1;
-		}
-
-		s_host = String.trim_all_whites(m->stdout);
-	}
-
 	// Determine build directory
-	string buildroot = "build/" + (s_host / "-")[0];
+	string buildroot = "build/" + s_host;
 
+	array(string) buildroot_suffixes = ({ });
 	foreach (a_flagkeys, string k) {
 		if (flags[k]->buildroot_suffix) {
 			string x = flags[k]->buildroot_suffix(flags[k]);
 			if (x && x != "") {
-				buildroot += "-" + x;
+				buildroot_suffixes += ({ x });
 			}
 		}
+	}
+
+	if (sizeof(buildroot_suffixes) > 0) {
+		buildroot += "_" + (buildroot_suffixes * "-");
 	}
 
 	// Determine executable filename
