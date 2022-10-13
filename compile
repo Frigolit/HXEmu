@@ -127,7 +127,7 @@ int main(int argc, array(string) argv) {
 
 	// Ensure compiler supports C++11
 	if (Process.run(s_cxx + " -std=c++11 -dM -E -x c++ /dev/null")->exitcode) {
-		werror("error: %O doesn't support c++11, please specify a compatible compiler using --cxx or the CXX environment variable.\n");
+		werror("error: %O doesn't support c++11, please specify a compatible compiler using --cxx or the CXX environment variable.\n", s_cxx);
 		return 1;
 	}
 
@@ -153,6 +153,11 @@ int main(int argc, array(string) argv) {
 		}
 
 		s_cxxflags += " " + String.trim_all_whites(m->stdout);
+	}
+
+	// MinGW hacks
+	if (glob("*mingw32*", s_host)) {
+		s_ldflags = "-static-libgcc -static-libstdc++ " + s_ldflags;
 	}
 
 	// Update CXXFLAGS and LDFLAGS from flags
@@ -214,7 +219,7 @@ int main(int argc, array(string) argv) {
 	// Detect HXEmu version
 	string hxemu_version;
 	{
-		string local_cc = find_bin(s_host, ({ "g++", "clang++", "cpp", "gcc", "clang", "cc" }));
+		string local_cc = find_bin(UNDEFINED, ({ "g++", "clang++", "cpp", "gcc", "clang", "cc" }));
 		string code = "#include \"hxemu/src/version.h\"\n#include <stdio.h>\nint main() { printf(\"%d.%d.%d\", APP_MAJOR, APP_MINOR, APP_REVISION); }";
 		string tmpfile = "/tmp/hxemuc-" + String.string2hex(random_string(8));
 
