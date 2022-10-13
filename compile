@@ -39,6 +39,8 @@ mapping flags = ([
 	]),
 ]);
 
+multiset buildtypes = (< "bundle", "system", "flatpak" >);
+
 int main(int argc, array(string) argv) {
 	array a_flagkeys = sort(indices(flags));
 	mapping env = getenv();
@@ -55,6 +57,8 @@ int main(int argc, array(string) argv) {
 
 	string|void s_cxxflags = Getopt.find_option(argv, "", "cxxflags", "CXXFLAGS", "");
 	string|void s_ldflags = Getopt.find_option(argv, "", "ldflags", "LDFLAGS", "");
+
+	string|void s_buildtype = Getopt.find_option(argv, "", "type", UNDEFINED, "bundle");
 
 	int f_nolink = Getopt.find_option(argv, "", "no-link");
 
@@ -77,6 +81,11 @@ int main(int argc, array(string) argv) {
 				return 1;
 			}
 		}
+	}
+
+	if (!buildtypes[s_buildtype]) {
+		werror("error: invalid build type specified, supported values are: bundle, system, flatpak\n");
+		return 1;
 	}
 
 	// Clear some potentially blank values
@@ -203,7 +212,7 @@ int main(int argc, array(string) argv) {
 	}
 
 	if (!buildroot) {
-		// Auto-generate a path based
+		// Auto-generate a path (<host machine tuple>[_<flag1>[-<flagN>]])
 		buildroot = "build/" + s_host;
 
 		array(string) buildroot_suffixes = ({ });
@@ -221,9 +230,27 @@ int main(int argc, array(string) argv) {
 		}
 	}
 
-	// Determine executable filename
-	string hxemu_filename = combine_path(buildroot, "release/hxemu");
+	// Build variables
+	string release_path = combine_path(buildroot, "release");
 
+	string hxemu_filename;
+	string data_path;
+
+	// Handle build type
+	if (s_buildtype == "bundle") {
+		hxemu_filename = combine_path(release_path, "hxemu");
+		data_path = combine_path(release_path, "data");
+	}
+	else if (s_buildtype == "system") {
+		hxemu_filename = combine_path(release_path, "bin/hxemu");
+		data_path = combine_path(release_path, "usr/share/hxemu");
+	}
+	else if (s_buildtype == "flatpak") {
+		hxemu_filename = "/app/bin/hxemu";
+		data_path = "/app/share/hxemu";
+	}
+
+	// Determine executable filename
 	foreach (a_flagkeys, string k) {
 		if (flags[k]->hxemu_suffix) {
 			string x = flags[k]->hxemu_suffix(flags[k]);
@@ -273,6 +300,7 @@ int main(int argc, array(string) argv) {
 	write("Frontend:       %s\n", frontends[flags->frontend->value]->caption);
 	write("Build path:     %s\n", buildroot);
 	write("Executable:     %s\n", hxemu_filename);
+	write("Data path:      %s\n", data_path);
 	write("%s\n", "-" * 80);
 	write("AS02 assembler: %s\n", s_as02 || "(n/a)");
 	write("C++ compiler:   %s\n", s_cxx);
@@ -285,12 +313,15 @@ int main(int argc, array(string) argv) {
 
 	// Create directories
 	string path_work = combine_path(buildroot, "work");
-	string path_release = combine_path(buildroot, "release");
+
+	string path_image_bin = dirname(hxemu_filename);
+	string path_image_share = dirname(data_path);
 
 	string path_cache = combine_path(path_work, "cache.bin");
 
 	if (!Stdio.is_dir(path_work)) { Stdio.mkdirhier(path_work); }
-	if (!Stdio.is_dir(path_release)) { Stdio.mkdirhier(path_release); }
+	if (!Stdio.is_dir(path_image_bin)) { Stdio.mkdirhier(path_image_bin); }
+	if (!Stdio.is_dir(path_image_share)) { Stdio.mkdirhier(path_image_share); }
 
 	// Load or initialize cache
 	mapping cache;
