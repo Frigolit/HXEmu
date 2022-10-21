@@ -6,7 +6,7 @@ mapping frontends = ([
 		"libs": ({ "sdl2", "SDL2_ttf", "SDL2_image" }),
 	]),
 	"cli": ([
-		"caption": "Command-Line Interface (CLI)",
+		"caption": "CLI",
 	])
 ]);
 
@@ -22,19 +22,24 @@ mapping flags = ([
 			return flag->value && "static";
 		},
 	]),
-	"frontend": ([
-		"description": "Specifies the frontend to build.",
-		"type": "enum",
-		"values": (< "sdl2", "cli" >),
-		"default": "sdl2",
+	"frontend-sdl2": ([
+		"description": "Build the SDL2 frontend.",
+		"type": "bool",
+		"default": Val.null,
 		"cxxflags": lambda(mapping flag) {
-			return "-DFRONTEND_" + upper_case(flag->value);
+			if (flag->value != 0) {
+				return "-DFRONTEND_SDL2";
+			}
 		},
-		"buildroot_suffix": lambda(mapping flag) {
-			return flag->value;
-		},
-		"hxemu_suffix": lambda(mapping flag) {
-			return (flag->value != flag->default) && flag->value;
+	]),
+	"frontend-cli": ([
+		"description": "Build the CLI frontend.",
+		"type": "bool",
+		"default": Val.null,
+		"cxxflags": lambda(mapping flag) {
+			if (flag->value != 0) {
+				return "-DFRONTEND_CLI";
+			}
 		},
 	]),
 ]);
@@ -153,9 +158,41 @@ int main(int argc, array(string) argv) {
 		s_host = String.trim_all_whites(m->stdout);
 	}
 
+	// Auto-detect optional components
+	bool sdl2_required = (flags["frontend-sdl2"]->value == 1);
+	bool sdl2_optional = (flags["frontend-sdl2"]->value != 0);
+
+	if (sdl2_required || sdl2_optional) {
+		bool ok = true;
+		foreach (frontends["sdl2"]->libs, string n) {
+			int r = Process.create_process(({ s_pkgconfig, n }))->wait();
+
+			if (r) {
+				ok = false;
+				break;
+			}
+		}
+
+		if (sdl2_required && !ok) {
+			werror("error: sdl2 frontend is enabled (--frontend-sdl2) but libraries are missing.\n");
+			return 1;
+		}
+
+		frontends["sdl2"]->enabled = ok;
+	}
+
+	if (flags["frontend-cli"] != 0) {
+		frontends["cli"]->enabled = true;
+	}
+
 	// Add library dependencies
 	array libs = ({ "jsoncpp" });
-	libs += frontends[flags->frontend->value]->libs || ({ });
+
+	foreach (frontends; string n; mapping m) {
+		if (m->enabled) {
+			libs += m->libs || ({ });
+		}
+	}
 
 	s_ldflags += " -lpthread";
 
@@ -296,11 +333,13 @@ int main(int argc, array(string) argv) {
 	}
 
 	// Print information
+	array enabled_frontends = filter(values(frontends), lambda(mapping m) { return m->enabled; });
+
 	write("%s\n", "=" * 80);
 	write("HXEmu v%s\n", hxemu_version);
 	write("%s\n", "-" * 80);
 	write("Host:           %s\n", s_host);
-	write("Frontend:       %s\n", frontends[flags->frontend->value]->caption);
+	write("Frontends:      %s\n", enabled_frontends->caption * ", ");
 	write("Build path:     %s\n", buildroot);
 	write("Executable:     %s\n", hxemu_filename);
 	write("Data path:      %s\n", data_path);

@@ -37,12 +37,28 @@ Frontend *frontend;
 CHX20 *hx20_machine;
 std::thread *hx20_thread;
 
+enum Frontends {
+	#ifdef FRONTEND_SDL2
+	sdl2,
+	#endif
+	#ifdef FRONTEND_CLI
+	cli,
+	#endif
+};
+
+Frontends default_frontend =
+	#ifdef FRONTEND_SDL2
+	sdl2
+	#elif FRONTEND_CLI
+	cli
+	#endif
+;
+
 #ifdef FRONTEND_SDL2
-int hx20_run(void *args);
-#else
-int hx20_run(void);
+int hx20_run_sdl2(void *args);
 #endif
 
+int hx20_run(void);
 void shutdown(int);
 
 Logger *logger;
@@ -97,17 +113,25 @@ int main(int argc, char **argv) {
 		optionrompath[0] = 0;
 	}
 
-	#ifdef FRONTEND_SDL2
-	logger = new ConsoleLogger();
-	#elif FRONTEND_CLI
-	logger = new NullLogger();
-	#endif
+	Frontends selected_frontend = default_frontend;
+	// TODO: Frontend selection via command-line arguments and/or auto-detection
 
-	#ifdef FRONTEND_SDL2
-	frontend = new FrontendSdl2();
-	#elif FRONTEND_CLI
-	frontend = new FrontendCli();
-	#endif
+	// Prepare frontend
+	switch (selected_frontend) {
+		#ifdef FRONTEND_SDL2
+		case sdl2:
+			logger = new ConsoleLogger();
+			frontend = new FrontendSdl2();
+			break;
+		#endif
+
+		#ifdef FRONTEND_CLI
+		case cli:
+			logger = new NullLogger();
+			frontend = new FrontendCli();
+			break;
+		#endif
+	}
 
 	char logbuf[256];
 
@@ -131,12 +155,8 @@ int main(int argc, char **argv) {
 	// Start frontend
 	frontend->start(hx20_machine);
 
-	// Start HX-20 processing thread
-	#ifdef FRONTEND_SDL2
-	SDL_CreateThread(hx20_run, "HX-20 Main Thread", NULL);
-	#else
-	std::thread hx20_thread(hx20_run);
-	#endif
+	// Start HX-20 processing thread (TODO: Clean this up properly)
+	std::thread *hx20_thread = new std::thread(hx20_run);
 
 	// Run frontend (blocking)
 	frontend->run();
@@ -150,16 +170,10 @@ int main(int argc, char **argv) {
 
 void shutdown(int sig) {
 	frontend->stop();
-	//SDL_KillThread(hx20_thread);
-	//delete(hx20_machine);
 	exit(0);
 }
 
-#ifdef FRONTEND_SDL2
-int hx20_run(void *args) {
-#else
 int hx20_run(void) {
-#endif
 	int i;
 	while (1) {
 		for (i = 0; i < 3200; i++) {

@@ -2,6 +2,7 @@
 
 #include "cli.h"
 
+#include <iostream>
 #include <thread>
 #include <chrono>
 
@@ -9,6 +10,8 @@ void FrontendCli::start(CHX20 *hx20) {
 	printf("Initializing CLI frontend...\n");
 
 	lcd = new CliLcdInterface();
+
+	printf("Configuring LCD interface...\n");
 	hx20->set_lcd_interface(lcd);
 }
 
