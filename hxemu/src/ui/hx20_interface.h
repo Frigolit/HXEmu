@@ -1,7 +1,7 @@
 #ifdef FRONTEND_SDL2
 
-#ifndef __UI_HX20_H__
-#define __UI_HX20_H__
+#ifndef HXEMU_UI_HX20_INTERFACE_H
+#define HXEMU_UI_HX20_INTERFACE_H
 
 #include <functional>
 

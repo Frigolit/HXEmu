@@ -1,5 +1,5 @@
-#ifndef __EXPANSIONDEVICE_H__
-#define __EXPANSIONDEVICE_H__
+#ifndef HXEMU_EXPANSIONDEVICE_H
+#define HXEMU_EXPANSIONDEVICE_H
 
 #include <stdint.h>
 #include "memorydevice.h"

@@ -5,8 +5,8 @@
 
 #ifdef FRONTEND_SDL2
 
-#ifndef __LCD_H__
-#define __LCD_H__
+#ifndef HXEMU_FRONTENDS_SDL2_LCD_INTERFACE
+#define HXEMU_FRONTENDS_SDL2_LCD_INTERFACE
 
 #include <stdint.h>
 

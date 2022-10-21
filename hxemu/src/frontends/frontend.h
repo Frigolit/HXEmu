@@ -1,5 +1,5 @@
-#ifndef __FRONTEND_H__
-#define __FRONTEND_H__
+#ifndef HXEMU_FRONTENDS_FRONTEND_H
+#define HXEMU_FRONTENDS_FRONTEND_H
 
 #include "../hx20.h"
 

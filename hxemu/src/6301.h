@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __6301_H__
-#define __6301_H__
+#ifndef HXEMU_6301_H
+#define HXEMU_6301_H
 
 #include <stdint.h>
 #include <stdio.h>

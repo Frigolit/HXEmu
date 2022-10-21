@@ -1,6 +1,6 @@
 #ifdef FRONTEND_CLI
-#ifndef __FRONTENDS_CLI__
-#define __FRONTENDS_CLI__
+#ifndef HXEMU_FRONTENDS_CLI
+#define HXEMU_FRONTENDS_CLI
 
 #include "frontend.h"
 

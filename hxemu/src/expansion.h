@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __EXPANSION_H__
-#define __EXPANSION_H__
+#ifndef HXEMU_EXPANSION_H
+#define HXEMU_EXPANSION_H
 
 #include "memorydevice.h"
 #include "expansiondevice.h"

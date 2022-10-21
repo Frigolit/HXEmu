@@ -3,6 +3,9 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
+#include <cstddef>
+#include <stdio.h>
+
 #include "logging/logger.h"
 
 #include "iocontroller.h"

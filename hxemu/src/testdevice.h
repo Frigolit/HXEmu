@@ -1,5 +1,5 @@
-#ifndef __TESTDEVICE_H__
-#define __TESTDEVICE_H__
+#ifndef HXEMU_TESTDEVICE_H
+#define HXEMU_TESTDEVICE_H
 
 #include "expansiondevice.h"
 #include "rom.h"

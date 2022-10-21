@@ -1,5 +1,5 @@
-#ifndef __GLOBALS_H__
-#define __GLOBALS_H__
+#ifndef HXEMU_GLOBALS_H
+#define HXEMU_GLOBALS_H
 
 extern char datapath[256];
 

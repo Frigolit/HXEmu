@@ -1,5 +1,5 @@
-#ifndef __LCD_INTERFACE_H__
-#define __LCD_INTERFACE_H__
+#ifndef HXEMU_LCD_INTERFACE_H
+#define HXEMU_LCD_INTERFACE_H
 
 #include <cstdint>
 

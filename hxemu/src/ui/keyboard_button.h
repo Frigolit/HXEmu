@@ -1,7 +1,7 @@
 #ifdef FRONTEND_SDL2
 
-#ifndef __UI_KEYBOARD_BUTTON_H__
-#define __UI_KEYBOARD_BUTTON_H__
+#ifndef HXEMU_UI_KEYBOARD_BUTTON_H
+#define HXEMU_UI_KEYBOARD_BUTTON_H
 
 #include "button.h"
 

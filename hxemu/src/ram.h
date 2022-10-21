@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __RAM_H__
-#define __RAM_H__
+#ifndef HXMEU_RAM_H
+#define HXMEU_RAM_H
 
 #include <stdint.h>
 

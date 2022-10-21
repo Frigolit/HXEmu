@@ -3,6 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
+#include <cstddef>
+
 #include "expansion.h"
 
 CExpansion::CExpansion(CMemoryDevice *mem) {

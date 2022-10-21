@@ -1,7 +1,7 @@
 #ifdef FRONTEND_SDL2
 
-#ifndef __UI_WIDGET_H__
-#define __UI_WIDGET_H__
+#ifndef HXEMU_UI_WIDGET_H
+#define HXEMU_UI_WIDGET_H
 
 #include <SDL2/SDL.h>
 

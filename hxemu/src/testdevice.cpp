@@ -1,5 +1,9 @@
-#include "testdevice.h"
 #include <string.h>
+#include <stdio.h>
+
+#include <cstdlib>
+
+#include "testdevice.h"
 
 /*
 	0x4000-0x4FFF	ROM

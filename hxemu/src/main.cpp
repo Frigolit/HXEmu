@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 		readlink("/proc/self/exe", exepath, 256);
 
 		if (strlen(exepath) + strlen(tmp) + 1 > 255) {
-			std:cerr << "error: data path is too long" << std::endl;
+			std::cerr << "error: data path is too long" << std::endl;
 		}
 
 		strcpy(tmp, datapath);

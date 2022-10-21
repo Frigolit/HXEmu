@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __ROM_H__
-#define __ROM_H__
+#ifndef HXEMU_ROM_H
+#define HXEMU_ROM_H
 
 #include <stdint.h>
 

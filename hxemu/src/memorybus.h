@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __MEMORYBUS_H__
-#define __MEMORYBUS_H__
+#ifndef HXEMU_MEMORYBUS_H
+#define HXEMU_MEMORYBUS_H
 
 #include <stdint.h>
 #include <vector>

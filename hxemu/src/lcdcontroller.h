@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __LCDCONTROLLER_H__
-#define __LCDCONTROLLER_H__
+#ifndef HXEMU_LCDCONTROLLER_H
+#define HXEMU_LCDCONTROLLER_H
 
 #include <stdint.h>
 

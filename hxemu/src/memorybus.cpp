@@ -9,7 +9,7 @@
 #include "memorybus.h"
 
 CMemoryBus::CMemoryBus() {
-	entries = new vector<CMemoryBusEntry *>();
+	entries = new std::vector<CMemoryBusEntry *>();
 	p_fallback = NULL;
 }
 

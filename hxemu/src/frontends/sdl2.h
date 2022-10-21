@@ -1,6 +1,6 @@
 #ifdef FRONTEND_SDL2
-#ifndef __FRONTENDS_SDL2__
-#define __FRONTENDS_SDL2__
+#ifndef HXEMU_FRONTENDS_SDL2
+#define HXEMU_FRONTENDS_SDL2
 
 #include "frontend.h"
 #include "../ui/hx20_interface.h"

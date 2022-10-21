@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __FAKESECONDARY_H__
-#define __FAKESECONDARY_H__
+#ifndef HXEMU_FAKESECONDARY_H
+#define HXEMU_FAKESECONDARY_H
 
 #include <stdint.h>
 

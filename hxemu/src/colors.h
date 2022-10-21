@@ -1,5 +1,5 @@
-#ifndef __COLORS_H__
-#define __COLORS_H__
+#ifndef HXEMU_COLORS_H
+#define HXEMU_COLORS_H
 
 struct RgbColor {
 	int r;

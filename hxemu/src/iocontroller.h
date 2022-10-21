@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __IOCONTROLLER_H__
-#define __IOCONTROLLER_H__
+#ifndef HXEMU_IOCONTROLLER_H
+#define HXEMU_IOCONTROLLER_H
 
 #include <stdint.h>
 

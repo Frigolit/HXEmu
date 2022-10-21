@@ -3,11 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#include <iostream>
-using namespace std;
-
-#ifndef __MEMORYDEVICE_H__
-#define __MEMORYDEVICE_H__
+#ifndef HXEMU_MEMORYDEVICE_H
+#define HXEMU_MEMORYDEVICE_H
 
 #include <stdint.h>
 

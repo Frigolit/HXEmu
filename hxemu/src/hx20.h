@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __HX20_H__
-#define __HX20_H__
+#ifndef HXEMU_HX20_H
+#define HXEMU_HX20_H
 
 #include "6301.h"
 #include "ram.h"

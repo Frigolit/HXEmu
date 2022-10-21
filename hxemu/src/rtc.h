@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef __CRTC_H__
-#define __CRTC_H__
+#ifndef HXEMU_CRTC_H
+#define HXEMU_CRTC_H
 
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
-#ifndef __UI_PRINTER_H__
-#define __UI_PRINTER_H__
+#ifndef HXEMU_UI_PRINTER_H
+#define HXEMU_UI_PRINTER_H
 
 #include "widget.h"
 #include <functional>

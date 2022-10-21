@@ -1,5 +1,5 @@
-#ifndef __UI_OPTION_TAPE_H__
-#define __UI_OPTION_TAPE_H__
+#ifndef HXEMU_UI_OPTION_TAPE_H
+#define HXEMU_UI_OPTION_TAPE_H
 
 #include "widget.h"
 #include <functional>

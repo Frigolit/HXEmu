@@ -1,5 +1,5 @@
-#ifndef __FONTS_H__
-#define __FONTS_H__
+#ifndef HXEMU_FONTS_H
+#define HXEMU_FONTS_H
 
 #ifdef FRONTEND_SDL2
 #include <SDL2/SDL_ttf.h>

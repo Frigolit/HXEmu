@@ -1,5 +1,5 @@
-#ifndef __LOGGING_LOGGER_H__
-#define __LOGGING_LOGGER_H__
+#ifndef HXEMU_LOGGING_LOGGER_H
+#define HXEMU_LOGGING_LOGGER_H
 
 #define LOG_FATAL 0
 #define LOG_ERROR 1

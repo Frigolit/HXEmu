@@ -1,5 +1,5 @@
-#ifndef __LOGGING_CONSOLE_LOGGER_H__
-#define __LOGGING_CONSOLE_LOGGER_H__
+#ifndef HXEMU_LOGGING_CONSOLE_LOGGER_H
+#define HXEMU_LOGGING_CONSOLE_LOGGER_H
 
 #include "logger.h"
 
