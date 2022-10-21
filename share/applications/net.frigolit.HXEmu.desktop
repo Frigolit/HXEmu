@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=HXEmu
+Comment=Epson HX-20 Emulator
+Exec=hxemu
+Icon=net.frigolit.HXEmu
+Terminal=false
+Type=Application

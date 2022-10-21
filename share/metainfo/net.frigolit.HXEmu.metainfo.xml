@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>net.frigolit.HXEmu</id>
+	<metadata_license>FSFAP</metadata_license>
+	<project_license>MIT</project_license>
+	<name>HXEmu</name>
+	<summary>Epson HX-20 Emulator</summary>
+	<description><p>HXEmu is an emulator for the Epson HX-20 portable computer.</p></description>
+	<launchable type="desktop-id">net.frigolit.HXEmu.desktop</launchable>
+
+	<url type="homepage">https://frigolit.net/projects/hxemu</url>
+	<url type="bugtracker">https://github.com/Frigolit/HXEmu/issues</url>
+	<url type="contact">https://frigolit.net/about</url>
+
+	<provides>
+		<binary>hxemu</binary>
+	</provides>
+</component>
