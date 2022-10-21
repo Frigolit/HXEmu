@@ -5,20 +5,22 @@ It's licensed under the MIT license, see the LICENSE file for more information.
 This project is still under heavy development and many features are not yet available and/or buggy.
 
 ## Binary downloads
-Binaries are provided for the SDL2 version of HXEmu for the following platforms:
-- Linux x86_64 (via Flatpak)
-- Windows x64
+Binaries are provided for the following platforms:
+- Linux x86_64 (SDL2) via Flatpak
+- Windows x86_64 (SDL2)
 
 See the [releases](https://github.com/Frigolit/HXEmu/releases) in GitHub or visit the [project page](https://frigolit.net/projects/hxemu).
 
 ## How to compile
-The compilation script is written in Pike (pike8.0 or similar package on e.g. Debian), simply run the compilation script after installing the Pike runtime and it'll perform some basic auto-detection of the platform and build environment.
+The compilation script is written in [Pike](https://pike.lysator.liu.se/) ("pike8.0" or similar package on e.g. Debian), simply run the compilation script after installing the Pike runtime and it'll perform some basic auto-detection of the platform and build environment.
 It requires a compiler (e.g. GCC, Clang) with support for the C++11 standard as well as the following libraries (in some Linux distributions these will be "-dev" packages):
 - jsoncpp
 - pthreads
-- SDL2 (SDL2 frontend)
-- SDL2_ttf (SDL2 frontend)
-- SDL2_image (SDL2 frontend)
+
+For SDL2 frontend support:
+- SDL2
+- SDL2_ttf
+- SDL2_image
 
 ### Frontends
 There are currently two frontends available which can be specified via the "--frontend" argument to the compilation script:
