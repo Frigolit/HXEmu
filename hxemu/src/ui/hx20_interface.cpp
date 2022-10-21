@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
 
+#include "../globals.h"
 #include "hx20_interface.h"
 #include "keyboard.h"
 
@@ -28,7 +29,10 @@ CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	bg_rect.w = w;
 	bg_rect.h = h;
 
-	SDL_Surface *bg_surface = IMG_Load("data/ui/device.png");
+	char imgpath[512];
+	get_data_path(imgpath, "ui/device.png", 512);
+
+	SDL_Surface *bg_surface = IMG_Load(imgpath);
 	SDL_BlitScaled(bg_surface, NULL, surface, &bg_rect);
 	SDL_FreeSurface(bg_surface);
 

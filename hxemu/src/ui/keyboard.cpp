@@ -1,5 +1,6 @@
 #ifdef FRONTEND_SDL2
 
+#include "../globals.h"
 #include "keyboard.h"
 
 #include <json/json.h>
@@ -24,7 +25,10 @@ CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
 	update();
 
 	// FIXME: Should be called by creator
-	load_keymap("data/ui/keymaps/se.json");
+	char keymappath[512];
+	get_data_path(keymappath, "ui/keymaps/se.json", 512);
+
+	load_keymap(keymappath);
 }
 
 CKeyboardWidget::~CKeyboardWidget() {

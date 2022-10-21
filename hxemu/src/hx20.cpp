@@ -9,6 +9,7 @@
 
 #include "hx20.h"
 
+#include "globals.h"
 #include "hash.h"
 #include "rtc.h"
 #include "iocontroller.h"
@@ -55,7 +56,7 @@ CHX20::CHX20() {
 
 	#ifdef REALSECONDARY
 		mcu_secondary->maskrom = new CROM(4096);
-		mcu_secondary->maskrom->load_from_file((char *)"data/roms/firmware/v1.1-swe/secondary.bin");
+		mcu_secondary->maskrom->load_from_file((char *)"roms/firmware/v1.1-swe/secondary.bin");
 	#endif
 
 	// Initialize LCD and controllers
@@ -114,11 +115,13 @@ void CHX20::set_lcd_interface(LcdInterface *lcdif) {
 }
 
 void CHX20::load_roms(char *dirname) {
-	char x[256];
+	char path[256];
+	char fullpath[512];
 
 	for (int i = 0; i < 4; i++) {
-		sprintf(x, "data/roms/%s/rom%d.bin", dirname, i);
-		roms[i]->load_from_file(x);
+		sprintf(path, "roms/%s/rom%d.bin", dirname, i);
+		get_data_path(fullpath, path, 512);
+		roms[i]->load_from_file(fullpath);
 	}
 
 	// Checksum ROMs

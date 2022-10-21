@@ -240,14 +240,17 @@ int main(int argc, array(string) argv) {
 	if (s_buildtype == "bundle") {
 		hxemu_filename = combine_path(release_path, "hxemu");
 		data_path = combine_path(release_path, "data");
+		s_cxxflags += " -DDATAPATH=\"data\"";
 	}
 	else if (s_buildtype == "system") {
 		hxemu_filename = combine_path(release_path, "bin/hxemu");
 		data_path = combine_path(release_path, "usr/share/hxemu");
+		s_cxxflags += " -DDATAPATH=\"/usr/share/hxemu\"";
 	}
 	else if (s_buildtype == "flatpak") {
 		hxemu_filename = "/app/bin/hxemu";
 		data_path = "/app/share/hxemu";
+		s_cxxflags += " -DDATAPATH=\"/app/share/hxemu\"";
 	}
 
 	// Determine executable filename

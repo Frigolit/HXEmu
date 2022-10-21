@@ -1,3 +1,5 @@
+#include "globals.h"
+
 #include "fonts.h"
 
 #ifdef FRONTEND_SDL2
@@ -6,7 +8,10 @@ TTF_Font *font_buttons;
 
 void fonts_init() {
 	#ifdef FRONTEND_SDL2
-	font_buttons = TTF_OpenFont("data/fonts/LiberationSans-Regular.ttf", 16);
+	char fontpath[512];
+	get_data_path(fontpath, "fonts/LiberationSans-Regular.ttf", 512);
+
+	font_buttons = TTF_OpenFont(fontpath, 16);
 	#endif
 }
 

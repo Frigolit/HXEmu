@@ -25,6 +25,7 @@
 #include "logging/console_logger.h"
 #include "logging/null_logger.h"
 
+#include "globals.h"
 #include "hash.h"
 #include "config.h"
 #include "version.h"
@@ -47,14 +48,30 @@ void shutdown(int);
 Logger *logger;
 
 int main(int argc, char **argv) {
-	if (argc >= 1 && strlen(argv[0]) < 256) {
-		char basepath[256];
-		strncpy(basepath, argv[0], 256);
-		chdir(dirname(basepath));
-	}
+	strcpy(datapath, DATAPATH);
 
 	char rompath[256];
 	char optionrompath[256];
+
+	#ifdef __LINUX__
+	if (datapath[0] != '/') {
+		char exepath[256];
+		char tmp[256];
+
+		readlink("/proc/self/exe", exepath, 256);
+
+		if (strlen(exepath) + strlen(tmp) + 1 > 255) {
+			std:cerr << "error: data path is too long" << std::endl;
+		}
+
+		strcpy(tmp, datapath);
+		sprintf(datapath, "%s/%s", dirname(exepath), tmp);
+	}
+	#endif
+
+	while (datapath[strlen(datapath) - 1] == '/') {
+		datapath[strlen(datapath) - 1] = 0;
+	}
 
 	if (argc > 1) {
 		if (strlen(argv[1]) > 255) {
