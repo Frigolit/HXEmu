@@ -3,6 +3,6 @@
 
 #define APP_MAJOR 0
 #define APP_MINOR 1
-#define APP_REVISION 9
+#define APP_REVISION 10
 
 #endif
