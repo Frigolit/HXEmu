@@ -23,8 +23,8 @@ For SDL2 frontend support:
 - SDL2_image
 
 ### Frontends
-There are currently two frontends available which can be specified via the "--frontend" argument to the compilation script:
-- sdl2 - Simple DirectMedia Layer 2.x (default)
+Frontends are enabled if support is available by default, but can be enabled or disabled specifically by passing the "--frontend-NNN" and "--no-frontend-NNN" flags to the compilation script.
+- sdl2 - Simple DirectMedia Layer 2.x
 - cli - Command-Line Interface (incomplete, just LCD output for now)
 
 Note: The CLI frontend requires a Unicode-capable terminal emulator and font for proper display.
