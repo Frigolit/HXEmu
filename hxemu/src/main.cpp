@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <signal.h>
+#include <pthread.h>
 
 #ifdef FRONTEND_SDL2
 #include "frontends/sdl2.h"
@@ -35,7 +36,7 @@
 Frontend *frontend;
 
 CHX20 *hx20_machine;
-std::thread *hx20_thread;
+pthread_t hx20_thread;
 
 enum Frontends {
 	#ifdef FRONTEND_SDL2
@@ -54,11 +55,7 @@ Frontends default_frontend =
 	#endif
 ;
 
-#ifdef FRONTEND_SDL2
-int hx20_run_sdl2(void *args);
-#endif
-
-int hx20_run(void);
+void *hx20_run(void*);
 void shutdown(int);
 
 Logger *logger;
@@ -156,7 +153,7 @@ int main(int argc, char **argv) {
 	frontend->start(hx20_machine);
 
 	// Start HX-20 processing thread (TODO: Clean this up properly)
-	std::thread *hx20_thread = new std::thread(hx20_run);
+	pthread_create(&hx20_thread, NULL, hx20_run, NULL);
 
 	// Run frontend (blocking)
 	frontend->run();
@@ -173,7 +170,7 @@ void shutdown(int sig) {
 	exit(0);
 }
 
-int hx20_run(void) {
+void *hx20_run(void *args) {
 	int i;
 	while (1) {
 		for (i = 0; i < 3200; i++) {
@@ -182,6 +179,4 @@ int hx20_run(void) {
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-
-	return 0;
 }

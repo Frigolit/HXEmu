@@ -101,6 +101,9 @@ int main(int argc, array(string) argv) {
 	if (s_pkgconfig == "") { s_pkgconfig = UNDEFINED; }
 	if (s_as02 == "") { s_as02 = UNDEFINED; }
 
+	// Add required CXXFLAGS
+	s_cxxflags = "-std=c++11 " + s_cxxflags;
+
 	// Auto-detect compilation environment as needed
 	if (!s_cxx) {
 		if (!(s_cxx = find_bin(s_host, ({ "g++", "clang++", "cpp" })))) {
