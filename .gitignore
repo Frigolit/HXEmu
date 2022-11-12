@@ -11,4 +11,9 @@
 *.la
 *.a
 
+# Build directory
 build/
+
+# Local Pike/Nettle installation and build directories
+.local/
+.pike-build/

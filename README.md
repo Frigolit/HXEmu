@@ -13,7 +13,9 @@ See the [releases](https://github.com/Frigolit/HXEmu/releases) in GitHub or visi
 
 ## How to compile
 The compilation script is written in [Pike](https://pike.lysator.liu.se/) ("pike8.0" or similar package on e.g. Debian), simply run the compilation script after installing the Pike runtime and it'll perform some basic auto-detection of the platform and build environment.
-It requires a compiler (e.g. GCC, Clang) with support for the C++11 standard as well as the following libraries (in some Linux distributions these will be "-dev" packages):
+If Pike is not available as a package in your distribution, you can try using the "autocompile.sh" script which will attempt to automatically install it if unavailable. This process will require a basic C/C++ toolchain (e.g. gcc) and m4 if the Nettle library is also unavailable on the system (e.g. the "nettle-dev" package in Debian/Ubuntu).
+
+HXEmu requires a compiler (e.g. GCC, Clang) with support for the C++11 standard as well as the following libraries (in some Linux distributions these will be "-dev" packages):
 - jsoncpp
 - pthreads
 
