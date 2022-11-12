@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "virtualserial.h"
-#include "config.h"
+#include "defines.h"
 
 VirtualSerial::VirtualSerial() {
 	buf = (uint8_t*)malloc(VIRTUALSERIAL_BUFFERSIZE);

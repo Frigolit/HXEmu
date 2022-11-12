@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "6301.h"
 
 #include "logging/logger.h"

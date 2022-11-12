@@ -28,7 +28,6 @@
 
 #include "globals.h"
 #include "hash.h"
-#include "config.h"
 #include "version.h"
 #include "hx20.h"
 #include "fonts.h"

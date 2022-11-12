@@ -3,8 +3,8 @@
 // @license MIT license - See LICENSE for more information
 // =============================================================================
 
-#ifndef HXEMU_CONFIG_H
-#define HXEMU_CONFIG_H
+#ifndef HXEMU_DEFINES_H
+#define HXEMU_DEFINES_H
 
 	#define VIRTUALSERIAL_BUFFERSIZE 256
 
