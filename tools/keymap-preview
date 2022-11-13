@@ -19,7 +19,7 @@ int main(int argc, array(string) argv) {
 	cd("..");
 
 	// Load keymap
-	array keys = Standards.JSON.decode(utf8_to_string(Stdio.read_file(path_keymap)));
+	array keys = Standards.JSON.decode(utf8_to_string(Stdio.read_file(path_keymap)))->keyboard;
 
 	// Initialize fonts
 	Image.Fonts.set_font_dirs(({ "data/bin/fonts" }));

@@ -44,22 +44,6 @@ void FrontendSdl2::start(CHX20 *hx20) {
 
 	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
 
-	// Draw toolbar
-
-
-	/*
-	char icons[][32] = {
-		"ui/icons/toolbar/hx20.png",
-		"ui/icons/toolbar/system.png",
-		"ui/icons/toolbar/tape.png",
-		"ui/icons/toolbar/serial.png",
-		"ui/icons/toolbar/monitor.png",
-		"ui/icons/toolbar/expansion.png",
-		"ui/icons/toolbar/expert.png",
-		"ui/icons/toolbar/about.png",
-	};
-	*/
-
 	// Load fonts
 	fonts_init();
 
