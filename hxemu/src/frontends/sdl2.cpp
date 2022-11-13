@@ -129,13 +129,7 @@ void FrontendSdl2::run() {
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE) {
-						SDL_Quit();
-						return;
-					}
-					else {
-						active_widget->sdl_keydown(event.key.keysym.sym);
-					}
+					active_widget->sdl_keydown(event.key.keysym.sym);
 					break;
 
 				case SDL_KEYUP:
@@ -173,7 +167,7 @@ void FrontendSdl2::run() {
 		// Render active widget
 		active_widget->draw(screen);
 
-			// Render
+		// Render
 		SDL_RenderClear(sdl_renderer);
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
 		SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
