@@ -59,6 +59,17 @@ ExpertDialog::ExpertDialog(CHX20 *hx20, int x, int y) {
 
 	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
 	SDL_FreeSurface(surf_text);
+
+	// Sorry...
+	surf_text = TTF_RenderUTF8_Blended(font_dialog_text, "Sorry, nothing here yet...", text_color);
+
+	rect_text.w = surf_text->w;
+	rect_text.h = surf_text->h;
+	rect_text.x = 16;
+	rect_text.y = 64;
+
+	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+	SDL_FreeSurface(surf_text);
 }
 
 ExpertDialog::~ExpertDialog() {
