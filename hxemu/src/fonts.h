@@ -5,6 +5,7 @@
 #include <SDL2/SDL_ttf.h>
 
 extern TTF_Font *font_buttons;
+extern TTF_Font *font_dialog_text;
 #endif
 
 void fonts_init(void);
