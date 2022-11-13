@@ -13,9 +13,6 @@ class AboutDialog : public CWidget {
 		AboutDialog(CHX20 *hx20, int x, int y);
 		~AboutDialog();
 
-		virtual void sdl_keydown(int keysym);
-		virtual void sdl_keyup(int keysym);
-
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 

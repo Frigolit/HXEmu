@@ -10,8 +10,8 @@ class CWidget {
 		CWidget();
 		~CWidget();
 
-		void sdl_keydown(int keysym) { };
-		void sdl_keyup(int keysym) { };
+		virtual void sdl_keydown(int keysym) { };
+		virtual void sdl_keyup(int keysym) { };
 
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);

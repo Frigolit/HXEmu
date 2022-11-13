@@ -33,38 +33,13 @@ bool SystemDialog::update() {
 }
 
 void SystemDialog::draw(SDL_Surface *dest) {
-	//lcd->draw(surface, 288, 28);
-	//keyboard->draw(surface);
-
 	CWidget::draw(dest);
 }
 
 void SystemDialog::mousedown(int x, int y) {
-	/*
-	CWidget *w = keyboard;
-	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-		w->mousedown(x - w->x, y - w->y);
-		return;
-	}
-	*/
 }
 
 void SystemDialog::mouseup(int x, int y) {
-	/*
-	CWidget *w = keyboard;
-	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-		w->mouseup(x - w->x, y - w->y);
-		return;
-	}
-	*/
-}
-
-void SystemDialog::sdl_keydown(int keysym) {
-	//keyboard->sdl_keydown(keysym);
-}
-
-void SystemDialog::sdl_keyup(int keysym) {
-	//keyboard->sdl_keyup(keysym);
 }
 
 #endif

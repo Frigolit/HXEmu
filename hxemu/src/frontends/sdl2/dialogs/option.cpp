@@ -33,38 +33,14 @@ bool OptionDialog::update() {
 }
 
 void OptionDialog::draw(SDL_Surface *dest) {
-	//lcd->draw(surface, 288, 28);
-	//keyboard->draw(surface);
-
 	CWidget::draw(dest);
 }
 
 void OptionDialog::mousedown(int x, int y) {
-	/*
-	CWidget *w = keyboard;
-	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-		w->mousedown(x - w->x, y - w->y);
-		return;
-	}
-	*/
 }
 
 void OptionDialog::mouseup(int x, int y) {
-	/*
-	CWidget *w = keyboard;
-	if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-		w->mouseup(x - w->x, y - w->y);
-		return;
-	}
-	*/
 }
 
-void OptionDialog::sdl_keydown(int keysym) {
-	//keyboard->sdl_keydown(keysym);
-}
-
-void OptionDialog::sdl_keyup(int keysym) {
-	//keyboard->sdl_keyup(keysym);
-}
 
 #endif
