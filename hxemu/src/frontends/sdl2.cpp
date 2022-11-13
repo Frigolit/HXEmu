@@ -53,6 +53,10 @@ void FrontendSdl2::start(CHX20 *hx20) {
 	// Create configuration dialogs
 	dialog_system = new SystemDialog(hx20, 38, 0);
 	dialog_option = new OptionDialog(hx20, 38, 0);
+	dialog_serial = new SerialDialog(hx20, 38, 0);
+	dialog_monitor = new MonitorDialog(hx20, 38, 0);
+	dialog_expansion = new ExpansionDialog(hx20, 38, 0);
+	dialog_expert = new ExpertDialog(hx20, 38, 0);
 	dialog_about = new AboutDialog(hx20, 38, 0);
 
 	// Set active widget to the HX-20 interface
@@ -74,9 +78,16 @@ void FrontendSdl2::start(CHX20 *hx20) {
 	toolbar_buttons[2]->widget = dialog_option;
 
 	strcpy(toolbar_buttons[3]->icon_path, "ui/icons/toolbar/serial.png");
+	toolbar_buttons[3]->widget = dialog_serial;
+
 	strcpy(toolbar_buttons[4]->icon_path, "ui/icons/toolbar/monitor.png");
+	toolbar_buttons[4]->widget = dialog_monitor;
+
 	strcpy(toolbar_buttons[5]->icon_path, "ui/icons/toolbar/expansion.png");
+	toolbar_buttons[5]->widget = dialog_expansion;
+
 	strcpy(toolbar_buttons[6]->icon_path, "ui/icons/toolbar/expert.png");
+	toolbar_buttons[6]->widget = dialog_expert;
 
 	strcpy(toolbar_buttons[7]->icon_path, "ui/icons/toolbar/about.png");
 	toolbar_buttons[7]->widget = dialog_about;

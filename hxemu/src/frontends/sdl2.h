@@ -5,6 +5,10 @@
 #include "frontend.h"
 #include "sdl2/dialogs/system.h"
 #include "sdl2/dialogs/option.h"
+#include "sdl2/dialogs/serial.h"
+#include "sdl2/dialogs/monitor.h"
+#include "sdl2/dialogs/expansion.h"
+#include "sdl2/dialogs/expert.h"
 #include "sdl2/dialogs/about.h"
 
 #include "../ui/hx20_interface.h"
@@ -32,6 +36,10 @@ class FrontendSdl2 : public Frontend {
 		CHX20InterfaceWidget *hx20_interface;
 		SystemDialog *dialog_system;
 		OptionDialog *dialog_option;
+		SerialDialog *dialog_serial;
+		MonitorDialog *dialog_monitor;
+		ExpansionDialog *dialog_expansion;
+		ExpertDialog *dialog_expert;
 		AboutDialog *dialog_about;
 
 		// Active widget for rendering and user interaction

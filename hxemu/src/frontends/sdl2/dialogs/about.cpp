@@ -24,39 +24,39 @@ AboutDialog::AboutDialog(CHX20 *hx20, int x, int y) {
 	bg_rect.y = 0;
 	bg_rect.w = w;
 	bg_rect.h = 48;
-	SDL_FillRect(surface, &bg_rect, SDL_MapRGB(surface->format, 0xA0, 0xA0, 0xA0));
+	SDL_FillRect(surface, &bg_rect, SDL_MapRGB(surface->format, 0x4a, 0x82, 0x52));
 
 	// Draw texts
 	char txt_title[64];
 	sprintf(txt_title, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
 
 	SDL_Color text_color {
-		.r = 32,
+		.r = 0,
 		.g = 32,
-		.b = 32
+		.b = 0
 	};
 
 	SDL_Color text_color2 {
-		.r = 180,
-		.g = 180,
-		.b = 180
+		.r = 255,
+		.g = 255,
+		.b = 255
 	};
 
 	SDL_Surface *surf_text;
 	SDL_Rect rect_text;
 
 	// Title
-	surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, txt_title, text_color2, w);
+	surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, txt_title, text_color, w);
 
 	rect_text.w = surf_text->w;
 	rect_text.h = surf_text->h;
 	rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0));
-	rect_text.y = 17;
+	rect_text.y = 15;
 
 	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
 	SDL_FreeSurface(surf_text);
 
-	surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, txt_title, text_color, w);
+	surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, txt_title, text_color2, w);
 	rect_text.y = 16;
 
 	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);

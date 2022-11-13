@@ -3,9 +3,9 @@
 #include "../../../globals.h"
 #include "../../../fonts.h"
 
-#include "system.h"
+#include "expansion.h"
 
-SystemDialog::SystemDialog(CHX20 *hx20, int x, int y) {
+ExpansionDialog::ExpansionDialog(CHX20 *hx20, int x, int y) {
 	::CWidget();
 
 	this->hx20 = hx20;
@@ -26,7 +26,7 @@ SystemDialog::SystemDialog(CHX20 *hx20, int x, int y) {
 	SDL_FillRect(surface, &bg_rect, SDL_MapRGB(surface->format, 0x4a, 0x82, 0x52));
 
 	// Draw texts
-	char txt_title[64] = "System configuration";
+	char txt_title[64] = "Expansion port";
 
 	SDL_Color text_color {
 		.r = 0,
@@ -61,22 +61,23 @@ SystemDialog::SystemDialog(CHX20 *hx20, int x, int y) {
 	SDL_FreeSurface(surf_text);
 }
 
-SystemDialog::~SystemDialog() {
+ExpansionDialog::~ExpansionDialog() {
 	SDL_FreeSurface(surface);
 }
 
-bool SystemDialog::update() {
+bool ExpansionDialog::update() {
 	return true;
 }
 
-void SystemDialog::draw(SDL_Surface *dest) {
+void ExpansionDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void SystemDialog::mousedown(int x, int y) {
+void ExpansionDialog::mousedown(int x, int y) {
 }
 
-void SystemDialog::mouseup(int x, int y) {
+void ExpansionDialog::mouseup(int x, int y) {
 }
+
 
 #endif
