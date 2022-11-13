@@ -86,6 +86,9 @@ void CKeyboardWidget::load_keymap(const char *path) {
 		return;
 	}
 
+	// temp hack for format change
+	root = root["keyboard"];
+
 	if (!root.isArray()) {
 		std::cerr << "ERROR: Keymap root is not an array: " << path << std::endl;
 		return;

@@ -36,3 +36,6 @@ Thanks to everyone who has contributed to this project.
 - Pontus Rodling (@frigolit) - Project creator, lead developer.
 - Harald Lapp (@aurora) - Various fixes, support for compiling on OS X.
 - Dmitrii Eliuseev (@dmitryelj) - SDL2 support.
+
+## Acknowledgments
+- Fugue Icons by [Yusuke Kamiyamane](https://p.yusukekamiyamane.com/) - Licensed under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/).

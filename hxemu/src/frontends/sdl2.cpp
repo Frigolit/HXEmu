@@ -1,7 +1,9 @@
 #ifdef FRONTEND_SDL2
 
 #include "sdl2.h"
+#include <SDL2/SDL_image.h>
 
+#include "../globals.h"
 #include "../fonts.h"
 #include "../version.h"
 
@@ -26,41 +28,120 @@ void FrontendSdl2::start(CHX20 *hx20) {
 	char s_wintitle[256];
 	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
 
-	int ui_width = 992;
+	int ui_width = 992 + 36 + 2;
 	int ui_height = 528;
 
 	sdl_window = SDL_CreateWindow(s_wintitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ui_width, ui_height, 0);
 	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	screen = SDL_CreateRGBSurface(SDL_RLEACCEL, ui_width, ui_height, 32, 0, 0, 0, 0);
+	toolbar_surface = SDL_CreateRGBSurface(SDL_RLEACCEL, 36, ui_height, 32, 0, 0, 0, 0);
 
 	if (screen == NULL) {
 		fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
 
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0xAA, 0xAA, 0xAA));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+
+	// Draw toolbar
+
+
+	/*
+	char icons[][32] = {
+		"ui/icons/toolbar/hx20.png",
+		"ui/icons/toolbar/system.png",
+		"ui/icons/toolbar/tape.png",
+		"ui/icons/toolbar/serial.png",
+		"ui/icons/toolbar/monitor.png",
+		"ui/icons/toolbar/expansion.png",
+		"ui/icons/toolbar/expert.png",
+		"ui/icons/toolbar/about.png",
+	};
+	*/
 
 	// Load fonts
 	fonts_init();
 
 	// Create HX-20 interface
-	hx20_interface = new CHX20InterfaceWidget(hx20, 0, 0);
+	hx20_interface = new CHX20InterfaceWidget(hx20, 38, 0);
+
+	// Create configuration dialogs
+	dialog_system = new SystemDialog(hx20, 38, 0);
+	dialog_option = new OptionDialog(hx20, 38, 0);
+	dialog_about = new AboutDialog(hx20, 38, 0);
+
+	// Set active widget to the HX-20 interface
+	active_widget = hx20_interface;
+
+	// Initialize toolbar
+	for (int i = 0; i < TOOLBAR_BUTTONS; i++) {
+		toolbar_buttons[i] = (s_toolbar_button *)malloc(sizeof(struct s_toolbar_button));
+		toolbar_buttons[i]->widget = NULL;
+	}
+
+	strcpy(toolbar_buttons[0]->icon_path, "ui/icons/toolbar/hx20.png");
+	toolbar_buttons[0]->widget = hx20_interface;
+
+	strcpy(toolbar_buttons[1]->icon_path, "ui/icons/toolbar/system.png");
+	toolbar_buttons[1]->widget = dialog_system;
+
+	strcpy(toolbar_buttons[2]->icon_path, "ui/icons/toolbar/tape.png");
+	toolbar_buttons[2]->widget = dialog_option;
+
+	strcpy(toolbar_buttons[3]->icon_path, "ui/icons/toolbar/serial.png");
+	strcpy(toolbar_buttons[4]->icon_path, "ui/icons/toolbar/monitor.png");
+	strcpy(toolbar_buttons[5]->icon_path, "ui/icons/toolbar/expansion.png");
+	strcpy(toolbar_buttons[6]->icon_path, "ui/icons/toolbar/expert.png");
+
+	strcpy(toolbar_buttons[7]->icon_path, "ui/icons/toolbar/about.png");
+	toolbar_buttons[7]->widget = dialog_about;
+
+	toolbar_selected_index = 0;
+	refresh_toolbar();
 }
 
 void FrontendSdl2::stop() {
 	//fonts_quit();
-	//TTF_Quit();
-	//SDL_Quit();
+	TTF_Quit();
+	SDL_Quit();
+}
+
+void FrontendSdl2::refresh_toolbar() {
+	SDL_FillRect(toolbar_surface, NULL, SDL_MapRGB(toolbar_surface->format, 0x7b, 0x88, 0x93)); // 0x4b, 0x5e, 0x6c
+
+	SDL_Rect icon_rect;
+
+	for (int i = 0; i < TOOLBAR_BUTTONS; i++) {
+		if (toolbar_selected_index == i) {
+			icon_rect.x = 0;
+			icon_rect.y = i * 36;
+			icon_rect.w = 36;
+			icon_rect.h = 36;
+
+			SDL_FillRect(toolbar_surface, &icon_rect, SDL_MapRGB(toolbar_surface->format, 0x3a, 0x5f, 0x7e)); // 0x40, 0x80, 0xFF
+		}
+
+		icon_rect.x = 2;
+		icon_rect.y = 2 + (i * 36);
+		icon_rect.w = 32;
+		icon_rect.h = 32;
+
+		char imgpath[512];
+		get_data_path(imgpath, toolbar_buttons[i]->icon_path, 512);
+
+		SDL_Surface *icon_surface = IMG_Load(imgpath);
+		SDL_BlitScaled(icon_surface, NULL, toolbar_surface, &icon_rect);
+		SDL_FreeSurface(icon_surface);
+	}
+
+	SDL_BlitSurface(toolbar_surface, NULL, screen, NULL);
 }
 
 void FrontendSdl2::run() {
-	FrontendSdl2 *frontend = this;
-
 	SDL_Event event;
 	while (1) {
-		frontend->hx20_interface->draw(frontend->screen);
-
+		// Event processing
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
@@ -69,20 +150,32 @@ void FrontendSdl2::run() {
 						return;
 					}
 					else {
-						frontend->hx20_interface->sdl_keydown(event.key.keysym.sym);
+						active_widget->sdl_keydown(event.key.keysym.sym);
 					}
 					break;
 
 				case SDL_KEYUP:
-					frontend->hx20_interface->sdl_keyup(event.key.keysym.sym);
+					active_widget->sdl_keyup(event.key.keysym.sym);
 					break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					frontend->hx20_interface->mousedown(event.button.x, event.button.y);
+					if (event.button.x <= 35) {
+						int n = event.button.y / 36;
+						if (n < TOOLBAR_BUTTONS && toolbar_buttons[n]->widget != NULL) {
+							toolbar_selected_index = n;
+							active_widget = toolbar_buttons[n]->widget;
+							refresh_toolbar();
+						}
+					}
+					else if (event.button.x >= 38) {
+						active_widget->mousedown(event.button.x - 38, event.button.y);
+					}
 					break;
 
 				case SDL_MOUSEBUTTONUP:
-					frontend->hx20_interface->mouseup(event.button.x, event.button.y);
+					if (event.button.x >= 38) {
+						active_widget->mouseup(event.button.x - 38, event.button.y);
+					}
 					break;
 
 				case SDL_QUIT:
@@ -93,11 +186,14 @@ void FrontendSdl2::run() {
 			}
 		}
 
-		// Render
-		SDL_RenderClear(frontend->sdl_renderer);
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(frontend->sdl_renderer, frontend->screen);
-		SDL_RenderCopy(frontend->sdl_renderer, texture, NULL, NULL);
-		SDL_RenderPresent(frontend->sdl_renderer);
+		// Render active widget
+		active_widget->draw(screen);
+
+			// Render
+		SDL_RenderClear(sdl_renderer);
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
+		SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
+		SDL_RenderPresent(sdl_renderer);
 		SDL_DestroyTexture(texture);
 
 		// Wait a little bit (TODO: improve me)
