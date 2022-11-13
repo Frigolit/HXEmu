@@ -17,7 +17,7 @@ AboutDialog::AboutDialog(CHX20 *hx20, int x, int y) {
 	CWidget::h = 528;
 
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, w, h, 32, 0, 0, 0, 0);
-	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xB0, 0xB0, 0xB0));
+	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xC0, 0xC0, 0xc0));
 
 	SDL_Rect bg_rect;
 	bg_rect.x = 0;
@@ -30,9 +30,9 @@ AboutDialog::AboutDialog(CHX20 *hx20, int x, int y) {
 	sprintf(txt_title, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
 
 	SDL_Color text_color {
-		.r = 0,
-		.g = 0,
-		.b = 0
+		.r = 32,
+		.g = 32,
+		.b = 32
 	};
 
 	SDL_Surface *surf_text;
@@ -52,7 +52,7 @@ AboutDialog::AboutDialog(CHX20 *hx20, int x, int y) {
 	SDL_FreeSurface(surf_text);
 
 	// Info
-	surf_text = TTF_RenderUTF8_Blended(font_buttons, "HXEmu is an open-source Epson HX-20 emulator developed by Pontus \"Frigolit\" Rodling and licensed under the MIT license.", text_color);
+	surf_text = TTF_RenderUTF8_Blended(font_buttons, "HXEmu is an open-source Epson HX-20 emulator licensed under the MIT license.", text_color);
 
 	rect_text.w = surf_text->w;
 	rect_text.h = surf_text->h;
