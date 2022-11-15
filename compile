@@ -181,7 +181,7 @@ int main(int argc, array(string) argv) {
 			return 1;
 		}
 
-		frontends["sdl2"]->enabled = ok;
+		flags["frontend-sdl2"]->value = frontends["sdl2"]->enabled = ok;
 	}
 
 	if (flags["frontend-cli"] != 0) {
