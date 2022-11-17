@@ -1,6 +1,6 @@
 #ifdef FRONTEND_SDL2
 
-#include "../globals.h"
+#include "../../../globals.h"
 #include "keyboard.h"
 
 #include <json/json.h>

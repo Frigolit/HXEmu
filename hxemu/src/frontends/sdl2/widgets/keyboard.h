@@ -9,7 +9,7 @@
 #include "widget.h"
 #include "keyboard_button.h"
 
-#include "../hx20.h"
+#include "../../../hx20.h"
 
 class CKeyboardWidget : public CWidget {
 	public:

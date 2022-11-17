@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
 
-#include "../globals.h"
+#include "../../../globals.h"
 #include "hx20_interface.h"
 #include "keyboard.h"
 

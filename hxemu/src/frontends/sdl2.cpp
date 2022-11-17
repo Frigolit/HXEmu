@@ -4,8 +4,9 @@
 #include <SDL2/SDL_image.h>
 
 #include "../globals.h"
-#include "../fonts.h"
 #include "../version.h"
+
+#include "sdl2/fonts.h"
 
 void FrontendSdl2::start(CHX20 *hx20) {
 	printf("Initializing SDL2 frontend...\n");
@@ -103,7 +104,7 @@ void FrontendSdl2::stop() {
 }
 
 void FrontendSdl2::refresh_toolbar() {
-	SDL_FillRect(toolbar_surface, NULL, SDL_MapRGB(toolbar_surface->format, 0x7b, 0x88, 0x93)); // 0x4b, 0x5e, 0x6c
+	SDL_FillRect(toolbar_surface, NULL, SDL_MapRGB(toolbar_surface->format, 0x7b, 0x88, 0x93));
 
 	SDL_Rect icon_rect;
 
@@ -114,7 +115,7 @@ void FrontendSdl2::refresh_toolbar() {
 			icon_rect.w = 36;
 			icon_rect.h = 36;
 
-			SDL_FillRect(toolbar_surface, &icon_rect, SDL_MapRGB(toolbar_surface->format, 0x3a, 0x5f, 0x7e)); // 0x40, 0x80, 0xFF
+			SDL_FillRect(toolbar_surface, &icon_rect, SDL_MapRGB(toolbar_surface->format, 0x3a, 0x5f, 0x7e));
 		}
 
 		icon_rect.x = 2;

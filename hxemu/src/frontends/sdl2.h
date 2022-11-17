@@ -11,7 +11,7 @@
 #include "sdl2/dialogs/expert.h"
 #include "sdl2/dialogs/about.h"
 
-#include "../ui/hx20_interface.h"
+#include "sdl2/widgets/hx20_interface.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>

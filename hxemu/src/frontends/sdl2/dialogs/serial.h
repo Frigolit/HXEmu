@@ -5,7 +5,7 @@
 
 #include <functional>
 
-#include "../../../ui/widget.h"
+#include "../widgets/widget.h"
 #include "../../../hx20.h"
 
 class SerialDialog : public CWidget {

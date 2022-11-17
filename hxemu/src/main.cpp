@@ -30,7 +30,6 @@
 #include "hash.h"
 #include "version.h"
 #include "hx20.h"
-#include "fonts.h"
 
 Frontend *frontend;
 

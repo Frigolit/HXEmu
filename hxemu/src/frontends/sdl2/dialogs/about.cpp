@@ -1,8 +1,8 @@
 #ifdef FRONTEND_SDL2
 
 #include "../../../globals.h"
-#include "../../../fonts.h"
 #include "../../../version.h"
+#include "../fonts.h"
 
 #include "about.h"
 

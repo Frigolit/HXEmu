@@ -1,7 +1,7 @@
 #ifdef FRONTEND_SDL2
 
 #include "../../../globals.h"
-#include "../../../fonts.h"
+#include "../fonts.h"
 
 #include "monitor.h"
 

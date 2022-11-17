@@ -8,8 +8,8 @@
 #include "widget.h"
 #include "keyboard.h"
 
-#include "../hx20.h"
-#include "../frontends/sdl2/lcd_interface.h"
+#include "../../../hx20.h"
+#include "../lcd_interface.h"
 
 class CHX20InterfaceWidget : public CWidget {
 	public:

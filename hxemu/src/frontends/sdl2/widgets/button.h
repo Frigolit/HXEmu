@@ -8,7 +8,7 @@
 
 #include "widget.h"
 
-#include "../colors.h"
+#include "../../../colors.h"
 
 class CButton : public CWidget {
 	public:
