@@ -6,6 +6,7 @@
 
 extern TTF_Font *font_buttons;
 extern TTF_Font *font_dialog_text;
+extern TTF_Font *font_dialog_title;
 #endif
 
 void fonts_init(void);

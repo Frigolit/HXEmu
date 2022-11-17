@@ -5,10 +5,9 @@
 
 #include <functional>
 
-#include "../widgets/widget.h"
-#include "../../../hx20.h"
+#include "config_dialog.h"
 
-class AboutDialog : public CWidget {
+class AboutDialog : public ConfigDialog {
 	public:
 		AboutDialog(CHX20 *hx20, int x, int y);
 		~AboutDialog();
@@ -18,9 +17,6 @@ class AboutDialog : public CWidget {
 
 		virtual void mousedown(int x, int y);
 		virtual void mouseup(int x, int y);
-
-	protected:
-		CHX20 *hx20;
 };
 
 #endif

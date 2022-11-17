@@ -5,10 +5,9 @@
 
 #include <functional>
 
-#include "../widgets/widget.h"
-#include "../../../hx20.h"
+#include "config_dialog.h"
 
-class ExpertDialog : public CWidget {
+class ExpertDialog : public ConfigDialog {
 	public:
 		ExpertDialog(CHX20 *hx20, int x, int y);
 		~ExpertDialog();

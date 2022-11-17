@@ -5,10 +5,9 @@
 
 #include <functional>
 
-#include "../widgets/widget.h"
-#include "../../../hx20.h"
+#include "config_dialog.h"
 
-class ExpansionDialog : public CWidget {
+class ExpansionDialog : public ConfigDialog {
 	public:
 		ExpansionDialog(CHX20 *hx20, int x, int y);
 		~ExpansionDialog();
