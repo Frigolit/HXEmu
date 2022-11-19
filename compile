@@ -487,20 +487,66 @@ int main(int argc, array(string) argv) {
 	// Compile source files
 	if (sizeof(m_compile)) {
 		write("Compiling objects...\n");
+
+		do_link = true;
 		int build_fail = 0;
-		foreach (sort(indices(m_compile)), string src) {
-			string objfile = cache->sources[src]->obj;
-			write(">> %s\n", src);
 
-			if (!Stdio.is_dir(dirname(objfile))) {
-				Stdio.mkdirhier(dirname(objfile));
-			}
+		array threads = ({ });
+		Thread.Queue queue = Thread.Queue();
+		Thread.Mutex mtx = Thread.Mutex();
 
-			array args = ({ s_cxx }) + (s_cxxflags / " ") + ({ "-c", "-o", objfile, src });
-			build_fail |= Process.create_process(args)->wait();
-			do_link = true;
+		int thread_count = sizeof(m_compile);
+		if (thread_count > 4) {
+			// TODO: Limit to 4 compilation threads for now...
+			thread_count = 4;
 		}
 
+		void compile_thread() {
+			while (true) {
+				mapping m = queue->read();
+				if (!m) {
+					return;
+				}
+
+				object k = mtx->lock(1);
+				write(">> %s\n", m->src_file);
+
+				if (!Stdio.is_dir(dirname(m->out_file))) {
+					Stdio.mkdirhier(dirname(m->out_file));
+				}
+				destruct(k);
+
+				array args = ({ m->cxx }) + (m->cxxflags / " ") + ({ "-c", "-o", m->out_file, m->src_file });
+				int r = Process.create_process(args)->wait();
+
+				if (r) {
+					k = mtx->lock(1);
+					build_fail++;
+					destruct(k);
+				}
+			}
+		};
+
+		// Queue up all build operations
+		foreach (sort(indices(m_compile)), string src) {
+			queue->write(([
+				"cxx": s_cxx,
+				"cxxflags": s_cxxflags,
+				"src_file": src,
+				"out_file": cache->sources[src]->obj,
+			]));
+		}
+
+		// Start all threads and queue up end-of-queue elements
+		for (int i = 0; i < thread_count; i++) {
+			threads += ({ Thread.Thread(compile_thread) });
+			queue->write(UNDEFINED);
+		}
+
+		// Wait for all threads to exit
+		threads->wait();
+
+		// Did we fail?
 		if (build_fail) {
 			werror("error: compilation failed\n");
 			return 1;
