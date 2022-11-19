@@ -1,3 +1,5 @@
+#ifdef FRONTEND_SDL2
+
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
@@ -73,3 +75,5 @@ void Checkbox::set_caption(std::string c) {
 	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
 	SDL_FreeSurface(surf_text);
 }
+
+#endif
