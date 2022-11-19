@@ -9,13 +9,17 @@
 
 #include "../widgets/button.h"
 #include "../widgets/checkbox.h"
+#include "../widgets/label.h"
 
 class SystemDialog : public ConfigDialog {
 	public:
 		SystemDialog(CHX20 *hx20, int x, int y);
 
 	protected:
-		Checkbox *chk_test;
+		Checkbox *chk_dip0;
+		Checkbox *chk_dip1;
+		Checkbox *chk_dip2;
+		Checkbox *chk_dip3;
 };
 
 #endif

@@ -42,6 +42,20 @@ CIOController::CIOController() {
 	// DIP4 = Terminal Floppy connected
 }
 
+void CIOController::get_dip_switch(bool *d0, bool *d1, bool *d2, bool *d3) {
+	*d0 = !!(krtn_map[0] & (1 << 9));
+	*d1 = !!(krtn_map[1] & (1 << 9));
+	*d2 = !!(krtn_map[2] & (1 << 9));
+	*d3 = !!(krtn_map[3] & (1 << 9));
+}
+
+void CIOController::set_dip_switch(bool d0, bool d1, bool d2, bool d3) {
+	krtn_map[0] = (krtn_map[0] & ~(uint16_t)(1 << 9)) | (!!d0 << 9);
+	krtn_map[1] = (krtn_map[1] & ~(uint16_t)(1 << 9)) | (!!d1 << 9);
+	krtn_map[2] = (krtn_map[2] & ~(uint16_t)(1 << 9)) | (!!d2 << 9);
+	krtn_map[3] = (krtn_map[3] & ~(uint16_t)(1 << 9)) | (!!d3 << 9);
+}
+
 CIOController::~CIOController() {
 	for (int i = 0; i < 6; i++) {
 		lcd_ctls[i] = NULL;

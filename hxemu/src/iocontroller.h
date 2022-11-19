@@ -23,6 +23,9 @@ class CIOController: public CMemoryDevice {
 
 		void set_lcd_controller(uint8_t n, CLCDController *c);
 
+		void get_dip_switch(bool *d0, bool *d1, bool *d2, bool *d3);
+		void set_dip_switch(bool d0, bool d1, bool d2, bool d3);
+
 		void set_power_button(bool p);
 		bool get_power_button();
 
