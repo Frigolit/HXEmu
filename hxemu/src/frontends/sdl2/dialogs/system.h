@@ -7,19 +7,15 @@
 
 #include "config_dialog.h"
 
+#include "../widgets/button.h"
+#include "../widgets/checkbox.h"
+
 class SystemDialog : public ConfigDialog {
 	public:
 		SystemDialog(CHX20 *hx20, int x, int y);
-		~SystemDialog();
-
-		virtual bool update();
-		virtual void draw(SDL_Surface *dest);
-
-		virtual void mousedown(int x, int y);
-		virtual void mouseup(int x, int y);
 
 	protected:
-		CHX20 *hx20;
+		Checkbox *chk_test;
 };
 
 #endif
