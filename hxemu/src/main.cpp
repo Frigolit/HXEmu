@@ -108,8 +108,20 @@ int main(int argc, char **argv) {
 		optionrompath[0] = 0;
 	}
 
+	#if defined(__LINUX__) && defined(FRONTEND_SDL2) && defined(FRONTEND_CLI)
+	// Detect if we have a display on Linux if SDL2 support is built-in, otherwise default the frontend to CLI
+	char *env_display = getenv("DISPLAY");
+	if (env_display != NULL && strlen(env_display) > 0) {
+		default_frontend = sdl2;
+	}
+	else {
+		default_frontend = cli;
+	}
+	#endif
+
+	// TODO: Frontend selection via command-line arguments
+
 	Frontends selected_frontend = default_frontend;
-	// TODO: Frontend selection via command-line arguments and/or auto-detection
 
 	// Prepare frontend
 	switch (selected_frontend) {
