@@ -22,6 +22,7 @@ class Checkbox : public CWidget {
 		virtual void mouseleave();
 		virtual void mouseenter();
 
+		void set_checked(bool c);
 		void set_caption(std::string c);
 		//void set_change_callback(std::function<void(Checkbox*, bool)> callback);
 

@@ -33,6 +33,10 @@ Checkbox::Checkbox(CWidget *p, int x, int y, int w) : CWidget(p) {
 }
 
 Checkbox::~Checkbox() {
+	if (caption != NULL) {
+		free(caption);
+	}
+
 	SDL_FreeSurface(img_unchecked);
 	SDL_FreeSurface(img_checked);
 }
@@ -120,6 +124,13 @@ void Checkbox::draw_state(bool focus, bool state) {
 	};
 
 	SDL_BlitScaled(state ? img_checked : img_unchecked, NULL, surface, &dst_rect);
+}
+
+void Checkbox::set_checked(bool c) {
+	if (c != checked) {
+		checked = c;
+		draw_state(false, checked);
+	}
 }
 
 #endif
