@@ -22,8 +22,8 @@ class CKeyboardWidget : public CWidget {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
-		virtual void mousedown(int x, int y);
-		virtual void mouseup(int x, int y);
+		virtual CWidget* mousedown(int x, int y);
+		virtual CWidget* mouseup(int x, int y);
 
 		void load_keymap(const char *path);
 

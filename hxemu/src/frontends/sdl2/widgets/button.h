@@ -19,8 +19,8 @@ class CButton : public CWidget {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
-		virtual void mousedown(int x, int y);
-		virtual void mouseup(int x, int y);
+		virtual CWidget* mousedown(int x, int y);
+		virtual CWidget* mouseup(int x, int y);
 
 		void set_caption(const char *new_caption);
 		void set_click_callback(std::function<void(CButton*, int, int)> callback);

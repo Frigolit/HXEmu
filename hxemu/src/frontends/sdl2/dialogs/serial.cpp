@@ -34,11 +34,4 @@ void SerialDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void SerialDialog::mousedown(int x, int y) {
-}
-
-void SerialDialog::mouseup(int x, int y) {
-}
-
-
 #endif

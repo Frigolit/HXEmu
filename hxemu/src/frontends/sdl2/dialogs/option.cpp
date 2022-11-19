@@ -34,11 +34,4 @@ void OptionDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void OptionDialog::mousedown(int x, int y) {
-}
-
-void OptionDialog::mouseup(int x, int y) {
-}
-
-
 #endif

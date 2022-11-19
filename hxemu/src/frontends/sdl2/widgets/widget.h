@@ -1,7 +1,7 @@
 #ifdef FRONTEND_SDL2
 
-#ifndef HXEMU_UI_WIDGET_H
-#define HXEMU_UI_WIDGET_H
+#ifndef HXEMU_FRONTENDS_SDL2_WIDGETS_WIDGET_H
+#define HXEMU_FRONTENDS_SDL2_WIDGETS_WIDGET_H
 
 #include <SDL2/SDL.h>
 
@@ -13,11 +13,13 @@ class CWidget {
 		virtual void sdl_keydown(int keysym) { };
 		virtual void sdl_keyup(int keysym) { };
 
-		virtual bool update();
+		virtual bool update() { return false; }
 		virtual void draw(SDL_Surface *dest);
 
-		virtual void mousedown(int x, int y) {};
-		virtual void mouseup(int x, int y) {};
+		virtual CWidget* mousedown(int x, int y) { return NULL; };
+		virtual CWidget* mouseup(int x, int y) { return NULL; };
+		virtual void mouseleave() { };
+		virtual void mouseenter() { };
 
 		// Coordinates
 		int x, y, w, h;

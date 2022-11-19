@@ -34,11 +34,4 @@ void MonitorDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void MonitorDialog::mousedown(int x, int y) {
-}
-
-void MonitorDialog::mouseup(int x, int y) {
-}
-
-
 #endif

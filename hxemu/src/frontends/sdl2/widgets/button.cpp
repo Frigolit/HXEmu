@@ -128,16 +128,20 @@ void CButton::set_click_callback(std::function<void(CButton*, int, int)> callbac
 	cb_click = callback;
 }
 
-void CButton::mousedown(int cx, int cy) {
+CWidget* CButton::mousedown(int cx, int cy) {
 	if (cb_click != NULL) {
 		cb_click(this, 0, 0);
 	}
+
+	return this;
 }
 
-void CButton::mouseup(int cx, int cy) {
+CWidget* CButton::mouseup(int cx, int cy) {
 	if (cb_click != NULL) {
 		cb_click(this, 1, 0);
 	}
+
+	return this;
 }
 
 #endif

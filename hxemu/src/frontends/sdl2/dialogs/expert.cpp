@@ -34,11 +34,4 @@ void ExpertDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void ExpertDialog::mousedown(int x, int y) {
-}
-
-void ExpertDialog::mouseup(int x, int y) {
-}
-
-
 #endif

@@ -15,9 +15,6 @@ class MonitorDialog : public ConfigDialog {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
-		virtual void mousedown(int x, int y);
-		virtual void mouseup(int x, int y);
-
 	protected:
 		CHX20 *hx20;
 };

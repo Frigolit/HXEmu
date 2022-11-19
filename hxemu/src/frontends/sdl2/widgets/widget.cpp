@@ -29,8 +29,4 @@ void CWidget::draw(SDL_Surface *dest) {
 	SDL_BlitSurface(surface, NULL, dest, &dst);
 }
 
-bool CWidget::update() {
-	return true;
-}
-
 #endif

@@ -52,10 +52,4 @@ void AboutDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void AboutDialog::mousedown(int x, int y) {
-}
-
-void AboutDialog::mouseup(int x, int y) {
-}
-
 #endif

@@ -16,8 +16,8 @@ class Checkbox : public CWidget {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
-		//virtual void mousedown(int x, int y);
-		//virtual void mouseup(int x, int y);
+		//virtual CWidget* mousedown(int x, int y);
+		//virtual CWidget* mouseup(int x, int y);
 
 		void set_caption(std::string c);
 		//void set_change_callback(std::function<void(Checkbox*, bool)> callback);

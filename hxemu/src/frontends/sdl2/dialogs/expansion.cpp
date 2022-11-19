@@ -34,11 +34,4 @@ void ExpansionDialog::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
 }
 
-void ExpansionDialog::mousedown(int x, int y) {
-}
-
-void ExpansionDialog::mouseup(int x, int y) {
-}
-
-
 #endif

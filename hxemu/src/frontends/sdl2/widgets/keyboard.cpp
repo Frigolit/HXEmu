@@ -158,28 +158,30 @@ void CKeyboardWidget::button_callback(CButton *widget, int released, int discard
 	}
 }
 
-void CKeyboardWidget::mousedown(int x, int y) {
+CWidget* CKeyboardWidget::mousedown(int x, int y) {
 	int sz = keys->size();
 
 	for (int i = 0; i < sz; i++) {
 		CWidget *w = keys->at(i);
 		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-			w->mousedown(x - w->x, y - w->y);
-			return;
+			return w->mousedown(x - w->x, y - w->y);
 		}
 	}
+
+	return NULL;
 }
 
-void CKeyboardWidget::mouseup(int x, int y) {
+CWidget* CKeyboardWidget::mouseup(int x, int y) {
 	int sz = keys->size();
 
 	for (int i = 0; i < sz; i++) {
 		CWidget *w = keys->at(i);
 		if (w->visible && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
-			w->mouseup(x - w->x, y - w->y);
-			return;
+			return w->mouseup(x - w->x, y - w->y);
 		}
 	}
+
+	return NULL;
 }
 
 void CKeyboardWidget::sdl_keydown(int keysym) {
