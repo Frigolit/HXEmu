@@ -68,8 +68,8 @@
 		{ "label": "N", "line": 3, "bit": 6, "sdlkey": 110, "x": 6.5, "y": 4 },
 		{ "label": "M", "line": 3, "bit": 5, "sdlkey": 109, "x": 7.5, "y": 4 },
 		{ "label": "<\n,", "line": 1, "bit": 4, "sdlkey": 44, "x": 8.5, "y": 4 },
-		{ "label": ">\n.", "line": 1, "bit": 3, "sdlkey": 46, "x": 9.5, "y": 4 },
-		{ "label": "?\n/", "line": 1, "bit": 6, "sdlkey": 45, "x": 10.5, "y": 4 },
+		{ "label": ">\n.", "line": 1, "bit": 6, "sdlkey": 46, "x": 9.5, "y": 4 },
+		{ "label": "?\n/", "line": 1, "bit": 7, "sdlkey": 45, "x": 10.5, "y": 4 },
 		{ "label": "SHIFT", "line": 5, "bit": 9, "sdlkey": 1073742053, "x": 11.5, "y": 4, "w": 1.75, "color": 1 },
 		{ "label": "GRPH", "line": 0, "bit": 0, "x": 13.25, "y": 4, "color": 1 },
 
