@@ -5,9 +5,7 @@
 
 #include "../fonts.h"
 
-CButton::CButton(std::string c, int x, int y, int w, int h) {
-	::CWidget();
-
+CButton::CButton(CWidget *p, std::string c, int x, int y, int w, int h) : CWidget(p) {
 	caption = (char *)malloc(sizeof(char) * 256);
 	caption[255] = 0;
 	strncpy(caption, c.c_str(), 255);
@@ -21,9 +19,7 @@ CButton::CButton(std::string c, int x, int y, int w, int h) {
 	init(x, y, w, h, rgb);
 }
 
-CButton::CButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) {
-	::CWidget();
-
+CButton::CButton(CWidget *p, std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) : CWidget(p) {
 	caption = (char *)malloc(sizeof(char) * 256);
 	caption[255] = 0;
 	strncpy(caption, c.c_str(), 255);
@@ -39,6 +35,8 @@ CButton::CButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g
 
 void CButton::init(int x, int y, int w, int h, RgbColor &rgb) {
 	cb_click = NULL;
+	is_pressed = false;
+	has_focus = false;
 
 	CWidget::x = x;
 	CWidget::y = y;
@@ -77,7 +75,9 @@ CButton::~CButton() {
 }
 
 bool CButton::update() {
-	if (updated) return false;
+	if (updated) {
+		return false;
+	}
 
 	SDL_Color text_fg;
 
@@ -91,11 +91,11 @@ bool CButton::update() {
 		.h = h
 	};
 
-	SDL_FillRect(surface, &r, button_color_lit);
+	SDL_FillRect(surface, &r, is_pressed ? button_color_dim : button_color_lit);
 
 	r.x++;
 	r.y++;
-	SDL_FillRect(surface, &r, button_color_dim);
+	SDL_FillRect(surface, &r, is_pressed ? button_color_lit : button_color_dim);
 
 	r.w -= 2;
 	r.h -= 2;
@@ -108,8 +108,8 @@ bool CButton::update() {
 		SDL_Rect rect_text;
 		rect_text.w = surf_text->w;
 		rect_text.h = surf_text->h;
-		rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0));
-		rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0));
+		rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0)) + (is_pressed ? 1 : 0);
+		rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0)) + (is_pressed ? 1 : 0);
 
 		SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
 		SDL_FreeSurface(surf_text);
@@ -120,7 +120,10 @@ bool CButton::update() {
 }
 
 void CButton::draw(SDL_Surface *dest) {
-	if (!updated) update();
+	if (!updated) {
+		update();
+	}
+
 	CWidget::draw(dest);
 }
 
@@ -129,6 +132,9 @@ void CButton::set_click_callback(std::function<void(CButton*, int, int)> callbac
 }
 
 CWidget* CButton::mousedown(int cx, int cy) {
+	has_focus = true;
+	mouseenter();
+
 	if (cb_click != NULL) {
 		cb_click(this, 0, 0);
 	}
@@ -137,11 +143,25 @@ CWidget* CButton::mousedown(int cx, int cy) {
 }
 
 CWidget* CButton::mouseup(int cx, int cy) {
+	is_pressed = false;
+	has_focus = false;
+	updated = false;
+
 	if (cb_click != NULL) {
 		cb_click(this, 1, 0);
 	}
 
 	return this;
+}
+
+void CButton::mouseleave() {
+	is_pressed = false;
+	updated = false;
+}
+
+void CButton::mouseenter() {
+	is_pressed = true;
+	updated = false;
 }
 
 #endif

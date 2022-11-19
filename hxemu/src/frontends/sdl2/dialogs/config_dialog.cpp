@@ -2,7 +2,7 @@
 
 #include "config_dialog.h"
 
-ConfigDialog::ConfigDialog(CHX20 *hx20, int x, int y) {
+ConfigDialog::ConfigDialog(CHX20 *hx20, int x, int y) : CWidget(NULL) {
 	this->hx20 = hx20;
 
 	CWidget::x = x;
@@ -64,7 +64,8 @@ void ConfigDialog::draw_dialog_title(const char *title) {
 
 bool ConfigDialog::update() {
 	for (int i = 0, j = widgets->size(); i < j; i++) {
-		if (widgets->at(i)->update()) {
+		CWidget *w = widgets->at(i);
+		if (w->visible && w->update()) {
 			return true;
 		}
 	}
@@ -75,10 +76,38 @@ bool ConfigDialog::update() {
 void ConfigDialog::draw(SDL_Surface *dest) {
 	for (int i = 0, j = widgets->size(); i < j; i++) {
 		CWidget *w = widgets->at(i);
-		w->draw(surface);
+		if (w->visible) {
+			w->draw(surface);
+		}
 	}
 
 	CWidget::draw(dest);
+}
+
+CWidget* ConfigDialog::mousedown(int x, int y) {
+	int sz = widgets->size();
+
+	for (int i = 0; i < sz; i++) {
+		CWidget *w = widgets->at(i);
+		if (w->visible && w->enabled && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+			return w->mousedown(x - w->x, y - w->y);
+		}
+	}
+
+	return NULL;
+}
+
+CWidget* ConfigDialog::mouseup(int x, int y) {
+	int sz = widgets->size();
+
+	for (int i = 0; i < sz; i++) {
+		CWidget *w = widgets->at(i);
+		if (w->visible && w->enabled && (x >= w->x) && (y >= w->y) && (x < w->x + w->w) && (y < w->y + w->h)) {
+			return w->mouseup(x - w->x, y - w->y);
+		}
+	}
+
+	return NULL;
 }
 
 #endif

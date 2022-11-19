@@ -13,7 +13,7 @@
 
 class CKeyboardWidget : public CWidget {
 	public:
-		CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h);
+		CKeyboardWidget(CWidget *p, CHX20 *hx20, int x, int y, int w, int h);
 		~CKeyboardWidget();
 
 		void sdl_keydown(int keysym);

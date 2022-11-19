@@ -95,6 +95,9 @@ void FrontendSdl2::start(CHX20 *hx20) {
 
 	toolbar_selected_index = 0;
 	refresh_toolbar();
+
+	focused_widget = NULL;
+	mouse_inside_widget = false;
 }
 
 void FrontendSdl2::stop() {
@@ -149,22 +152,55 @@ void FrontendSdl2::run() {
 					break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.x <= 35) {
-						int n = event.button.y / 36;
-						if (n < TOOLBAR_BUTTONS && toolbar_buttons[n]->widget != NULL) {
-							toolbar_selected_index = n;
-							active_widget = toolbar_buttons[n]->widget;
-							refresh_toolbar();
+					{
+						if (event.button.x <= 35) {
+							int n = event.button.y / 36;
+							if (n < TOOLBAR_BUTTONS && toolbar_buttons[n]->widget != NULL) {
+								toolbar_selected_index = n;
+								active_widget = toolbar_buttons[n]->widget;
+								refresh_toolbar();
+							}
 						}
-					}
-					else if (event.button.x >= 38) {
-						active_widget->mousedown(event.button.x - 38, event.button.y);
+						else if (event.button.x >= 38) {
+							int x = event.button.x - 38;
+							int y = event.button.y;
+
+							CWidget *widget = active_widget->mousedown(event.button.x - 38, event.button.y);
+							if (widget != NULL) {
+								focused_widget = widget;
+								mouse_inside_widget = true;
+							}
+						}
 					}
 					break;
 
 				case SDL_MOUSEBUTTONUP:
-					if (event.button.x >= 38) {
-						active_widget->mouseup(event.button.x - 38, event.button.y);
+					if (focused_widget != NULL) {
+						int x = event.button.x - 38;
+						focused_widget->mouseup(x, event.button.y);
+						focused_widget = NULL;
+						mouse_inside_widget = false;
+					}
+					break;
+
+				case SDL_MOUSEMOTION:
+					if (focused_widget != NULL) {
+						int x = event.button.x;
+						int y = event.button.y;
+
+						int fx0, fy0, fx1, fy1;
+						focused_widget->get_screen_coords(&fx0, &fy0);
+						fx1 = fx0 + focused_widget->w - 1;
+						fy1 = fy0 + focused_widget->h - 1;
+
+						if (mouse_inside_widget && (x < fx0 || x > fx1 || y < fy0 || y > fy1)) {
+							mouse_inside_widget = false;
+							focused_widget->mouseleave();
+						}
+						else if (!mouse_inside_widget && x >= fx0 && x <= fx1 && y >= fy0 && y <= fy1) {
+							mouse_inside_widget = true;
+							focused_widget->mouseenter();
+						}
 					}
 					break;
 
@@ -177,6 +213,7 @@ void FrontendSdl2::run() {
 		}
 
 		// Render active widget
+		active_widget->update();
 		active_widget->draw(screen);
 
 		// Render

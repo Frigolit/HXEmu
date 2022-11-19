@@ -7,7 +7,7 @@
 
 class CWidget {
 	public:
-		CWidget();
+		CWidget(CWidget *parent);
 		~CWidget();
 
 		virtual void sdl_keydown(int keysym) { };
@@ -21,10 +21,14 @@ class CWidget {
 		virtual void mouseleave() { };
 		virtual void mouseenter() { };
 
+		void get_screen_coords(int *x, int *y);
+
 		// Coordinates
 		int x, y, w, h;
 		bool visible;
 		bool enabled;
+
+		CWidget *parent;
 
 	protected:
 		SDL_Surface *surface;

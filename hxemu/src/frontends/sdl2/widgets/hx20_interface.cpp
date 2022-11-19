@@ -7,9 +7,7 @@
 #include "hx20_interface.h"
 #include "keyboard.h"
 
-CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
-	::CWidget();
-
+CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) : CWidget(NULL) {
 	lcd = new Sdl2LcdInterface();
 
 	this->hx20 = hx20;
@@ -36,7 +34,7 @@ CHX20InterfaceWidget::CHX20InterfaceWidget(CHX20 *hx20, int x, int y) {
 	SDL_BlitScaled(bg_surface, NULL, surface, &bg_rect);
 	SDL_FreeSurface(bg_surface);
 
-	keyboard = new CKeyboardWidget(hx20, 32, 230, w - 32, h - 230);
+	keyboard = new CKeyboardWidget(this, hx20, 32, 230, w - 32, h - 230);
 }
 
 CHX20InterfaceWidget::~CHX20InterfaceWidget() {

@@ -8,9 +8,7 @@
 #include <fstream>
 #include <iostream>
 
-CKeyboardWidget::CKeyboardWidget(CHX20 *hx20, int x, int y, int w, int h) {
-	::CWidget();
-
+CKeyboardWidget::CKeyboardWidget(CWidget *p, CHX20 *hx20, int x, int y, int w, int h) : CWidget(p) {
 	this->hx20 = hx20;
 
 	CWidget::x = x;
@@ -56,6 +54,7 @@ bool CKeyboardWidget::update() {
 }
 
 void CKeyboardWidget::draw(SDL_Surface *dest) {
+	update();
 	CWidget::draw(dest);
 }
 
@@ -123,7 +122,7 @@ void CKeyboardWidget::load_keymap(const char *path) {
 			c_g = c_b = 16;
 		}
 
-		CKeyboardButton *btn = new CKeyboardButton(key["label"].asString(), (int)x, y * 48, (int)w, 48, c_r, c_g, c_b);
+		CKeyboardButton *btn = new CKeyboardButton(this, key["label"].asString(), (int)x, y * 48, (int)w, 48, c_r, c_g, c_b);
 		btn->set_keycode(krtn, value);
 		btn->set_click_callback(std::bind(&CKeyboardWidget::button_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 

@@ -18,6 +18,9 @@ class ConfigDialog : public CWidget {
 		virtual bool update();
 		virtual void draw(SDL_Surface *dest);
 
+		virtual CWidget* mousedown(int x, int y);
+		virtual CWidget* mouseup(int x, int y);
+
 		void draw_dialog_title(const char *title);
 
 	protected:

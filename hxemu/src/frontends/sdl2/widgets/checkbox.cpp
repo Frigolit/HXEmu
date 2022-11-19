@@ -9,8 +9,8 @@
 
 #include "../../../globals.h"
 
-Checkbox::Checkbox(int x, int y, int w) {
-	::CWidget();
+Checkbox::Checkbox(CWidget *p, int x, int y, int w) : CWidget(p) {
+	caption = NULL;
 
 	CWidget::x = x;
 	CWidget::y = y;
@@ -27,14 +27,9 @@ Checkbox::Checkbox(int x, int y, int w) {
 	img_checked = IMG_Load(imgpath);
 
 	// Draw unchecked state
-	SDL_Rect dst_rect {
-		.x = 0,
-		.y = 0,
-		.w = 32,
-		.h = 32
-	};
-
-	SDL_BlitScaled(img_unchecked, NULL, surface, &dst_rect);
+	checked = false;
+	is_pressed = false;
+	draw_state(false, false);
 }
 
 Checkbox::~Checkbox() {
@@ -43,7 +38,7 @@ Checkbox::~Checkbox() {
 }
 
 bool Checkbox::update() {
-	return true;
+	return updated;
 }
 
 void Checkbox::draw(SDL_Surface *dest) {
@@ -51,29 +46,80 @@ void Checkbox::draw(SDL_Surface *dest) {
 }
 
 void Checkbox::set_caption(std::string c) {
-	caption = c;
+	if (caption != NULL) {
+		free(caption);
+		caption = NULL;
+	}
 
 	int s = c.size();
-	char *txt = (char *)malloc(sizeof(char) * (s + 1));
-	txt[s] = 0;
-	strncpy(txt, c.c_str(), s);
+	caption = (char *)malloc(sizeof(char) * (s + 1));
+	caption[s] = 0;
+	strncpy(caption, c.c_str(), s);
 
-	SDL_Color text_color {
-		.r = 32,
-		.g = 32,
-		.b = 32
+	draw_caption(false);
+	draw_state(false, checked);
+}
+
+void Checkbox::draw_caption(bool focus) {
+	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xC0, 0xC0, 0xC0));
+
+	if (caption != NULL) {
+		uint8_t c = focus ? 96 : 32;
+
+		SDL_Color text_color {
+			.r = c,
+			.g = c,
+			.b = c
+		};
+
+		SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font_dialog_text, caption, text_color, w);
+		SDL_Rect rect_text {
+			.x = 34,
+			.y = (int)(((float)h / 2.0) - ((float)surf_text->h / 2.0)),
+			.w = surf_text->w,
+			.h = surf_text->h
+		};
+
+		SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+		SDL_FreeSurface(surf_text);
+	}
+}
+
+CWidget* Checkbox::mousedown(int cx, int cy) {
+	mouseenter();
+	return this;
+}
+
+CWidget* Checkbox::mouseup(int cx, int cy) {
+	if (is_pressed) {
+		is_pressed = false;
+		checked = !checked;
+		draw_state(false, checked);
+	}
+	return this;
+}
+
+void Checkbox::mouseleave() {
+	is_pressed = false;
+	draw_state(true, checked);
+}
+
+void Checkbox::mouseenter() {
+	is_pressed = true;
+	draw_state(true, !checked);
+}
+
+void Checkbox::draw_state(bool focus, bool state) {
+	draw_caption(focus);
+
+	SDL_Rect dst_rect {
+		.x = 0,
+		.y = 0,
+		.w = 32,
+		.h = 32
 	};
 
-	SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font_dialog_text, txt, text_color, w);
-	SDL_Rect rect_text {
-		.x = 34,
-		.y = (int)(((float)h / 2.0) - ((float)surf_text->h / 2.0)),
-		.w = surf_text->w,
-		.h = surf_text->h
-	};
-
-	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
-	SDL_FreeSurface(surf_text);
+	SDL_BlitScaled(state ? img_checked : img_unchecked, NULL, surface, &dst_rect);
 }
 
 #endif

@@ -57,6 +57,9 @@ class FrontendSdl2 : public Frontend {
 
 		int toolbar_selected_index;
 
+		CWidget *focused_widget;
+		bool mouse_inside_widget;
+
 		//static int thread_main(void *data);
 };
 

@@ -2,7 +2,7 @@
 
 #include "keyboard_button.h"
 
-CKeyboardButton::CKeyboardButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) : CButton(c, x, y, w, h, r, g, b) {
+CKeyboardButton::CKeyboardButton(CWidget *p, std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b) : CButton(p, c, x, y, w, h, r, g, b) {
 	krtn_index = 0;
 	krtn_bits = 0;
 }

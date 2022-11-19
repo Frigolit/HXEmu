@@ -12,8 +12,8 @@
 
 class CButton : public CWidget {
 	public:
-		CButton(std::string c, int x, int y, int w, int h);
-		CButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b);
+		CButton(CWidget *p, std::string c, int x, int y, int w, int h);
+		CButton(CWidget *p, std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b);
 		~CButton();
 
 		virtual bool update();
@@ -21,6 +21,9 @@ class CButton : public CWidget {
 
 		virtual CWidget* mousedown(int x, int y);
 		virtual CWidget* mouseup(int x, int y);
+
+		virtual void mouseenter();
+		virtual void mouseleave();
 
 		void set_caption(const char *new_caption);
 		void set_click_callback(std::function<void(CButton*, int, int)> callback);
@@ -30,6 +33,9 @@ class CButton : public CWidget {
 
 		char *caption;
 		bool updated;
+
+		bool is_pressed;
+		bool has_focus;
 
 		std::function<void(CButton*, int, int)> cb_click;
 		uint32_t button_color;

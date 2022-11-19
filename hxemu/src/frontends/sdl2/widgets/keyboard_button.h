@@ -7,7 +7,7 @@
 
 class CKeyboardButton : public CButton {
 	public:
-		CKeyboardButton(std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b);
+		CKeyboardButton(CWidget *p, std::string c, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b);
 		~CKeyboardButton();
 
 		void set_keycode(int krtn, int bits);
