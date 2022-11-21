@@ -56,6 +56,8 @@ uint8_t CRTC::read(uint16_t addr) {
 				int y = lt->tm_year % 100;
 				return ((y / 10) << 4) | (y % 10);
 			}
+			default:
+				return 0x00;
 		}
 	}
 	else if (addr < 0x0E) {

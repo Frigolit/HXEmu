@@ -56,7 +56,6 @@ CHX20::CHX20() {
 
 	#ifdef REALSECONDARY
 		mcu_secondary->maskrom = new CROM(4096);
-		mcu_secondary->maskrom->load_from_file((char *)"roms/firmware/v1.1-swe/secondary.bin");
 	#endif
 
 	// Initialize LCD and controllers
@@ -81,29 +80,6 @@ CHX20::CHX20() {
 		ioctl->set_lcd_controller(i, lcd_ctls[i]);
 	}
 
-	// Checksum ROMs
-
-	#ifdef REALSECONDARY
-		CHash *hash = new CHash();
-		uint8_t buf[4096];
-
-		for (int n = 0; n < 4096; n++) {
-			buf[n] = mcu_secondary->maskrom->read(n);
-		}
-
-		printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
-		delete hash;
-	#endif
-
-	char logbuf[256];
-	sprintf(logbuf, "Master CPU reset vector is 0x%02X%02X", membus->read(0xFFFE), membus->read(0xFFFF));
-	logger->debug(logbuf);
-
-	#ifdef REALSECONDARY
-		sprintf(logbuf, "Secondary CPU reset vector is 0x%02X%02X", mcu_secondary->maskrom->read(0x0FFE), mcu_secondary->maskrom->read(0x0FFF));
-		logger->debug(logbuf);
-	#endif
-
 	// Reset
 	reset();
 }
@@ -115,6 +91,8 @@ void CHX20::set_lcd_interface(LcdInterface *lcdif) {
 }
 
 void CHX20::load_roms(char *dirname) {
+	char logbuf[256];
+
 	char path[256];
 	char fullpath[512];
 
@@ -124,9 +102,13 @@ void CHX20::load_roms(char *dirname) {
 		roms[i]->load_from_file(fullpath);
 	}
 
-	// Checksum ROMs
-	char logbuf[256];
+	#ifdef REALSECONDARY
+		sprintf(path, "roms/%s/secondary.bin", dirname);
+		get_data_path(fullpath, path, 512);
+		mcu_secondary->maskrom->load_from_file(fullpath);
+	#endif
 
+	// Checksum ROMs
 	CHash *hash = new CHash();
 	uint8_t buf[8192];
 
@@ -139,7 +121,24 @@ void CHX20::load_roms(char *dirname) {
 		logger->debug(logbuf);
 	}
 
+	#ifdef REALSECONDARY
+	for (int n = 0; n < 4096; n++) {
+		buf[n] = mcu_secondary->maskrom->read(n);
+	}
+
+	printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
+	#endif
+
 	delete hash;
+
+	// Dump reset vectors
+	sprintf(logbuf, "Primary CPU reset vector is 0x%02X%02X", membus->read(0xFFFE), membus->read(0xFFFF));
+	logger->debug(logbuf);
+
+	#ifdef REALSECONDARY
+		sprintf(logbuf, "Secondary CPU reset vector is 0x%02X%02X", mcu_secondary->maskrom->read(0x0FFE), mcu_secondary->maskrom->read(0x0FFF));
+		logger->debug(logbuf);
+	#endif
 }
 
 void CHX20::load_option_rom(char *path) {
