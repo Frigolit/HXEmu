@@ -126,7 +126,8 @@ void CHX20::load_roms(char *dirname) {
 		buf[n] = mcu_secondary->maskrom->read(n);
 	}
 
-	printf("Mask ROM - Checksum: %08X\n", hash->crc32(buf, 4096));
+	sprintf(logbuf, "Mask ROM - Checksum: %08X", hash->crc32(buf, 4096));
+	logger->debug(logbuf);
 	#endif
 
 	delete hash;
