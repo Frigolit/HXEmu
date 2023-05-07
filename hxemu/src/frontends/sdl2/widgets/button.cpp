@@ -2,6 +2,7 @@
 
 #include "button.h"
 #include <cstring>
+#include <vector>
 
 #include "../fonts.h"
 
@@ -67,6 +68,15 @@ void CButton::init(int x, int y, int w, int h, RgbColor &rgb) {
 	button_color_lit = SDL_MapRGB(surface->format, c_lit.r, c_lit.g, c_lit.b);
 	button_color_dim = SDL_MapRGB(surface->format, c_dim.r, c_dim.g, c_dim.b);
 
+	// Determine if caption has linebreaks in it
+	has_breaks = false;
+	for (int i = 0; i < strlen(caption); i++) {
+		if (caption[i] == '\n') {
+			has_breaks = true;
+			break;
+		}
+	}
+
 	updated = false;
 }
 
@@ -103,16 +113,73 @@ bool CButton::update() {
 
 	// Draw label
 	if (caption[0] != 0) {
-		SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, caption, text_fg, w);
+		if (has_breaks) {
+			// If the button caption contains linebreaks, TTF_RenderUTF8_Blended_Wrapped will left-align the text instead of centering it
+			// as it would if it wrapped due to width or if it didn't wrap at all, so we have to split the caption and render each line.
 
-		SDL_Rect rect_text;
-		rect_text.w = surf_text->w;
-		rect_text.h = surf_text->h;
-		rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0)) + (is_pressed ? 1 : 0);
-		rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0)) + (is_pressed ? 1 : 0);
+			char *c = caption;
+			int sz = strlen(caption);
 
-		SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
-		SDL_FreeSurface(surf_text);
+			char buf[256];
+
+			std::vector<SDL_Surface*> lines;
+			for (int i = 0; i < sz; i++) {
+				if (c[i] == '\n') {
+					strncpy(buf, c, i);
+					buf[i] = 0;
+
+					lines.push_back(TTF_RenderUTF8_Blended_Wrapped(font_buttons, buf, text_fg, w));
+
+					c = c + i + 1;
+					sz = strlen(c);
+					i = 0;
+				}
+			}
+
+			strncpy(buf, c, strlen(c));
+			buf[strlen(c)] = 0;
+
+			lines.push_back(TTF_RenderUTF8_Blended_Wrapped(font_buttons, buf, text_fg, w));
+
+			int total_height = 0;
+
+			for (int i = 0, j = lines.size(); i < j; i++) {
+				SDL_Surface *text = lines.at(i);
+				total_height += text->h;
+			}
+
+			int text_y = ((float)h / 2.0) - ((float)total_height / 2.0);
+
+			for (int i = 0, j = lines.size(); i < j; i++) {
+				SDL_Surface *text = lines.at(i);
+
+				SDL_Rect rect_text;
+				rect_text.w = text->w;
+				rect_text.h = text->h;
+				rect_text.x = (int)(((float)w / 2.0) - ((float)text->w / 2.0)) + (is_pressed ? 1 : 0);
+				rect_text.y = text_y + (is_pressed ? 1 : 0);
+
+				text_y += text->h;
+
+				SDL_BlitSurface(text, NULL, surface, &rect_text);
+
+				SDL_FreeSurface(text);
+			}
+		}
+		else {
+			// Caption doesn't contain any linebreaks, render normally.
+
+			SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font_buttons, caption, text_fg, w);
+
+			SDL_Rect rect_text;
+			rect_text.w = surf_text->w;
+			rect_text.h = surf_text->h;
+			rect_text.x = (int)(((float)w / 2.0) - ((float)rect_text.w / 2.0)) + (is_pressed ? 1 : 0);
+			rect_text.y = (int)(((float)h / 2.0) - ((float)rect_text.h / 2.0)) + (is_pressed ? 1 : 0);
+
+			SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
+			SDL_FreeSurface(surf_text);
+		}
 	}
 
 	updated = true;

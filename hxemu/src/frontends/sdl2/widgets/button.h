@@ -37,6 +37,8 @@ class CButton : public CWidget {
 		bool is_pressed;
 		bool has_focus;
 
+		bool has_breaks;
+
 		std::function<void(CButton*, int, int)> cb_click;
 		uint32_t button_color;
 		uint32_t button_color_lit;
