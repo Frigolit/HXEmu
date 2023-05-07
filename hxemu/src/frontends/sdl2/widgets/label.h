@@ -16,12 +16,14 @@ class Label : public CWidget {
 		virtual void draw(SDL_Surface *dest);
 
 		void set_caption(std::string c);
+		void set_font(TTF_Font *font);
 
 	protected:
 		void draw_caption();
 
 		char *caption;
 		bool is_updated;
+		TTF_Font *font;
 };
 
 #endif

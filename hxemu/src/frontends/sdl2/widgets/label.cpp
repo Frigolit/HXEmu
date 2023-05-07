@@ -16,6 +16,8 @@ Label::Label(CWidget *p, int x, int y, int w, int h) : CWidget(p) {
 	CWidget::w = w;
 	CWidget::h = h;
 
+	font = font_dialog_text;
+
 	surface = SDL_CreateRGBSurface(SDL_RLEACCEL, w, h, 32, 0, 0, 0, 0);
 	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xC0, 0xC0, 0xC0));
 }
@@ -37,6 +39,10 @@ bool Label::update() {
 
 void Label::draw(SDL_Surface *dest) {
 	CWidget::draw(dest);
+}
+
+void Label::set_font(TTF_Font *font) {
+	this->font = font;
 }
 
 void Label::set_caption(std::string c) {
@@ -63,7 +69,7 @@ void Label::draw_caption() {
 			.b = 32
 		};
 
-		SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font_dialog_text, caption, text_color, w);
+		SDL_Surface *surf_text = TTF_RenderUTF8_Blended_Wrapped(font, caption, text_color, w);
 		SDL_Rect rect_text {
 			.x = 0,
 			.y = (int)(((float)h / 2.0) - ((float)surf_text->h / 2.0)),
