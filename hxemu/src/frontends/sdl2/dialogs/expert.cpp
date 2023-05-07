@@ -8,30 +8,16 @@
 ExpertDialog::ExpertDialog(CHX20 *hx20, int x, int y) : ConfigDialog(hx20, x, y) {
 	draw_dialog_title("Expert features");
 
-	// Sorry...
-	SDL_Surface *surf_text = TTF_RenderUTF8_Blended(font_dialog_text, "Sorry, nothing here yet...", text_color);
-
-	SDL_Rect rect_text {
-		.x = 16,
-		.y = 64,
-		.w = surf_text->w,
-		.h = surf_text->h
-	};
-
-	SDL_BlitSurface(surf_text, NULL, surface, &rect_text);
-	SDL_FreeSurface(surf_text);
+	// Test button
+	btn_trace = new CButton(this, "CPU trace toggle", 16, 64, 130, 24);
+	btn_trace->set_click_callback(std::bind(&ExpertDialog::cb_trace_click, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	widgets->push_back(btn_trace);
 }
 
-ExpertDialog::~ExpertDialog() {
-	SDL_FreeSurface(surface);
-}
-
-bool ExpertDialog::update() {
-	return true;
-}
-
-void ExpertDialog::draw(SDL_Surface *dest) {
-	CWidget::draw(dest);
+void ExpertDialog::cb_trace_click(CButton *btn, int a, int b) {
+	if (a == 0) {
+		hx20->mcu_master->b_trace ^= 1;
+	}
 }
 
 #endif

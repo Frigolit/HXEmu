@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 
+#include "globals.h"
 #include "testdevice.h"
 
 /*
@@ -21,7 +22,10 @@ CTestDevice::CTestDevice() {
 	state = 0;
 
 	rom = new CROM(4096);
-	rom->load_from_file((char *)"data/roms/ext-test/test.bin");
+
+	char fullpath[512];
+	get_data_path(fullpath, "roms/option/test.bin", 512);
+	rom->load_from_file(fullpath);
 
 	dynrom = (uint8_t *)malloc(sizeof(uint8_t) * 2048);
 	memset(dynrom, 0, 2048);

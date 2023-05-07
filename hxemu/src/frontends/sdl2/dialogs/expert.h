@@ -7,16 +7,16 @@
 
 #include "config_dialog.h"
 
+#include "../widgets/button.h"
+
 class ExpertDialog : public ConfigDialog {
 	public:
 		ExpertDialog(CHX20 *hx20, int x, int y);
-		~ExpertDialog();
-
-		virtual bool update();
-		virtual void draw(SDL_Surface *dest);
 
 	protected:
-		CHX20 *hx20;
+		CButton *btn_trace;
+
+		void cb_trace_click(CButton *btn, int a, int b);
 };
 
 #endif

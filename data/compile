@@ -19,8 +19,8 @@ if [ "$PIKE" != "" ]; then
 				rm -f $BUILDPATH/romfixer
 				rm -f $BUILDPATH/test.bin
 
-				echo "$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c"
-				$HOST_CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c
+				echo "$CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c"
+				$CC $CFLAGS -o $BUILDPATH/romfixer data/src/roms/test/romfixer.c
 				if [ "$?" != 0 ]; then
 					echo "ERROR: romfixer.c failed to compile"
 					exit 1
@@ -46,11 +46,11 @@ if [ "$PIKE" != "" ]; then
 				fi
 			fi
 
-			if [ "$BUILDROOT/release/data/roms/ext-test/test.bin" -ot "$BUILDPATH/test.bin" ]; then
-				if [ ! -d "$BUILDROOT/release/data/roms/ext-test" ]; then mkdir $BUILDROOT/release/data/roms/ext-test; fi
+			if [ "$BUILDROOT/release/data/roms/option/test.bin" -ot "$BUILDPATH/test.bin" ]; then
+				if [ ! -d "$BUILDROOT/release/data/roms/option" ]; then mkdir $BUILDROOT/release/data/roms/option; fi
 
-				echo cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/ext-test/
-				cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/ext-test/
+				echo cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/option/
+				cp $BUILDPATH/test.bin $BUILDROOT/release/data/roms/option/
 			fi
 		fi
 	fi
