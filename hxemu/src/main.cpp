@@ -181,10 +181,23 @@ void shutdown(int sig) {
 }
 
 void *hx20_run(void *args) {
-	int i;
+	std::chrono::time_point<std::chrono::steady_clock> last_tick = std::chrono::steady_clock::now();
+
+	long freq = 2457600 / 4;	// cpu frequency
+	double rate_us = (1 / (double)freq);
+
+	double n = 0.0;
+
 	while (1) {
-		for (i = 0; i < 3200; i++) {
+		std::chrono::time_point<std::chrono::steady_clock> tick = std::chrono::steady_clock::now();
+		std::chrono::duration<double> diff = tick - last_tick;
+		last_tick = tick;
+
+		n += diff.count();
+
+		while (n >= rate_us) {
 			hx20_machine->think();
+			n -= rate_us;
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
