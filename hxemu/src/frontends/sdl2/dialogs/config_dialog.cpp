@@ -63,14 +63,16 @@ void ConfigDialog::draw_dialog_title(const char *title) {
 }
 
 bool ConfigDialog::update() {
+	bool updated = false;
+
 	for (int i = 0, j = widgets->size(); i < j; i++) {
 		CWidget *w = widgets->at(i);
 		if (w->visible && w->update()) {
-			return true;
+			updated = true;
 		}
 	}
 
-	return false;
+	return updated;
 }
 
 void ConfigDialog::draw(SDL_Surface *dest) {
