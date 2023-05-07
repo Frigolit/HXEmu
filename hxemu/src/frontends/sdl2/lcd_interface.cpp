@@ -24,11 +24,16 @@ Sdl2LcdInterface::Sdl2LcdInterface() {
 	r.h = 32 * 4;
 
 	SDL_FillRect(surface, &r, color_set);
+	updated = true;
 }
 
 Sdl2LcdInterface::~Sdl2LcdInterface() {
 	SDL_FreeSurface(surface);
 	SDL_DestroyMutex(mtx);
+}
+
+bool Sdl2LcdInterface::update() {
+	return updated;
 }
 
 void Sdl2LcdInterface::draw(SDL_Surface *dest, int x, int y) {
@@ -41,6 +46,7 @@ void Sdl2LcdInterface::draw(SDL_Surface *dest, int x, int y) {
 
 	SDL_mutexP(mtx);
 	SDL_BlitSurface(surface, NULL, dest, &dst);
+	updated = false;
 	SDL_mutexV(mtx);
 }
 
@@ -53,6 +59,7 @@ void Sdl2LcdInterface::set_pixel(uint8_t x, uint8_t y) {
 
 	SDL_mutexP(mtx);
 	SDL_FillRect(surface, &r, color_set);
+	updated = true;
 	SDL_mutexV(mtx);
 }
 
@@ -65,6 +72,7 @@ void Sdl2LcdInterface::clear_pixel(uint8_t x, uint8_t y) {
 
 	SDL_mutexP(mtx);
 	SDL_FillRect(surface, &r, color_clear);
+	updated = true;
 	SDL_mutexV(mtx);
 }
 #endif

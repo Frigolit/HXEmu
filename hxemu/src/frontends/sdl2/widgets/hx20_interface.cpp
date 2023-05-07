@@ -44,7 +44,7 @@ CHX20InterfaceWidget::~CHX20InterfaceWidget() {
 }
 
 bool CHX20InterfaceWidget::update() {
-	return true;
+	return lcd->update();
 }
 
 void CHX20InterfaceWidget::draw(SDL_Surface *dest) {

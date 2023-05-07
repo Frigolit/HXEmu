@@ -20,6 +20,7 @@ class Sdl2LcdInterface : public LcdInterface {
 		~Sdl2LcdInterface();
 
 		void draw(SDL_Surface *dest, int x, int y);
+		bool update();
 
 		virtual void set_pixel(uint8_t x, uint8_t y);
 		virtual void clear_pixel(uint8_t x, uint8_t y);
@@ -30,6 +31,8 @@ class Sdl2LcdInterface : public LcdInterface {
 
 		uint32_t color_set;
 		uint32_t color_clear;
+
+		bool updated;
 };
 
 #endif

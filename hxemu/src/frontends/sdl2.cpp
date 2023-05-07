@@ -138,6 +138,8 @@ void FrontendSdl2::refresh_toolbar() {
 }
 
 void FrontendSdl2::run() {
+	int c = 10;
+
 	SDL_Event event;
 	while (1) {
 		// Event processing
@@ -213,15 +215,17 @@ void FrontendSdl2::run() {
 		}
 
 		// Render active widget
-		active_widget->update();
-		active_widget->draw(screen);
+		if (active_widget->update() || --c == 0) {
+			active_widget->draw(screen);
+			c = 10;
 
-		// Render
-		SDL_RenderClear(sdl_renderer);
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
-		SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
-		SDL_RenderPresent(sdl_renderer);
-		SDL_DestroyTexture(texture);
+			// Render
+			SDL_RenderClear(sdl_renderer);
+			SDL_Texture* texture = SDL_CreateTextureFromSurface(sdl_renderer, screen);
+			SDL_RenderCopy(sdl_renderer, texture, NULL, NULL);
+			SDL_RenderPresent(sdl_renderer);
+			SDL_DestroyTexture(texture);
+		}
 
 		// Wait a little bit (TODO: improve me)
 		SDL_Delay(10);
