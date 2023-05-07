@@ -27,7 +27,11 @@ void FrontendSdl2::start(CHX20 *hx20) {
 
 	// Create window
 	char s_wintitle[256];
+	#ifdef DEVMODE
+	sprintf(s_wintitle, "HXEmu %d.%d.%d (Development mode)", APP_MAJOR, APP_MINOR, APP_REVISION);
+	#else
 	sprintf(s_wintitle, "HXEmu %d.%d.%d", APP_MAJOR, APP_MINOR, APP_REVISION);
+	#endif
 
 	int ui_width = 992 + 36 + 2;
 	int ui_height = 528;
@@ -75,6 +79,7 @@ void FrontendSdl2::start(CHX20 *hx20) {
 	strcpy(toolbar_buttons[1]->icon_path, "ui/icons/toolbar/system.png");
 	toolbar_buttons[1]->widget = dialog_system;
 
+	#ifdef DEVMODE
 	strcpy(toolbar_buttons[2]->icon_path, "ui/icons/toolbar/tape.png");
 	toolbar_buttons[2]->widget = dialog_option;
 
@@ -92,6 +97,10 @@ void FrontendSdl2::start(CHX20 *hx20) {
 
 	strcpy(toolbar_buttons[7]->icon_path, "ui/icons/toolbar/about.png");
 	toolbar_buttons[7]->widget = dialog_about;
+	#else
+	strcpy(toolbar_buttons[2]->icon_path, "ui/icons/toolbar/about.png");
+	toolbar_buttons[2]->widget = dialog_about;
+	#endif
 
 	toolbar_selected_index = 0;
 	refresh_toolbar();

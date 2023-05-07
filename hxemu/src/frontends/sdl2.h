@@ -17,7 +17,11 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_timer.h>
 
+#ifdef DEVMODE
 #define TOOLBAR_BUTTONS 8
+#else
+#define TOOLBAR_BUTTONS 3
+#endif
 
 class FrontendSdl2 : public Frontend {
 	public:
