@@ -42,6 +42,29 @@ mapping flags = ([
 			}
 		},
 	]),
+	"dev": ([
+		"description": "Enables development mode to show and test upcoming features, etc.",
+		"type": "bool",
+		"default": Val.false,
+		"cxxflags": lambda(mapping flag) {
+			if (flag->value) {
+				return "-DDEVMODE";
+			}
+		},
+	]),
+	"debug": ([
+		"description": "Enables debugging options and disables compiler optimisations.",
+		"type": "bool",
+		"default": Val.false,
+		"cxxflags": lambda(mapping flag) {
+			if (flag->value) {
+				return "-Og -ggdb";
+			}
+			else {
+				return "-O2 -fomit-frame-pointer";
+			}
+		}
+	]),
 ]);
 
 multiset buildtypes = (< "bundle", "system", "flatpak" >);
@@ -54,6 +77,7 @@ int main(int argc, array(string) argv) {
 	string|void s_host = Getopt.find_option(argv, "", "host", "HOST", "");
 	string|void s_buildroot = Getopt.find_option(argv, "", "buildroot", UNDEFINED, "");
 
+	string|void s_cc = Getopt.find_option(argv, "", "cc", "CC", "");
 	string|void s_cxx = Getopt.find_option(argv, "", "cxx", "CXX", "");
 	string|void s_ld = Getopt.find_option(argv, "", "ld", "LD", "");
 	string|void s_pkgconfig = Getopt.find_option(argv, "", "pkgconfig", "pkg-config", "");
@@ -66,6 +90,8 @@ int main(int argc, array(string) argv) {
 	string|void s_buildtype = Getopt.find_option(argv, "", "type", UNDEFINED, "bundle");
 
 	int f_nolink = Getopt.find_option(argv, "", "no-link");
+
+	string s_pike = "pike";	// FIXME
 
 	foreach (flags; string flag; mapping m) {
 		if (m->type == "bool") {
@@ -96,6 +122,7 @@ int main(int argc, array(string) argv) {
 	// Clear some potentially blank values
 	if (s_host == "") { s_host = UNDEFINED; }
 	if (s_buildroot == "") { s_buildroot = UNDEFINED; }
+	if (s_cc == "") { s_cc = UNDEFINED; }
 	if (s_cxx == "") { s_cxx = UNDEFINED; }
 	if (s_ld == "") { s_ld = UNDEFINED; }
 	if (s_pkgconfig == "") { s_pkgconfig = UNDEFINED; }
@@ -105,6 +132,13 @@ int main(int argc, array(string) argv) {
 	s_cxxflags = "-std=c++11 " + s_cxxflags;
 
 	// Auto-detect compilation environment as needed
+	if (!s_cc) {
+		if (!(s_cc = find_bin(s_host, ({ "gcc", "clang", "cc" })))) {
+			werror("error: failed finding a c compiler, please specify with --cc or the CC environment variable.\n");
+			return 1;
+		}
+	}
+
 	if (!s_cxx) {
 		if (!(s_cxx = find_bin(s_host, ({ "g++", "clang++", "cpp" })))) {
 			werror("error: failed finding a c++ compiler, please specify with --cxx or the CXX environment variable.\n");
@@ -348,6 +382,7 @@ int main(int argc, array(string) argv) {
 	write("Data path:      %s\n", data_path);
 	write("%s\n", "-" * 80);
 	write("AS02 assembler: %s\n", s_as02 || "(n/a)");
+	write("C compiler:     %s\n", s_cc);
 	write("C++ compiler:   %s\n", s_cxx);
 	write("Linker:         %s\n", s_ld);
 	write("%s\n", "-" * 80);
@@ -590,7 +625,27 @@ int main(int argc, array(string) argv) {
 	}
 
 	// TODO: Build assets
-	return Process.create_process(({ "./data/compile" }), ([ "env": ([ "BUILDROOT": buildroot ]) ]))->wait();
+	/*
+	write("AS02 assembler: %s\n", s_as02 || "(n/a)");
+	write("C++ compiler:   %s\n", s_cxx);
+	write("Linker:         %s\n", s_ld);
+	write("%s\n", "-" * 80);
+	write("CXXFLAGS:       %s\n", s_cxxflags);
+	write("LDFLAGS:        %s\n", s_ldflags);
+	*/
+	return Process.create_process(
+		({ "./data/compile" }),
+		([
+			"env": ([
+				"BUILDROOT": buildroot,
+				"CC": s_cc,
+				"CXX": s_cxx,
+				"AS02": s_as02,
+				"LD": s_ld,
+				"PIKE": s_pike,
+			])
+		])
+	)->wait();
 }
 
 string find_bin(string|void prefix, array(string) names) {
